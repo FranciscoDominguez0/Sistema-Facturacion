@@ -67,15 +67,9 @@
 
     <!-- SideNavBar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
-        <!-- Header -->
-        <div class="px-6 pb-6 pt-4 flex items-center gap-3">
-            <div class="w-8 h-8 rounded bg-white flex items-center justify-center text-sovereign-blue">
-                <span class="material-symbols-outlined text-lg">receipt_long</span>
-            </div>
-            <div>
-                <h1 class="text-lg font-bold">VigiFact</h1>
-                <p class="text-[10px] text-white/70 uppercase tracking-widest mt-0.5">Enterprise ERP</p>
-            </div>
+        <!-- Header (Logo hardcodeado temporalmente) -->
+        <div class="px-6 pb-6 pt-4 flex items-center justify-center">
+            <img src="{{ asset('img/logo.png') }}" alt="Vigitec Panama" class="h-10 w-auto object-contain">
         </div>
 
         <!-- Navigation Menu -->
@@ -86,28 +80,28 @@
                 <span class="truncate">Inicio</span>
             </a>
 
-            <a href="#" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">group</span>
+            <a href="{{ route('clientes') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('clientes') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
+                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('clientes') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('clientes') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">group</span>
                 <span class="truncate">Clientes</span>
             </a>
             
-            <a href="#" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">inventory_2</span>
+            <a href="{{ route('productos') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('productos') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
+                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('productos') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('productos') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">inventory_2</span>
                 <span class="truncate">Productos</span>
             </a>
             
-            <a href="#" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">receipt_long</span>
+            <a href="{{ route('facturas') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('facturas') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
+                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('facturas') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('facturas') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt_long</span>
                 <span class="truncate">Facturas</span>
             </a>
 
-            <a href="#" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">badge</span>
+            <a href="{{ route('vendedores') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('vendedores') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
+                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('vendedores') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('vendedores') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">badge</span>
                 <span class="truncate">Vendedores</span>
             </a>
 
-            <a href="#" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">receipt</span>
+            <a href="{{ route('gastos') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('gastos') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
+                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('gastos') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('gastos') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt</span>
                 <span class="truncate">Gastos</span>
             </a>
 
@@ -115,8 +109,8 @@
                 <div class="h-px w-full bg-white/10 rounded-full"></div>
             </div>
 
-            <a href="#" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">business</span>
+            <a href="{{ route('empresa') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('empresa') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
+                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('empresa') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('empresa') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">business</span>
                 <span class="truncate">Empresa</span>
             </a>
 
