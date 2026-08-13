@@ -6,7 +6,7 @@
             <span class="material-symbols-outlined text-2xl">receipt_long</span>
         </div>
         <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
-            Sovereign<span class="font-light">Fact</span>
+            Vigi<span class="font-light">Fact</span>
         </h1>
     </div>
 
