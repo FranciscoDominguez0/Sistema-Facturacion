@@ -2,22 +2,24 @@
 
 use App\Livewire\Clientes\ClienteIndex;
 use App\Livewire\Configuracion\EmpresaForm;
+use App\Livewire\Dashboard;
 use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Productos\ProductoIndex;
+use App\Livewire\Profile;
 use App\Livewire\Vendedores\VendedorIndex;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+Route::redirect('/', '/login');
 
 use App\Http\Middleware\PreventBackHistory;
 
 Route::middleware(['auth', PreventBackHistory::class])->group(function () {
-    Route::view('dashboard', 'dashboard')
+    Route::get('dashboard', Dashboard::class)
         ->middleware(['verified'])
         ->name('dashboard');
 
-    Route::view('profile', 'profile')
+    Route::get('profile', Profile::class)
         ->name('profile');
 
     Route::get('clientes', ClienteIndex::class)

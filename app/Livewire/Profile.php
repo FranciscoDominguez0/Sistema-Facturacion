@@ -6,10 +6,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
-class Dashboard extends Component
+class Profile extends Component
 {
     public function render()
     {
-        return view('livewire.dashboard');
+        return view('livewire.profile');
     }
 }
