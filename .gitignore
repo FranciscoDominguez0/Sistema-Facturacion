@@ -25,3 +25,13 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Archivos de bases de datos locales
+database/*.sqlite
+database/*.sqlite-journal
+
+# Archivos y scripts temporales del proyecto (Diseños, planes, scripts de descarga)
+*.html
+download.cjs
+create_structure.ps1
+Plan_Sistema_Facturacion_Completo*.md
