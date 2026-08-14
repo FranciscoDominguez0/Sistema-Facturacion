@@ -25,15 +25,19 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('profile');
 
     Route::get('clientes', ClienteIndex::class)
+        ->middleware('can:clientes.ver')
         ->name('clientes');
 
     Route::get('clientes/create', ClienteForm::class)
+        ->middleware('can:clientes.gestionar')
         ->name('clientes.create');
 
     Route::get('clientes/{cliente}/edit', ClienteForm::class)
+        ->middleware('can:clientes.gestionar')
         ->name('clientes.edit');
 
     Route::get('clientes/{cliente}', ClienteShow::class)
+        ->middleware('can:clientes.ver')
         ->name('clientes.show');
 
     Route::get('productos', ProductoIndex::class)

@@ -9,17 +9,17 @@ class ClienteForm extends Form
 {
     public ?Cliente $cliente = null;
 
-    public $nombre = '';
+    public string $nombre = '';
 
-    public $identificacion = '';
+    public string $identificacion = '';
 
-    public $email = '';
+    public string $email = '';
 
-    public $telefono = '';
+    public string $telefono = '';
 
-    public $direccion = '';
+    public string $direccion = '';
 
-    public $activo = true;
+    public bool $activo = true;
 
     public function setCliente(Cliente $cliente)
     {
@@ -33,47 +33,64 @@ class ClienteForm extends Form
         $this->activo = $cliente->activo;
     }
 
-    public function store()
+    /**
+     * Reglas compartidas entre alta y edición (evitan duplicación).
+     */
+    protected function rules(): array
     {
-        $this->validate([
+        return [
             'nombre' => ['required', 'string', 'max:255'],
             'identificacion' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:255'],
             'direccion' => ['nullable', 'string'],
             'activo' => ['boolean'],
-        ]);
+        ];
+    }
 
-        Cliente::create([
-            'nombre' => $this->nombre,
-            'identificacion' => $this->identificacion,
-            'email' => $this->email,
-            'telefono' => $this->telefono,
-            'direccion' => $this->direccion,
-            'activo' => $this->activo,
-        ]);
+    public function store()
+    {
+        $this->normalizar();
+        $this->validate();
+
+        Cliente::create($this->datos());
 
         $this->reset();
     }
 
     public function update()
     {
-        $this->validate([
-            'nombre' => ['required', 'string', 'max:255'],
-            'identificacion' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'telefono' => ['nullable', 'string', 'max:255'],
-            'direccion' => ['nullable', 'string'],
-            'activo' => ['boolean'],
-        ]);
+        $this->normalizar();
+        $this->validate();
 
-        $this->cliente->update([
+        $this->cliente->update($this->datos());
+    }
+
+    /**
+     * Limpia los campos antes de validar: sin espacios al inicio/final
+     * y email siempre en minúsculas.
+     */
+    protected function normalizar(): void
+    {
+        $this->nombre = trim($this->nombre);
+        $this->identificacion = trim($this->identificacion);
+        $this->email = strtolower(trim($this->email));
+        $this->telefono = trim($this->telefono);
+        $this->direccion = trim($this->direccion);
+    }
+
+    /**
+     * Atributos que se guardan, compartidos entre alta y edición.
+     */
+    protected function datos(): array
+    {
+        return [
             'nombre' => $this->nombre,
             'identificacion' => $this->identificacion,
             'email' => $this->email,
             'telefono' => $this->telefono,
             'direccion' => $this->direccion,
             'activo' => $this->activo,
-        ]);
+        ];
     }
 }

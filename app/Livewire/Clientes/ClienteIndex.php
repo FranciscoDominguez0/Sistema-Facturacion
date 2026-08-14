@@ -11,9 +11,9 @@ class ClienteIndex extends Component
 {
     use WithPagination;
 
-    public $search = '';
+    public string $search = '';
 
-    public $filtroEstado = 'Todos';
+    public string $filtroEstado = 'Todos';
 
     public function updatingSearch()
     {
@@ -25,32 +25,44 @@ class ClienteIndex extends Component
         $this->resetPage();
     }
 
-    public function delete(Cliente $cliente)
-    {
-        $cliente->delete();
-    }
-
+    /**
+     * Desactivar/activar es la única vía de "eliminación":
+     * los clientes con facturas nunca se borran físicamente.
+     */
     public function toggleActivo(Cliente $cliente)
     {
+        $this->authorize('clientes.gestionar');
+
         $cliente->update(['activo' => ! $cliente->activo]);
     }
 
     #[Layout('layouts.app')]
     public function render()
     {
-        $query = Cliente::query()
+        $clientes = Cliente::query()
             ->when($this->search, function ($query) {
-                $query->where('nombre', 'like', '%'.$this->search.'%')
-                    ->orWhere('identificacion', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%');
+                $query->where(fn ($q) => $q
+                    ->where('nombre', 'like', '%'.$this->escapeLike($this->search).'%')
+                    ->orWhere('identificacion', 'like', '%'.$this->escapeLike($this->search).'%')
+                    ->orWhere('email', 'like', '%'.$this->escapeLike($this->search).'%'));
             })
             ->when($this->filtroEstado !== 'Todos', function ($query) {
-                $query->where('activo', $this->filtroEstado === 'Activo' ? true : false);
+                $query->where('activo', $this->filtroEstado === 'Activo');
             })
-            ->latest();
+            ->latest()
+            ->paginate(10);
 
         return view('livewire.clientes.cliente-index', [
-            'clientes' => $query->paginate(10),
+            'clientes' => $clientes,
         ]);
+    }
+
+    /**
+     * Escapa los comodines del término de búsqueda para que el LIKE
+     * no los interprete como patrones.
+     */
+    protected function escapeLike(string $termino): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $termino);
     }
 }
