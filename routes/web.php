@@ -41,7 +41,13 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('clientes.show');
 
     Route::get('productos', ProductoIndex::class)
-        ->name('productos');
+        ->name('productos.index');
+
+    Route::get('productos/create', \App\Livewire\Productos\ProductoForm::class)
+        ->name('productos.create');
+
+    Route::get('productos/{producto}/edit', \App\Livewire\Productos\ProductoForm::class)
+        ->name('productos.edit');
 
     Route::get('facturas', FacturaIndex::class)
         ->name('facturas');

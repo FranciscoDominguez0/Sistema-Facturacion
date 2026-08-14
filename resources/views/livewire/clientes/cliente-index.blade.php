@@ -19,7 +19,7 @@
             
             <!-- Filter Dropdown -->
             <div class="relative w-full sm:w-auto">
-                <select wire:model.live="filtroEstado" class="w-full appearance-none bg-white border border-slate-200 rounded-lg pl-4 pr-10 py-2 text-sm text-slate-800 focus:outline-none focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue cursor-pointer transition-colors">
+                <select wire:model.live="filtroEstado" class="w-full appearance-none bg-white bg-none border border-slate-200 rounded-lg pl-4 pr-10 py-2 text-sm text-slate-800 focus:outline-none focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue cursor-pointer transition-colors">
                     <option value="Todos">Todos</option>
                     <option value="Activo">Activo</option>
                     <option value="Inactivo">Inactivo</option>
