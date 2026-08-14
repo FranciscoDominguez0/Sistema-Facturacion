@@ -1,8 +1,10 @@
 <div class="w-full">
-    <x-breadcrumbs :links="[
-        ['title' => 'Clientes', 'url' => route('clientes')],
-        ['title' => $form->cliente ? 'Editar Cliente' : 'Nuevo Cliente']
-    ]" />
+    @section('breadcrumbs')
+        <x-breadcrumbs :links="[
+            ['title' => 'Clientes', 'url' => route('clientes')],
+            ['title' => $form->cliente ? 'Editar Cliente' : 'Nuevo Cliente']
+        ]" />
+    @endsection
 
     <!-- Modal/Form Container -->
     <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">

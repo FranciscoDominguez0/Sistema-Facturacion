@@ -1,7 +1,9 @@
 <div class="w-full">
-    <x-breadcrumbs :links="[
-        ['title' => 'Clientes']
-    ]" />
+    @section('breadcrumbs')
+        <x-breadcrumbs :links="[
+            ['title' => 'Clientes']
+        ]" />
+    @endsection
 
     <!-- Toolbar -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">

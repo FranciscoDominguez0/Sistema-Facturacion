@@ -1,6 +1,6 @@
 @props(['links' => []])
 
-<nav class="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
+<nav class="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
     <a href="{{ route('dashboard') }}" wire:navigate class="text-slate-500 hover:text-sovereign-blue transition-colors flex items-center justify-center" title="Inicio">
         <span class="material-symbols-outlined text-[20px]">home</span>
     </a>

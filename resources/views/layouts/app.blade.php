@@ -67,9 +67,10 @@
 
     <!-- SideNavBar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
-        <!-- Header (Logo hardcodeado temporalmente) -->
-        <div class="px-6 pb-6 pt-4 flex items-center justify-center">
-            <img src="{{ asset('img/logo.png') }}" alt="Vigitec Panama" class="h-10 w-auto object-contain">
+        <!-- Header (Logo) -->
+        <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-3xl text-emerald-400">receipt_long</span>
+            <span class="text-2xl font-bold text-white tracking-tight">VigiFact</span>
         </div>
 
         <!-- Navigation Menu -->
@@ -137,7 +138,11 @@
             <button @click="sidebarOpen = true" class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full lg:hidden focus:outline-none">
                 <span class="material-symbols-outlined">menu</span>
             </button>
-            <div class="hidden lg:block"></div> <!-- Spacer for desktop -->
+            <div class="flex-1 flex items-center ml-4 lg:ml-0 overflow-x-auto scrollbar-hide">
+                @hasSection('breadcrumbs')
+                    @yield('breadcrumbs')
+                @endif
+            </div> <!-- Spacer for desktop / Breadcrumbs -->
 
             <!-- Right: Trailing Actions -->
             <div class="flex items-center space-x-4">
