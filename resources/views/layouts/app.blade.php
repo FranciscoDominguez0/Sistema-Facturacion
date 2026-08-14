@@ -68,66 +68,82 @@
     <!-- SideNavBar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
         <!-- Header (Logo) -->
-        <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-3">
-            <div class="h-10 w-10 bg-white/15 rounded-full flex items-center justify-center text-white shadow-sm">
-                <span class="material-symbols-outlined text-2xl">receipt_long</span>
+        <div class="w-full px-6 pb-6 pt-6 flex items-center justify-center gap-3">
+            <div class="h-10 w-10 shrink-0 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-sm">
+                <span class="material-symbols-outlined text-[24px] leading-none">receipt_long</span>
             </div>
-            <h1 class="text-2xl font-semibold text-white tracking-tight">
+            <h1 class="text-2xl font-semibold text-white tracking-tight leading-none mt-1">
                 Vigi<span class="font-light">Fact</span>
             </h1>
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="flex-1 overflow-y-auto px-2 py-4 space-y-0.5 scrollbar-hide">
+        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-hide">
             
-            <a href="{{ route('dashboard') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('dashboard') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('dashboard') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('dashboard') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">home</span>
-                <span class="truncate">Inicio</span>
+            <a href="{{ route('dashboard') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('dashboard') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('dashboard') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('dashboard') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">home</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('dashboard') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Inicio</span>
             </a>
 
-            <a href="{{ route('clientes') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('clientes') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('clientes') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('clientes') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">group</span>
-                <span class="truncate">Clientes</span>
+            <a href="{{ route('clientes') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('clientes') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('clientes') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('clientes') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">group</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('clientes') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Clientes</span>
             </a>
             
-            <a href="{{ route('productos') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('productos') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('productos') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('productos') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">inventory_2</span>
-                <span class="truncate">Productos</span>
+            <a href="{{ route('productos') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('productos') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('productos') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('productos') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">inventory_2</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('productos') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Productos</span>
             </a>
             
-            <a href="{{ route('facturas') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('facturas') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('facturas') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('facturas') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt_long</span>
-                <span class="truncate">Facturas</span>
+            <a href="{{ route('facturas') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('facturas') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('facturas') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('facturas') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt_long</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('facturas') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Facturas</span>
             </a>
 
-            <a href="{{ route('vendedores') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('vendedores') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('vendedores') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('vendedores') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">badge</span>
-                <span class="truncate">Vendedores</span>
+            <a href="{{ route('vendedores') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('vendedores') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('vendedores') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('vendedores') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">badge</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('vendedores') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Vendedores</span>
             </a>
 
-            <a href="{{ route('gastos') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('gastos') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('gastos') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('gastos') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt</span>
-                <span class="truncate">Gastos</span>
+            <a href="{{ route('gastos') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('gastos') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('gastos') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('gastos') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('gastos') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Gastos</span>
             </a>
 
-            <div class="pt-4 pb-1">
+            <div class="pt-4 pb-2 px-2">
                 <div class="h-px w-full bg-white/10 rounded-full"></div>
             </div>
 
-            <a href="{{ route('empresa') }}" class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('empresa') ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] transition-colors {{ request()->routeIs('empresa') ? 'text-white' : 'text-white/70 group-hover:text-white' }}" style="{{ request()->routeIs('empresa') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">business</span>
-                <span class="truncate">Empresa</span>
+            <a href="{{ route('empresa') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('empresa') ? 'bg-slate-900 shadow-md' : 'hover:bg-white/5' }}" wire:navigate>
+                <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('empresa') ? 'bg-white text-slate-900 shadow-sm' : 'bg-white/5 text-white/70 group-hover:text-white group-hover:bg-white/10' }}">
+                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('empresa') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">business</span>
+                </div>
+                <span class="text-sm tracking-wide transition-colors {{ request()->routeIs('empresa') ? 'text-white font-semibold' : 'text-white/70 font-medium group-hover:text-white' }}">Empresa</span>
             </a>
 
         </nav>
 
         <!-- Footer Actions -->
-        <div class="px-2 py-3 border-t border-white/10 mt-auto">
+        <div class="px-4 py-4 border-t border-white/10 mt-auto">
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
-                <button type="submit" class="w-full group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-white/70 hover:bg-white/10 hover:text-white">
-                    <span class="material-symbols-outlined text-[20px] transition-colors text-white/70 group-hover:text-white">logout</span>
-                    <span class="truncate">Cerrar sesión</span>
+                <button type="submit" class="w-full group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all hover:bg-white/5">
+                    <div class="w-9 h-9 shrink-0 rounded-full bg-white/5 text-white/70 group-hover:bg-red-500 group-hover:text-white flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                    </div>
+                    <span class="text-sm tracking-wide text-white/70 font-medium group-hover:text-red-400 transition-colors">Cerrar sesión</span>
                 </button>
             </form>
         </div>
