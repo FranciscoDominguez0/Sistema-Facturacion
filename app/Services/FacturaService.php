@@ -2,6 +2,4 @@
 
 namespace App\Services;
 
-class FacturaService
-{
-}
+class FacturaService {}

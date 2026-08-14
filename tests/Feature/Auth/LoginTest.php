@@ -63,10 +63,10 @@ class LoginTest extends TestCase
     public function test_el_login_falla_si_el_email_esta_vacio(): void
     {
         Livewire::test(Login::class)
-            ->set('email', '')
-            ->set('password', 'password')
+            ->set('form.email', '')
+            ->set('form.password', 'password')
             ->call('login')
-            ->assertHasErrors(['email' => 'required'])
+            ->assertHasErrors(['form.email' => 'required'])
             ->assertNoRedirect();
 
         $this->assertGuest();
@@ -78,10 +78,10 @@ class LoginTest extends TestCase
     public function test_el_login_falla_si_el_email_no_es_valido(): void
     {
         Livewire::test(Login::class)
-            ->set('email', 'email-no-valido')
-            ->set('password', 'password')
+            ->set('form.email', 'email-no-valido')
+            ->set('form.password', 'password')
             ->call('login')
-            ->assertHasErrors(['email' => 'email'])
+            ->assertHasErrors(['form.email' => 'email'])
             ->assertNoRedirect();
 
         $this->assertGuest();
@@ -93,13 +93,30 @@ class LoginTest extends TestCase
     public function test_el_login_falla_si_la_contrasena_esta_vacia(): void
     {
         Livewire::test(Login::class)
-            ->set('email', 'test@example.com')
-            ->set('password', '')
+            ->set('form.email', 'test@example.com')
+            ->set('form.password', '')
             ->call('login')
-            ->assertHasErrors(['password' => 'required'])
+            ->assertHasErrors(['form.password' => 'required'])
             ->assertNoRedirect();
 
         $this->assertGuest();
+    }
+
+    /**
+     * El email se normaliza (sin espacios y en minúsculas) antes de autenticar.
+     */
+    public function test_el_email_se_normaliza_antes_de_autenticar(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::test(Login::class)
+            ->set('form.email', '  '.strtoupper($user->email).'  ')
+            ->set('form.password', 'password')
+            ->call('login')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticatedAs($user);
     }
 
     // =====================================================================
@@ -115,8 +132,8 @@ class LoginTest extends TestCase
         $user = User::factory()->create();
 
         Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password')
             ->call('login')
             ->assertHasNoErrors()
             ->assertRedirect(route('dashboard', absolute: false));
@@ -135,13 +152,14 @@ class LoginTest extends TestCase
     public function test_login_fallido_con_email_inexistente_muestra_error_generico(): void
     {
         $component = Livewire::test(Login::class)
-            ->set('email', 'no-existe@example.com')
-            ->set('password', 'password')
+            ->set('form.email', 'no-existe@example.com')
+            ->set('form.password', 'password')
             ->call('login');
 
         $component
-            ->assertHasErrors('email')
+            ->assertHasErrors('form.email')
             ->assertNoRedirect()
+            ->assertSet('form.password', '')
             ->assertSee('Las credenciales proporcionadas no son correctas.');
 
         $this->assertGuest();
@@ -156,13 +174,14 @@ class LoginTest extends TestCase
         $user = User::factory()->create();
 
         $component = Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'contrasena-incorrecta')
+            ->set('form.email', $user->email)
+            ->set('form.password', 'contrasena-incorrecta')
             ->call('login');
 
         $component
-            ->assertHasErrors('email')
+            ->assertHasErrors('form.email')
             ->assertNoRedirect()
+            ->assertSet('form.password', '')
             ->assertSee('Las credenciales proporcionadas no son correctas.');
 
         $this->assertGuest();
@@ -181,9 +200,9 @@ class LoginTest extends TestCase
         $user = User::factory()->create(['remember_token' => null]);
 
         Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->set('remember', true)
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password')
+            ->set('form.remember', true)
             ->call('login');
 
         $this->assertAuthenticatedAs($user);
@@ -200,9 +219,9 @@ class LoginTest extends TestCase
         $user = User::factory()->create(['remember_token' => null]);
 
         Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->set('remember', false)
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password')
+            ->set('form.remember', false)
             ->call('login');
 
         $this->assertAuthenticatedAs($user);
@@ -236,20 +255,30 @@ class LoginTest extends TestCase
     }
 
     /**
-     * Rate limiting: tras varios intentos fallidos el login debería
-     * bloquearse temporalmente (RateLimiter).
-     *
-     * NOTA: este test está deshabilitado porque el rate limiting NO está
-     * implementado en el componente activo (app/Livewire/Auth/Login.php).
-     * Existe la clase app/Livewire/Forms/LoginForm.php con RateLimiter,
-     * pero el componente actual no la utiliza. Habilitar este test cuando
-     * se integre el límite de intentos.
+     * Rate limiting: tras 5 intentos fallidos el login se bloquea
+     * temporalmente, incluso con credenciales correctas.
      */
     public function test_el_login_se_bloquea_temporalmente_despues_de_varios_intentos_fallidos(): void
     {
-        $this->markTestSkipped(
-            'Rate limiting no implementado en el componente activo de Login.'
-        );
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            Livewire::test(Login::class)
+                ->set('form.email', $user->email)
+                ->set('form.password', 'contrasena-incorrecta')
+                ->call('login')
+                ->assertHasErrors('form.email');
+        }
+
+        Livewire::test(Login::class)
+            ->set('form.email', $user->email)
+            ->set('form.password', 'password')
+            ->call('login')
+            ->assertHasErrors('form.email')
+            ->assertNoRedirect()
+            ->assertSee('Demasiados intentos de acceso');
+
+        $this->assertGuest();
     }
 
     // =====================================================================

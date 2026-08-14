@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/login');
 
 use App\Http\Middleware\PreventBackHistory;
+use App\Livewire\Clientes\ClienteForm;
+use App\Livewire\Clientes\ClienteShow;
 
 Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('dashboard', Dashboard::class)
@@ -24,6 +26,15 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     Route::get('clientes', ClienteIndex::class)
         ->name('clientes');
+
+    Route::get('clientes/create', ClienteForm::class)
+        ->name('clientes.create');
+
+    Route::get('clientes/{cliente}/edit', ClienteForm::class)
+        ->name('clientes.edit');
+
+    Route::get('clientes/{cliente}', ClienteShow::class)
+        ->name('clientes.show');
 
     Route::get('productos', ProductoIndex::class)
         ->name('productos');

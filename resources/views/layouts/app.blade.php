@@ -182,6 +182,7 @@
         </main>
     </div>
 
+    <x-toast />
     @livewireScripts
 </body>
 </html>

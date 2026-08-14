@@ -2,6 +2,4 @@
 
 namespace App\Services;
 
-class PdfFacturaService
-{
-}
+class PdfFacturaService {}

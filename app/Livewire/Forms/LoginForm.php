@@ -22,17 +22,23 @@ class LoginForm extends Form
     public bool $remember = false;
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Autentica al usuario con las credenciales del formulario.
      *
      * @throws ValidationException
      */
     public function authenticate(): void
     {
+        $this->normalizeEmail();
+        $this->validate();
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
+            RateLimiter::hit($this->throttleKey(), $this->decaySeconds());
 
+            // Limpia la contraseña para evitar dejarla en el formulario
+            $this->reset('password');
+
+            // Error genérico: no revela si el email existe (anti-enumeración)
             throw ValidationException::withMessages([
                 'form.email' => trans('auth.failed'),
             ]);
@@ -42,11 +48,21 @@ class LoginForm extends Form
     }
 
     /**
-     * Ensure the authentication request is not rate limited.
+     * Normaliza el email (sin espacios y en minúsculas) antes de validar.
+     */
+    protected function normalizeEmail(): void
+    {
+        $this->email = Str::lower(trim($this->email));
+    }
+
+    /**
+     * Bloquea temporalmente el intento tras demasiados fallos.
+     *
+     * @throws ValidationException
      */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), $this->maxAttempts())) {
             return;
         }
 
@@ -62,8 +78,18 @@ class LoginForm extends Form
         ]);
     }
 
+    protected function maxAttempts(): int
+    {
+        return (int) config('auth.max_attempts', 5);
+    }
+
+    protected function decaySeconds(): int
+    {
+        return (int) config('auth.decay_seconds', 60);
+    }
+
     /**
-     * Get the authentication rate limiting throttle key.
+     * Clave única del rate limiter: email + IP.
      */
     protected function throttleKey(): string
     {

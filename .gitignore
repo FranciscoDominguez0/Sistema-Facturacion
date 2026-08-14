@@ -36,3 +36,7 @@ database/*.sqlite-journal
 download.cjs
 create_structure.ps1
 Plan_Sistema_Facturacion_Completo*.md
+
+# Documentación interna del proyecto (no se versiona)
+/docs/
+/AGENTS.md

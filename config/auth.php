@@ -114,4 +114,18 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Límites de intentos de autenticación (login)
+    |--------------------------------------------------------------------------
+    |
+    | Controlan el rate limiting del formulario de login:
+    | - max_attempts:  máximo de intentos fallidos permitidos antes de bloquear.
+    | - decay_seconds: segundos de bloqueo antes de permitir un nuevo intento.
+    |
+    */
+
+    'max_attempts' => env('LOGIN_MAX_ATTEMPTS', 5),
+    'decay_seconds' => env('LOGIN_DECAY_SECONDS', 60),
+
 ];
