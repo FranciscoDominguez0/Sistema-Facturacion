@@ -2,84 +2,56 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Livewire\Auth\Login;
+use App\Livewire\Dashboard;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Volt\Volt;
 use Tests\TestCase;
 
+/**
+ * Tests de autenticación: renderizado del login, acceso al dashboard
+ * y cierre de sesión. La lógica completa del login está en LoginTest.
+ */
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_screen_can_be_rendered(): void
+    /**
+     * La vista de login se muestra correctamente con su componente Livewire.
+     */
+    public function test_la_vista_de_login_se_muestra_correctamente(): void
     {
-        $response = $this->get('/login');
-
-        $response
+        $this->get('/login')
             ->assertOk()
-            ->assertSeeVolt('pages.auth.login');
+            ->assertSeeLivewire(Login::class);
     }
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
-    {
-        $user = User::factory()->create();
-
-        $component = Volt::test('pages.auth.login')
-            ->set('form.email', $user->email)
-            ->set('form.password', 'password');
-
-        $component->call('login');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirect(route('dashboard', absolute: false));
-
-        $this->assertAuthenticated();
-    }
-
-    public function test_users_can_not_authenticate_with_invalid_password(): void
-    {
-        $user = User::factory()->create();
-
-        $component = Volt::test('pages.auth.login')
-            ->set('form.email', $user->email)
-            ->set('form.password', 'wrong-password');
-
-        $component->call('login');
-
-        $component
-            ->assertHasErrors()
-            ->assertNoRedirect();
-
-        $this->assertGuest();
-    }
-
-    public function test_navigation_menu_can_be_rendered(): void
+    /**
+     * Un usuario autenticado puede ver el dashboard con el menú de navegación.
+     */
+    public function test_un_usuario_autenticado_puede_ver_el_dashboard(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user);
 
-        $response = $this->get('/dashboard');
-
-        $response
+        $this->get('/dashboard')
             ->assertOk()
-            ->assertSeeVolt('layout.navigation');
+            ->assertSeeLivewire(Dashboard::class)
+            ->assertSee('Cerrar sesión');
     }
 
-    public function test_users_can_logout(): void
+    /**
+     * Un usuario autenticado puede cerrar sesión y es redirigido al login.
+     */
+    public function test_un_usuario_autenticado_puede_cerrar_sesion(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user);
 
-        $component = Volt::test('layout.navigation');
-
-        $component->call('logout');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirect('/');
+        $this->post('/logout')
+            ->assertRedirect(route('login'));
 
         $this->assertGuest();
     }

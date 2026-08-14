@@ -7,9 +7,9 @@ use PHPUnit\Framework\TestCase;
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Test de ejemplo básico.
      */
-    public function test_that_true_is_true(): void
+    public function test_que_true_es_true(): void
     {
         $this->assertTrue(true);
     }

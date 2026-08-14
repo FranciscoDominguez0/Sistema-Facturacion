@@ -11,7 +11,10 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed(): void
+    /**
+     * La página de perfil se muestra con sus formularios.
+     */
+    public function test_la_pagina_de_perfil_se_muestra(): void
     {
         $user = User::factory()->create();
 
@@ -24,7 +27,10 @@ class ProfileTest extends TestCase
             ->assertSeeVolt('profile.delete-user-form');
     }
 
-    public function test_profile_information_can_be_updated(): void
+    /**
+     * La información del perfil puede actualizarse.
+     */
+    public function test_la_informacion_del_perfil_puede_actualizarse(): void
     {
         $user = User::factory()->create();
 
@@ -46,7 +52,10 @@ class ProfileTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
+    /**
+     * El estado de verificación del email no cambia si el email es el mismo.
+     */
+    public function test_el_estado_de_verificacion_no_cambia_si_el_email_no_cambia(): void
     {
         $user = User::factory()->create();
 
@@ -64,7 +73,10 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    /**
+     * Un usuario puede eliminar su cuenta.
+     */
+    public function test_un_usuario_puede_eliminar_su_cuenta(): void
     {
         $user = User::factory()->create();
 
@@ -82,7 +94,10 @@ class ProfileTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account(): void
+    /**
+     * Se debe proporcionar la contraseña correcta para eliminar la cuenta.
+     */
+    public function test_se_requiere_la_contrasena_correcta_para_eliminar_la_cuenta(): void
     {
         $user = User::factory()->create();
 

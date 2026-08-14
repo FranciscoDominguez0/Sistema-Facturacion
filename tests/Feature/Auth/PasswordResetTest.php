@@ -2,83 +2,122 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\ResetPassword;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Livewire\Volt\Volt;
+use Livewire\Livewire;
 use Tests\TestCase;
 
+/**
+ * Tests de recuperación de contraseña (solicitud de enlace y restablecimiento).
+ */
 class PasswordResetTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_reset_password_link_screen_can_be_rendered(): void
+    /**
+     * La pantalla de solicitud de enlace de recuperación se muestra correctamente.
+     */
+    public function test_la_pantalla_de_solicitud_de_recuperacion_se_muestra(): void
     {
-        $response = $this->get('/forgot-password');
-
-        $response
-            ->assertSeeVolt('pages.auth.forgot-password')
-            ->assertStatus(200);
+        $this->get('/forgot-password')
+            ->assertOk()
+            ->assertSeeLivewire(ForgotPassword::class);
     }
 
-    public function test_reset_password_link_can_be_requested(): void
+    /**
+     * Se envía el enlace de recuperación si el email existe en el sistema.
+     */
+    public function test_se_envia_el_enlace_de_recuperacion_si_el_email_existe(): void
     {
         Notification::fake();
 
         $user = User::factory()->create();
 
-        Volt::test('pages.auth.forgot-password')
+        Livewire::test(ForgotPassword::class)
             ->set('email', $user->email)
-            ->call('sendPasswordResetLink');
+            ->call('sendPasswordResetLink')
+            ->assertHasNoErrors()
+            ->assertSet('email', '');
 
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
     }
 
-    public function test_reset_password_screen_can_be_rendered(): void
+    /**
+     * No se revela si un email existe: con un email desconocido se muestra
+     * el mismo mensaje genérico y no se envía ninguna notificación.
+     */
+    public function test_no_se_revela_si_un_email_no_existe(): void
+    {
+        Notification::fake();
+
+        Livewire::test(ForgotPassword::class)
+            ->set('email', 'no-existe@example.com')
+            ->call('sendPasswordResetLink')
+            ->assertHasNoErrors()
+            ->assertSet('email', '')
+            ->assertSet('status', 'Si el correo existe en nuestro sistema, te hemos enviado un enlace para restablecer la contraseña.');
+
+        Notification::assertNothingSent();
+    }
+
+    /**
+     * La pantalla de restablecimiento de contraseña se muestra con el token.
+     */
+    public function test_la_pantalla_de_restablecimiento_se_muestra(): void
+    {
+        $this->get('/reset-password/token-de-prueba')
+            ->assertOk()
+            ->assertSeeLivewire(ResetPassword::class);
+    }
+
+    /**
+     * La contraseña puede restablecerse con un token válido.
+     */
+    public function test_la_contrasena_puede_restablecerse_con_un_token_valido(): void
     {
         Notification::fake();
 
         $user = User::factory()->create();
 
-        Volt::test('pages.auth.forgot-password')
+        Livewire::test(ForgotPassword::class)
             ->set('email', $user->email)
             ->call('sendPasswordResetLink');
 
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-            $response = $this->get('/reset-password/'.$notification->token);
-
-            $response
-                ->assertSeeVolt('pages.auth.reset-password')
-                ->assertStatus(200);
-
-            return true;
-        });
-    }
-
-    public function test_password_can_be_reset_with_valid_token(): void
-    {
-        Notification::fake();
-
-        $user = User::factory()->create();
-
-        Volt::test('pages.auth.forgot-password')
-            ->set('email', $user->email)
-            ->call('sendPasswordResetLink');
-
-        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
-            $component = Volt::test('pages.auth.reset-password', ['token' => $notification->token])
+        Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) use ($user) {
+            Livewire::test(ResetPassword::class, ['token' => $notification->token])
                 ->set('email', $user->email)
-                ->set('password', 'password')
-                ->set('password_confirmation', 'password');
+                ->set('password', 'nueva-contrasena')
+                ->set('password_confirmation', 'nueva-contrasena')
+                ->call('resetPassword')
+                ->assertHasNoErrors()
+                ->assertRedirect(route('login'));
 
-            $component->call('resetPassword');
-
-            $component
-                ->assertRedirect('/login')
-                ->assertHasNoErrors();
+            $this->assertTrue(Hash::check('nueva-contrasena', $user->fresh()->password));
 
             return true;
         });
+    }
+
+    /**
+     * La contraseña no se restablece con un token inválido.
+     */
+    public function test_la_contrasena_no_se_restablece_con_un_token_invalido(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::test(ResetPassword::class, ['token' => 'token-invalido'])
+            ->set('email', $user->email)
+            ->set('password', 'nueva-contrasena')
+            ->set('password_confirmation', 'nueva-contrasena')
+            ->call('resetPassword')
+            ->assertHasErrors('email')
+            ->assertNoRedirect();
+
+        $this->assertFalse(Hash::check('nueva-contrasena', $user->fresh()->password));
     }
 }
