@@ -2,17 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Producto extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nombre',
         'descripcion',
@@ -24,21 +22,22 @@ class Producto extends Model
         'activo',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'precio' => 'decimal:2',
-        'aplica_impuesto' => 'boolean',
-        'activo' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'precio' => 'decimal:2',
+            'aplica_impuesto' => 'boolean',
+            'activo' => 'boolean',
+        ];
+    }
 
-    /**
-     * Scope a query to only include active products.
-     */
-    public function scopeActivos(\Illuminate\Database\Eloquent\Builder $query): void
+    // El string vacío del formulario se guarda como null (regla: sin imagen = null)
+    protected function imagenPath(): Attribute
+    {
+        return Attribute::set(fn ($value) => $value === '' ? null : $value);
+    }
+
+    public function scopeActivos(Builder $query): void
     {
         $query->where('activo', true);
     }

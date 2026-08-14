@@ -15,6 +15,7 @@ Route::redirect('/', '/login');
 use App\Http\Middleware\PreventBackHistory;
 use App\Livewire\Clientes\ClienteForm;
 use App\Livewire\Clientes\ClienteShow;
+use App\Livewire\Productos\ProductoForm;
 
 Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('dashboard', Dashboard::class)
@@ -41,12 +42,15 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('clientes.show');
 
     Route::get('productos', ProductoIndex::class)
+        ->middleware('can:productos.ver')
         ->name('productos.index');
 
-    Route::get('productos/create', \App\Livewire\Productos\ProductoForm::class)
+    Route::get('productos/create', ProductoForm::class)
+        ->middleware('can:productos.gestionar')
         ->name('productos.create');
 
-    Route::get('productos/{producto}/edit', \App\Livewire\Productos\ProductoForm::class)
+    Route::get('productos/{producto}/edit', ProductoForm::class)
+        ->middleware('can:productos.gestionar')
         ->name('productos.edit');
 
     Route::get('facturas', FacturaIndex::class)

@@ -2,42 +2,42 @@
 
 namespace App\Livewire\Productos;
 
-use Livewire\Component;
+use App\Livewire\Forms\ProductoForm as ProductoFormObject;
+use App\Models\Producto;
+use App\Services\ProductoImagenService;
+use Illuminate\Http\UploadedFile;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class ProductoForm extends Component
 {
-    use \Livewire\WithFileUploads;
+    use WithFileUploads;
 
-    public \App\Livewire\Forms\ProductoForm $form;
-    public ?\App\Models\Producto $producto = null;
-    public $imagen;
-    public $isEdit = false;
+    public ProductoFormObject $form;
 
-    public function mount(?\App\Models\Producto $producto = null)
+    public ?Producto $producto = null;
+
+    public UploadedFile|string|null $imagen = null;
+
+    public bool $isEdit = false;
+
+    public function mount(?Producto $producto = null)
     {
-        if ($producto && $producto->exists) {
-            $this->producto = $producto;
-            $this->isEdit = true;
-            $this->form->setProducto($producto);
+        if (! $producto?->exists) {
+            return;
         }
+
+        $this->producto = $producto;
+        $this->isEdit = true;
+        $this->form->setProducto($producto);
     }
 
-    public function save()
+    public function save(ProductoImagenService $imagenes)
     {
-        if ($this->imagen) {
-            $this->validate([
-                'imagen' => 'image|max:2048', // 2MB Max
-            ]);
-            
-            // Eliminar imagen anterior si existe
-            if ($this->isEdit && $this->producto->imagen_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($this->producto->imagen_path);
-            }
-            
-            $path = $this->imagen->store('productos', 'public');
-            $this->form->imagen_path = $path;
+        if ($this->imagen instanceof UploadedFile) {
+            $this->form->imagen_path = $imagenes->guardar($this->imagen, $this->producto?->imagen_path);
         }
 
         if ($this->isEdit) {

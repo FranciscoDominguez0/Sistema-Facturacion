@@ -2,17 +2,21 @@
 
 namespace App\Livewire\Productos;
 
+use App\Models\Producto;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class ProductoIndex extends Component
 {
-    use \Livewire\WithPagination;
+    use WithPagination;
 
-    public $search = '';
-    public $filtroEstado = 'Todos';
-    public $filtroTipo = 'Todos';
+    public string $search = '';
+
+    public string $filtroEstado = 'Todos';
+
+    public string $filtroTipo = 'Todos';
 
     public function updatingSearch()
     {
@@ -31,17 +35,19 @@ class ProductoIndex extends Component
 
     public function toggleActivo(int $id)
     {
-        $producto = \App\Models\Producto::findOrFail($id);
-        $producto->update(['activo' => !$producto->activo]);
+        $this->authorize('productos.gestionar');
+
+        $producto = Producto::findOrFail($id);
+        $producto->update(['activo' => ! $producto->activo]);
     }
 
     public function render()
     {
-        $productos = \App\Models\Producto::query()
+        $productos = Producto::query()
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('nombre', 'ilike', '%' . $this->search . '%')
-                      ->orWhere('codigo', 'ilike', '%' . $this->search . '%');
+                    $q->where('nombre', 'ilike', '%'.$this->escapeLike($this->search).'%')
+                        ->orWhere('codigo', 'ilike', '%'.$this->escapeLike($this->search).'%');
                 });
             })
             ->when($this->filtroEstado !== 'Todos', function ($query) {
@@ -56,5 +62,10 @@ class ProductoIndex extends Component
         return view('livewire.productos.producto-index', [
             'productos' => $productos,
         ]);
+    }
+
+    protected function escapeLike(string $termino): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $termino);
     }
 }
