@@ -68,9 +68,13 @@
     <!-- SideNavBar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
         <!-- Header (Logo) -->
-        <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-3xl text-emerald-400">receipt_long</span>
-            <span class="text-2xl font-bold text-white tracking-tight">VigiFact</span>
+        <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-3">
+            <div class="h-10 w-10 bg-white/15 rounded-full flex items-center justify-center text-white shadow-sm">
+                <span class="material-symbols-outlined text-2xl">receipt_long</span>
+            </div>
+            <h1 class="text-2xl font-semibold text-white tracking-tight">
+                Vigi<span class="font-light">Fact</span>
+            </h1>
         </div>
 
         <!-- Navigation Menu -->
