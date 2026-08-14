@@ -44,20 +44,20 @@
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Email</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Teléfono</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Estado</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Fecha de Creación</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right whitespace-nowrap">Acciones</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Fecha de Creación</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right whitespace-nowrap sticky right-0 bg-slate-50 shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.02)] z-10">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse($clientes as $cliente)
-                    <tr class="hover:bg-slate-50/50 transition-colors group" wire:key="{{ $cliente->id }}">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                    <tr class="hover:bg-slate-50 transition-colors group" wire:key="{{ $cliente->id }}">
+                        <td class="px-6 py-4">
                             <div class="text-sm text-slate-800 font-semibold">{{ $cliente->nombre }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                             {{ $cliente->identificacion ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                        <td class="px-6 py-4 text-sm text-slate-500 break-all min-w-[200px]">
                             {{ $cliente->email ?? '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
@@ -74,11 +74,11 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 hidden lg:table-cell">
                             {{ $cliente->created_at->format('d M Y') }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white group-hover:bg-slate-50 transition-colors shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.02)]">
+                            <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('clientes.show', $cliente) }}" wire:navigate class="text-slate-400 hover:text-sovereign-blue p-1 rounded transition-colors" title="Ver">
                                     <span class="material-symbols-outlined text-[20px]">visibility</span>
                                 </a>

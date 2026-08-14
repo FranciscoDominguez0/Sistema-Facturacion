@@ -6,5 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vendedor extends Model
 {
-    //
+    protected $table = 'vendedores';
+
+    protected $fillable = [
+        'user_id',
+        'codigo',
+        'comision_porcentaje',
+        'descuento_maximo_porcentaje',
+        'activo',
+    ];
 }
