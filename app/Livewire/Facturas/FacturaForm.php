@@ -9,46 +9,68 @@ use App\Models\Vendedor;
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
+use Livewire\Component;
 
 #[Layout('layouts.app')]
 class FacturaForm extends Component
 {
+    #[Url]
     public $cliente_id;
+
     public $vendedor_id;
+
     public $fecha_emision;
+
     public $fecha_vencimiento;
+
     public $descuento_porcentaje = 0;
+
     public $notas;
 
     public array $items = [];
 
     // Totales
     public $subtotal = 0;
+
     public $descuento_total = 0;
+
     public $impuesto = 0;
+
     public $total = 0;
 
     // Para la creación rápida de cliente
     public $nuevo_cliente_nombre = '';
+
     public $nuevo_cliente_identificacion = '';
+
     public $nuevo_cliente_email = '';
+
     public $nuevo_cliente_telefono = '';
+
     public $nuevo_cliente_direccion = '';
+
     public $mostrarModalCliente = false;
 
     // Para la creación rápida de producto
     public $nuevo_producto_nombre = '';
+
     public $nuevo_producto_precio = '';
+
     public $nuevo_producto_tipo = 'bien';
+
     public $nuevo_producto_aplica_impuesto = true;
+
     public $mostrarModalProducto = false;
+
     public $linea_producto_actual = null;
 
     // Para búsquedas
     public $searchCliente = '';
+
     public $clientes_sugeridos = [];
+
     public $cliente_seleccionado_nombre = '';
 
     protected FacturaService $facturaService;
@@ -61,12 +83,22 @@ class FacturaForm extends Component
     public function mount()
     {
         $this->fecha_emision = date('Y-m-d');
-        
+
         // Autoseleccionar vendedor si no puede elegirlo libremente
-        if (!Gate::allows('facturas.vendedor.seleccionar')) {
+        if (! Gate::allows('facturas.vendedor.seleccionar')) {
             $vendedor = Auth::user()->vendedor;
             if ($vendedor) {
                 $this->vendedor_id = $vendedor->id;
+            }
+        }
+
+        // Si viene un cliente_id por la URL
+        if ($this->cliente_id) {
+            $cliente = Cliente::find($this->cliente_id);
+            if ($cliente) {
+                $this->cliente_seleccionado_nombre = $cliente->nombre;
+            } else {
+                $this->cliente_id = null;
             }
         }
 
@@ -77,7 +109,7 @@ class FacturaForm extends Component
     public function updatedSearchCliente($value)
     {
         if (strlen($value) >= 2) {
-            $this->clientes_sugeridos = Cliente::where('nombre', 'ilike', '%' . $value . '%')
+            $this->clientes_sugeridos = Cliente::where('nombre', 'ilike', '%'.$value.'%')
                 ->take(5)
                 ->get()
                 ->toArray();
@@ -121,7 +153,7 @@ class FacturaForm extends Component
 
         $this->seleccionarCliente($cliente->id, $cliente->nombre);
         $this->mostrarModalCliente = false;
-        
+
         $this->nuevo_cliente_nombre = '';
         $this->nuevo_cliente_identificacion = '';
         $this->nuevo_cliente_email = '';
@@ -166,6 +198,7 @@ class FacturaForm extends Component
             $this->items[$index]['producto_id'] = null; // reset select
             $this->linea_producto_actual = $index;
             $this->mostrarModalProducto = true;
+
             return;
         }
 
@@ -208,7 +241,7 @@ class FacturaForm extends Component
         }
 
         $this->mostrarModalProducto = false;
-        
+
         $this->nuevo_producto_nombre = '';
         $this->nuevo_producto_precio = '';
         $this->nuevo_producto_tipo = 'bien';
@@ -236,7 +269,18 @@ class FacturaForm extends Component
 
     public function save()
     {
-        $this->validate([
+        $puedeDescontar = Gate::allows('facturas.descuento');
+
+        // Sin permiso de descuentos se ignoran los descuentos enviados por línea
+        if (! $puedeDescontar) {
+            foreach ($this->items as &$item) {
+                $item['descuento_porcentaje'] = 0;
+            }
+            unset($item);
+            $this->descuento_porcentaje = 0;
+        }
+
+        $reglas = [
             'cliente_id' => 'required|exists:clientes,id',
             'vendedor_id' => 'required|exists:vendedores,id',
             'fecha_emision' => 'required|date',
@@ -246,12 +290,21 @@ class FacturaForm extends Component
             'items.*.descripcion' => 'required|string',
             'items.*.cantidad' => 'required|numeric|min:0.01',
             'items.*.precio_unitario' => 'required|numeric|min:0',
-        ], [
+        ];
+
+        // Con permiso de descuentos, cada línea respeta el máximo del vendedor
+        if ($puedeDescontar && $this->vendedor_id) {
+            $descuentoMaximo = (float) (Vendedor::find($this->vendedor_id)?->descuento_maximo_porcentaje ?? 0);
+            $reglas['items.*.descuento_porcentaje'] = ['required', 'numeric', 'min:0', "max:{$descuentoMaximo}"];
+        }
+
+        $this->validate($reglas, [
             'cliente_id.required' => 'Debe seleccionar un cliente.',
             'vendedor_id.required' => 'Debe seleccionar un vendedor.',
             'items.min' => 'La factura debe tener al menos una línea.',
             'items.*.descripcion.required' => 'La descripción es obligatoria.',
             'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
+            'items.*.descuento_porcentaje.max' => 'El descuento de la línea supera el máximo permitido para el vendedor.',
         ]);
 
         $factura = $this->facturaService->crear([

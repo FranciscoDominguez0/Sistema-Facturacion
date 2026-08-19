@@ -146,26 +146,39 @@
 
         <!-- Panel Lateral Informativo -->
         <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 class="text-sm font-bold text-slate-800 mb-4 border-b border-slate-100 pb-3 flex items-center">
-                    <span class="material-symbols-outlined text-slate-400 mr-2 text-[20px]">info</span>
-                    Información Adicional
-                </h3>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50/50 px-6 py-4 border-b border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
+                        <span class="material-symbols-outlined text-sovereign-blue mr-2 text-[20px]">info</span>
+                        Información Adicional
+                    </h3>
+                </div>
                 
-                <div class="space-y-5">
-                    <div>
-                        <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Vendedor Asignado</span>
-                        <div class="mt-1.5 flex items-center text-sm font-medium text-slate-800">
-                            <span class="material-symbols-outlined text-slate-400 mr-2 text-[18px]">badge</span>
-                            {{ $factura->vendedor->user->name }}
+                <div class="p-6 space-y-4">
+                    <!-- Vendedor Asignado -->
+                    <div class="flex items-start bg-blue-50/50 p-4 rounded-lg border border-blue-100/50 transition-colors hover:bg-blue-50">
+                        <div class="flex-shrink-0 bg-blue-100/80 rounded-full p-2 mr-4 shadow-sm border border-blue-200/50">
+                            <span class="material-symbols-outlined text-sovereign-blue text-[20px] block">badge</span>
+                        </div>
+                        <div>
+                            <span class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Vendedor Asignado</span>
+                            <div class="text-sm font-bold text-slate-800">
+                                {{ $factura->vendedor->user->name }}
+                            </div>
                         </div>
                     </div>
                     
-                    <div>
-                        <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Creado el</span>
-                        <div class="mt-1.5 flex items-center text-sm font-medium text-slate-800">
-                            <span class="material-symbols-outlined text-slate-400 mr-2 text-[18px]">calendar_today</span>
-                            {{ $factura->created_at->format('d/m/Y H:i') }}
+                    <!-- Fecha Creación -->
+                    <div class="flex items-start bg-slate-50 p-4 rounded-lg border border-slate-100 transition-colors hover:bg-slate-100/50">
+                        <div class="flex-shrink-0 bg-white rounded-full p-2 mr-4 shadow-sm border border-slate-200/60">
+                            <span class="material-symbols-outlined text-slate-600 text-[20px] block">calendar_today</span>
+                        </div>
+                        <div>
+                            <span class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Creado el</span>
+                            <div class="text-sm font-bold text-slate-800">
+                                {{ $factura->created_at->format('d/m/Y') }}
+                                <span class="text-slate-500 font-medium ml-1">{{ $factura->created_at->format('H:i') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

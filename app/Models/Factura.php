@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Enums\EstadoFactura;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Factura extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'numero_factura',
         'cliente_id',

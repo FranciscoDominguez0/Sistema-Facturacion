@@ -1,0 +1,444 @@
+<?php
+
+namespace Tests\Feature\Livewire;
+
+use App\Livewire\Facturas\FacturaForm;
+use App\Models\Cliente;
+use App\Models\Empresa;
+use App\Models\Factura;
+use App\Models\Producto;
+use App\Models\User;
+use App\Models\Vendedor;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
+
+/**
+ * Tests del formulario de nueva venta (FacturaForm).
+ *
+ * El proyecto usa PHPUnit clásico con nombres de test en español.
+ */
+class FacturaFormTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Permisos del módulo de facturas
+        Permission::findOrCreate('facturas.ver');
+        Permission::findOrCreate('facturas.gestionar');
+        Permission::findOrCreate('facturas.estado.cambiar');
+        Permission::findOrCreate('facturas.vendedor.seleccionar');
+        Permission::findOrCreate('facturas.descuento');
+    }
+
+    // =====================================================================
+    // Acceso al formulario
+    // =====================================================================
+
+    /**
+     * Un usuario autenticado con permiso puede ver el formulario de nueva venta.
+     */
+    public function test_un_usuario_con_permiso_puede_ver_el_formulario_de_nueva_venta(): void
+    {
+        $usuario = User::factory()->create();
+        $usuario->givePermissionTo('facturas.gestionar');
+
+        $this->actingAs($usuario)
+            ->get(route('facturas.crear'))
+            ->assertOk();
+    }
+
+    /**
+     * Un usuario autenticado sin permiso recibe 403 al intentar acceder.
+     */
+    public function test_un_usuario_sin_permiso_no_puede_acceder_al_formulario_de_nueva_venta(): void
+    {
+        $usuario = User::factory()->create();
+
+        $this->actingAs($usuario)
+            ->get(route('facturas.crear'))
+            ->assertForbidden();
+    }
+
+    // =====================================================================
+    // Selección de cliente
+    // =====================================================================
+
+    /**
+     * Buscar cliente por nombre filtra correctamente los resultados del
+     * autocompletado.
+     */
+    public function test_la_busqueda_de_cliente_filtra_por_nombre(): void
+    {
+        Cliente::factory()->create(['nombre' => 'María Gómez']);
+        Cliente::factory()->create(['nombre' => 'Carlos Pérez']);
+        $usuario = User::factory()->create();
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('searchCliente', 'María')
+            ->assertSee('María Gómez')
+            ->assertDontSee('Carlos Pérez');
+    }
+
+    /**
+     * Se puede crear un cliente nuevo solo con nombre y queda seleccionado
+     * automáticamente en el formulario, sin recargar la página.
+     */
+    public function test_se_puede_crear_un_cliente_express_y_queda_seleccionado(): void
+    {
+        $usuario = User::factory()->create();
+
+        $componente = Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('nuevo_cliente_nombre', 'Cliente Express')
+            ->call('guardarClienteExpress')
+            ->assertHasNoErrors();
+
+        $cliente = Cliente::where('nombre', 'Cliente Express')->firstOrFail();
+
+        // El cliente queda seleccionado automáticamente en el formulario
+        $this->assertSame($cliente->id, $componente->get('cliente_id'));
+        $this->assertSame('Cliente Express', $componente->get('cliente_seleccionado_nombre'));
+
+        $this->assertDatabaseHas('clientes', [
+            'id' => $cliente->id,
+            'nombre' => 'Cliente Express',
+            'activo' => true,
+        ]);
+    }
+
+    /**
+     * Crear un cliente sin nombre falla la validación.
+     */
+    public function test_crear_cliente_sin_nombre_falla_la_validacion(): void
+    {
+        $usuario = User::factory()->create();
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('nuevo_cliente_nombre', '')
+            ->call('guardarClienteExpress')
+            ->assertHasErrors(['nuevo_cliente_nombre' => 'required']);
+
+        $this->assertDatabaseCount('clientes', 0);
+    }
+
+    // =====================================================================
+    // Líneas de venta
+    // =====================================================================
+
+    /**
+     * Agregar línea añade una fila vacía al array de items.
+     */
+    public function test_agregar_linea_anade_una_fila_vacia(): void
+    {
+        $usuario = User::factory()->create();
+
+        $componente = Livewire::actingAs($usuario)->test(FacturaForm::class);
+
+        // El formulario inicia con una línea
+        $this->assertCount(1, $componente->get('items'));
+
+        $componente->call('agregarLinea');
+
+        $this->assertCount(2, $componente->get('items'));
+        $this->assertSame(0, $componente->get('items.1.subtotal_linea'));
+    }
+
+    /**
+     * Eliminar línea remueve correctamente la fila del array.
+     */
+    public function test_eliminar_linea_remueve_la_fila_del_array(): void
+    {
+        $usuario = User::factory()->create();
+
+        $componente = Livewire::actingAs($usuario)->test(FacturaForm::class);
+        $componente->call('agregarLinea');
+        $this->assertCount(2, $componente->get('items'));
+
+        $componente->call('eliminarLinea', 0);
+
+        $this->assertCount(1, $componente->get('items'));
+        // El array se reindexa
+        $this->assertSame(0.0, $componente->get('items.0.subtotal_linea'));
+    }
+
+    /**
+     * Cambiar cantidad o precio_unitario recalcula el subtotal_linea y los
+     * totales generales en tiempo real.
+     */
+    public function test_cambiar_cantidad_y_precio_recalcula_los_totales(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $usuario = User::factory()->create();
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('items.0.descripcion', 'Producto A')
+            ->set('items.0.cantidad', 2)
+            ->set('items.0.precio_unitario', 100)
+            ->assertSet('items.0.subtotal_linea', 200.0)
+            ->assertSet('subtotal', 200.0)
+            ->assertSet('impuesto', 14.0)
+            ->assertSet('total', 214.0);
+    }
+
+    /**
+     * Seleccionar un producto del catálogo autocompleta la descripción y el
+     * precio, pero permite editarlos después.
+     */
+    public function test_seleccionar_producto_autocompleta_y_permite_editar(): void
+    {
+        $producto = Producto::factory()->create(['nombre' => 'Laptop Pro', 'precio' => 150.50]);
+        $usuario = User::factory()->create();
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->call('seleccionarProducto', 0, $producto->id)
+            ->assertSet('items.0.producto_id', $producto->id)
+            ->assertSet('items.0.descripcion', 'Laptop Pro')
+            ->assertSet('items.0.precio_unitario', '150.50');
+
+        // La descripción sigue siendo editable
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->call('seleccionarProducto', 0, $producto->id)
+            ->set('items.0.descripcion', 'Laptop Pro 16GB RAM')
+            ->assertSet('items.0.descripcion', 'Laptop Pro 16GB RAM');
+    }
+
+    // =====================================================================
+    // Descuentos
+    // =====================================================================
+
+    /**
+     * Un usuario sin permiso de descuento no puede aplicar descuentos por
+     * línea: los descuentos enviados se ignoran al guardar.
+     */
+    public function test_usuario_sin_permiso_de_descuento_no_puede_aplicar_descuentos(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar'], 10);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('cliente_id', $cliente->id)
+            ->set('items.0.descripcion', 'Producto A')
+            ->set('items.0.cantidad', 1)
+            ->set('items.0.precio_unitario', 100)
+            ->set('items.0.descuento_porcentaje', 20)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        // El descuento enviado se ignoró: la línea y la factura quedan sin descuento
+        $this->assertDatabaseHas('factura_items', [
+            'descripcion' => 'Producto A',
+            'descuento_porcentaje' => 0,
+            'descuento_monto' => 0,
+        ]);
+        $this->assertDatabaseHas('facturas', [
+            'cliente_id' => $cliente->id,
+            'vendedor_id' => $vendedor->id,
+            'descuento_total' => 0,
+        ]);
+    }
+
+    /**
+     * Un usuario con permiso de descuento no puede superar el
+     * descuento_maximo_porcentaje configurado en su registro de vendedor.
+     */
+    public function test_usuario_con_permiso_de_descuento_no_supera_el_maximo_del_vendedor(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar', 'facturas.descuento'], 10);
+
+        // Descuento dentro del límite (10%) sí se permite
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('cliente_id', $cliente->id)
+            ->set('items.0.descripcion', 'Producto A')
+            ->set('items.0.cantidad', 1)
+            ->set('items.0.precio_unitario', 100)
+            ->set('items.0.descuento_porcentaje', 5)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('factura_items', [
+            'descripcion' => 'Producto A',
+            'descuento_porcentaje' => 5,
+        ]);
+
+        // Descuento que supera el máximo (10%) falla la validación
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('cliente_id', $cliente->id)
+            ->set('items.0.descripcion', 'Producto B')
+            ->set('items.0.cantidad', 1)
+            ->set('items.0.precio_unitario', 100)
+            ->set('items.0.descuento_porcentaje', 15)
+            ->call('save')
+            ->assertHasErrors(['items.0.descuento_porcentaje' => 'max']);
+
+        $this->assertDatabaseCount('facturas', 1);
+    }
+
+    // =====================================================================
+    // Guardado
+    // =====================================================================
+
+    /**
+     * Guardar la venta sin cliente falla la validación.
+     */
+    public function test_guardar_sin_cliente_falla_la_validacion(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        [$usuario] = $this->usuarioConVendedor(['facturas.gestionar']);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('items.0.descripcion', 'Producto A')
+            ->set('items.0.cantidad', 1)
+            ->set('items.0.precio_unitario', 100)
+            ->call('save')
+            ->assertHasErrors(['cliente_id' => 'required']);
+
+        $this->assertDatabaseCount('facturas', 0);
+    }
+
+    /**
+     * Guardar la venta sin ninguna línea válida falla la validación.
+     */
+    public function test_guardar_sin_lineas_validas_falla_la_validacion(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        [$usuario] = $this->usuarioConVendedor(['facturas.gestionar']);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('cliente_id', $cliente->id)
+            ->call('eliminarLinea', 0)
+            ->call('save')
+            ->assertHasErrors(['items' => 'required']);
+
+        $this->assertDatabaseCount('facturas', 0);
+    }
+
+    /**
+     * Guardar una venta válida crea la factura con su número correlativo,
+     * crea los factura_items asociados y redirige al detalle.
+     */
+    public function test_guardar_venta_exitosa_crea_la_factura_y_redirige(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar']);
+
+        $componente = Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('cliente_id', $cliente->id)
+            ->set('items.0.descripcion', 'Producto A')
+            ->set('items.0.cantidad', 2)
+            ->set('items.0.precio_unitario', 100)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $factura = Factura::firstOrFail();
+
+        $componente->assertRedirect(route('facturas.show', $factura->id));
+
+        $this->assertDatabaseHas('facturas', [
+            'id' => $factura->id,
+            'numero_factura' => 'FAC-000001',
+            'cliente_id' => $cliente->id,
+            'vendedor_id' => $vendedor->id,
+            'estado' => 'Pendiente',
+            'subtotal' => 200,
+            'impuesto' => 14,
+            'total' => 214,
+        ]);
+
+        $this->assertDatabaseCount('factura_items', 1);
+        $this->assertDatabaseHas('factura_items', [
+            'factura_id' => $factura->id,
+            'descripcion' => 'Producto A',
+            'cantidad' => 2,
+            'precio_unitario' => 100,
+        ]);
+    }
+
+    // =====================================================================
+    // Vendedor y fechas
+    // =====================================================================
+
+    /**
+     * El vendedor se autoasigna al usuario autenticado si no tiene permiso
+     * de selección.
+     */
+    public function test_el_vendedor_se_autoasigna_sin_permiso_de_seleccion(): void
+    {
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar']);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->assertSet('vendedor_id', $vendedor->id);
+    }
+
+    /**
+     * El vendedor se puede elegir manualmente si el usuario tiene el permiso
+     * de selección.
+     */
+    public function test_el_usuario_con_permiso_de_seleccion_puede_elegir_vendedor(): void
+    {
+        $usuario = User::factory()->create();
+        $usuario->givePermissionTo('facturas.vendedor.seleccionar');
+        $otroVendedor = Vendedor::factory()->create();
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->assertSet('vendedor_id', null)
+            ->set('vendedor_id', $otroVendedor->id)
+            ->assertSet('vendedor_id', $otroVendedor->id);
+    }
+
+    /**
+     * La fecha de emisión por defecto es la fecha actual si no se modifica.
+     */
+    public function test_la_fecha_de_emision_por_defecto_es_hoy(): void
+    {
+        $usuario = User::factory()->create();
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->assertSet('fecha_emision', date('Y-m-d'));
+    }
+
+    // =====================================================================
+    // Helpers
+    // =====================================================================
+
+    /**
+     * Usuario con un vendedor asociado y los permisos indicados.
+     *
+     * @return array{0: User, 1: Vendedor}
+     */
+    protected function usuarioConVendedor(array $permisos = [], float $descuentoMaximo = 10): array
+    {
+        $usuario = User::factory()->create();
+        $vendedor = Vendedor::factory()->create([
+            'user_id' => $usuario->id,
+            'descuento_maximo_porcentaje' => $descuentoMaximo,
+        ]);
+
+        $usuario->givePermissionTo($permisos);
+
+        return [$usuario, $vendedor];
+    }
+}

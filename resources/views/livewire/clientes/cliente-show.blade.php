@@ -45,7 +45,7 @@
                 <span class="material-symbols-outlined text-[16px]">edit</span>
                 Editar
             </a>
-            <a href="{{ route('facturas', ['cliente_id' => $cliente->id]) }}" wire:navigate class="px-4 py-2 border border-sovereign-blue text-white bg-sovereign-blue rounded font-bold text-[11px] uppercase tracking-wider hover:bg-opacity-90 transition-colors flex items-center gap-2 shadow-sm">
+            <a href="{{ route('facturas.crear', ['cliente_id' => $cliente->id]) }}" wire:navigate class="px-4 py-2 border border-sovereign-blue text-white bg-sovereign-blue rounded font-bold text-[11px] uppercase tracking-wider hover:bg-opacity-90 transition-colors flex items-center gap-2 shadow-sm">
                 <span class="material-symbols-outlined text-[16px]">add</span>
                 Nueva Factura
             </a>
@@ -114,7 +114,7 @@
                     @forelse($facturas->take(10) as $factura)
                     <tr class="hover:bg-slate-50 transition-colors group">
                         <td class="px-6 py-4 text-sovereign-blue font-bold text-sm">
-                            <a href="#" class="hover:underline">{{ $factura->numero }}</a>
+                            <a href="{{ route('facturas.show', $factura->id) }}" wire:navigate class="hover:underline">{{ $factura->numero_factura }}</a>
                         </td>
                         <td class="px-6 py-4 text-slate-500 text-sm">
                             {{ $factura->fecha_emision->format('d M Y') }}
