@@ -4,6 +4,11 @@ use App\Livewire\Clientes\ClienteIndex;
 use App\Livewire\Configuracion\EmpresaForm;
 use App\Livewire\Dashboard;
 use App\Livewire\Facturas\FacturaIndex;
+use App\Livewire\Facturas\FacturaForm;
+use App\Livewire\Facturas\FacturaShow;
+use App\Models\Factura;
+use App\Models\Empresa;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
@@ -56,6 +61,37 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     Route::get('facturas', FacturaIndex::class)
         ->name('facturas');
+
+    Route::get('facturas/crear', FacturaForm::class)
+        ->middleware('can:facturas.gestionar')
+        ->name('facturas.crear');
+
+    Route::get('facturas/{factura}', FacturaShow::class)
+        ->middleware('can:facturas.ver')
+        ->name('facturas.show');
+
+    Route::get('facturas/{factura}/pdf', function (Factura $factura) {
+        if (!auth()->user()->can('facturas.ver')) {
+            abort(403);
+        }
+        $empresa = Empresa::first() ?? new Empresa([
+            'nombre' => 'Mi Empresa (No Configurada)',
+            'identificacion_fiscal' => '000000000',
+            'moneda' => 'USD',
+            'simbolo_moneda' => '$',
+            'impuesto_nombre' => 'Impuesto',
+            'impuesto_porcentaje' => 0,
+            'color_primario' => '#000000'
+        ]);
+        $factura->load(['cliente', 'vendedor.user', 'items']);
+        $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
+        
+        if (request()->has('print')) {
+            return $pdf->stream('factura-' . $factura->numero_factura . '.pdf');
+        }
+        
+        return $pdf->download('factura-' . $factura->numero_factura . '.pdf');
+    })->name('facturas.pdf');
 
     Route::get('vendedores', VendedorIndex::class)
         ->middleware('can:vendedores.gestionar')
