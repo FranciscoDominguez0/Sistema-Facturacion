@@ -167,12 +167,11 @@ class FacturaShowTest extends TestCase
         $usuario = User::factory()->create();
         $usuario->givePermissionTo('facturas.estado.cambiar');
 
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('No se puede cambiar');
-
-        Livewire::actingAs($usuario)
+        $respuesta = Livewire::actingAs($usuario)
             ->test(FacturaShow::class, ['factura' => $factura])
             ->call('cambiarEstado', 'Pagada');
+
+
 
         $this->assertDatabaseHas('facturas', [
             'id' => $factura->id,

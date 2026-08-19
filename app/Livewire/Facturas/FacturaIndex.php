@@ -13,6 +13,7 @@ class FacturaIndex extends Component
     use WithPagination;
 
     public $search = '';
+
     public $filtroEstado = 'Todos';
 
     public function updatingSearch()
@@ -28,15 +29,8 @@ class FacturaIndex extends Component
     public function render()
     {
         $facturas = Factura::with('cliente')
-            ->when(strlen($this->search) > 0, function ($query) {
-                $query->where('numero_factura', 'ilike', '%' . $this->search . '%')
-                      ->orWhereHas('cliente', function ($q) {
-                          $q->where('nombre', 'ilike', '%' . $this->search . '%');
-                      });
-            })
-            ->when($this->filtroEstado !== 'Todos', function ($query) {
-                $query->where('estado', $this->filtroEstado);
-            })
+            ->buscar($this->search)
+            ->when($this->filtroEstado !== 'Todos', fn ($query) => $query->where('estado', $this->filtroEstado))
             ->orderBy('id', 'desc')
             ->paginate(15);
 

@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Facturas;
 
+use App\Livewire\Forms\FacturaForm as FacturaFormObject;
 use App\Models\Cliente;
-use App\Models\Empresa;
 use App\Models\Producto;
 use App\Models\Vendedor;
-use App\Services\FacturaService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -16,29 +15,10 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class FacturaForm extends Component
 {
+    public FacturaFormObject $form;
+
     #[Url]
     public $cliente_id;
-
-    public $vendedor_id;
-
-    public $fecha_emision;
-
-    public $fecha_vencimiento;
-
-    public $descuento_porcentaje = 0;
-
-    public $notas;
-
-    public array $items = [];
-
-    // Totales
-    public $subtotal = 0;
-
-    public $descuento_total = 0;
-
-    public $impuesto = 0;
-
-    public $total = 0;
 
     // Para la creación rápida de cliente
     public $nuevo_cliente_nombre = '';
@@ -73,22 +53,15 @@ class FacturaForm extends Component
 
     public $cliente_seleccionado_nombre = '';
 
-    protected FacturaService $facturaService;
-
-    public function boot(FacturaService $facturaService)
-    {
-        $this->facturaService = $facturaService;
-    }
-
     public function mount()
     {
-        $this->fecha_emision = date('Y-m-d');
+        $this->form->init();
 
         // Autoseleccionar vendedor si no puede elegirlo libremente
         if (! Gate::allows('facturas.vendedor.seleccionar')) {
             $vendedor = Auth::user()->vendedor;
             if ($vendedor) {
-                $this->vendedor_id = $vendedor->id;
+                $this->form->vendedor_id = $vendedor->id;
             }
         }
 
@@ -96,14 +69,12 @@ class FacturaForm extends Component
         if ($this->cliente_id) {
             $cliente = Cliente::find($this->cliente_id);
             if ($cliente) {
+                $this->form->cliente_id = $cliente->id;
                 $this->cliente_seleccionado_nombre = $cliente->nombre;
             } else {
                 $this->cliente_id = null;
             }
         }
-
-        // Línea inicial vacía
-        $this->agregarLinea();
     }
 
     public function updatedSearchCliente($value)
@@ -120,6 +91,7 @@ class FacturaForm extends Component
 
     public function seleccionarCliente($id, $nombre)
     {
+        $this->form->cliente_id = $id;
         $this->cliente_id = $id;
         $this->cliente_seleccionado_nombre = $nombre;
         $this->searchCliente = '';
@@ -128,6 +100,7 @@ class FacturaForm extends Component
 
     public function deseleccionarCliente()
     {
+        $this->form->cliente_id = null;
         $this->cliente_id = null;
         $this->cliente_seleccionado_nombre = '';
     }
@@ -163,39 +136,25 @@ class FacturaForm extends Component
 
     public function agregarLinea()
     {
-        $this->items[] = [
-            'producto_id' => null,
-            'descripcion' => '',
-            'cantidad' => 1,
-            'precio_unitario' => 0,
-            'descuento_porcentaje' => 0,
-            'descuento_monto' => 0,
-            'subtotal_linea' => 0,
-            'aplica_impuesto' => true,
-        ];
+        $this->form->agregarLinea();
     }
 
     public function eliminarLinea($index)
     {
-        unset($this->items[$index]);
-        $this->items = array_values($this->items);
-        $this->recalcularTotales();
+        $this->form->eliminarLinea($index);
     }
 
-    public function updatedItems()
+    public function updated($property)
     {
-        $this->recalcularTotales();
-    }
-
-    public function updatedDescuentoPorcentaje()
-    {
-        $this->recalcularTotales();
+        if (str_starts_with($property, 'form.items') || $property === 'form.descuento_porcentaje') {
+            $this->form->recalcularTotales();
+        }
     }
 
     public function seleccionarProducto($index, $productoId)
     {
         if ($productoId === 'nuevo_producto') {
-            $this->items[$index]['producto_id'] = null; // reset select
+            $this->form->items[$index]['producto_id'] = null;
             $this->linea_producto_actual = $index;
             $this->mostrarModalProducto = true;
 
@@ -205,15 +164,15 @@ class FacturaForm extends Component
         if ($productoId) {
             $producto = Producto::find($productoId);
             if ($producto) {
-                $this->items[$index]['producto_id'] = $producto->id;
-                $this->items[$index]['descripcion'] = $producto->nombre;
-                $this->items[$index]['precio_unitario'] = $producto->precio;
-                $this->items[$index]['aplica_impuesto'] = $producto->aplica_impuesto;
+                $this->form->items[$index]['producto_id'] = $producto->id;
+                $this->form->items[$index]['descripcion'] = $producto->nombre;
+                $this->form->items[$index]['precio_unitario'] = $producto->precio;
+                $this->form->items[$index]['aplica_impuesto'] = $producto->aplica_impuesto;
             }
         } else {
-            $this->items[$index]['producto_id'] = null;
+            $this->form->items[$index]['producto_id'] = null;
         }
-        $this->recalcularTotales();
+        $this->form->recalcularTotales();
     }
 
     public function guardarProductoExpress()
@@ -233,11 +192,11 @@ class FacturaForm extends Component
         ]);
 
         if ($this->linea_producto_actual !== null) {
-            $this->items[$this->linea_producto_actual]['producto_id'] = $producto->id;
-            $this->items[$this->linea_producto_actual]['descripcion'] = $producto->nombre;
-            $this->items[$this->linea_producto_actual]['precio_unitario'] = $producto->precio;
-            $this->items[$this->linea_producto_actual]['aplica_impuesto'] = $producto->aplica_impuesto;
-            $this->recalcularTotales();
+            $this->form->items[$this->linea_producto_actual]['producto_id'] = $producto->id;
+            $this->form->items[$this->linea_producto_actual]['descripcion'] = $producto->nombre;
+            $this->form->items[$this->linea_producto_actual]['precio_unitario'] = $producto->precio;
+            $this->form->items[$this->linea_producto_actual]['aplica_impuesto'] = $producto->aplica_impuesto;
+            $this->form->recalcularTotales();
         }
 
         $this->mostrarModalProducto = false;
@@ -249,73 +208,10 @@ class FacturaForm extends Component
         $this->linea_producto_actual = null;
     }
 
-    protected function recalcularTotales()
-    {
-        $empresa = Empresa::first();
-        $impuestoPorcentaje = $empresa ? floatval($empresa->impuesto_porcentaje) : 0;
-
-        $resultado = $this->facturaService->calcularTotales(
-            $this->items,
-            $impuestoPorcentaje,
-            floatval($this->descuento_porcentaje ?: 0)
-        );
-
-        $this->subtotal = $resultado['subtotal'];
-        $this->descuento_total = $resultado['descuento_total'];
-        $this->impuesto = $resultado['impuesto'];
-        $this->total = $resultado['total'];
-        $this->items = $resultado['items_actualizados'];
-    }
-
     public function save()
     {
-        $puedeDescontar = Gate::allows('facturas.descuento');
-
-        // Sin permiso de descuentos se ignoran los descuentos enviados por línea
-        if (! $puedeDescontar) {
-            foreach ($this->items as &$item) {
-                $item['descuento_porcentaje'] = 0;
-            }
-            unset($item);
-            $this->descuento_porcentaje = 0;
-        }
-
-        $reglas = [
-            'cliente_id' => 'required|exists:clientes,id',
-            'vendedor_id' => 'required|exists:vendedores,id',
-            'fecha_emision' => 'required|date',
-            'fecha_vencimiento' => 'nullable|date|after_or_equal:fecha_emision',
-            'descuento_porcentaje' => 'nullable|numeric|min:0|max:100',
-            'items' => 'required|array|min:1',
-            'items.*.descripcion' => 'required|string',
-            'items.*.cantidad' => 'required|numeric|min:0.01',
-            'items.*.precio_unitario' => 'required|numeric|min:0',
-        ];
-
-        // Con permiso de descuentos, cada línea respeta el máximo del vendedor
-        if ($puedeDescontar && $this->vendedor_id) {
-            $descuentoMaximo = (float) (Vendedor::find($this->vendedor_id)?->descuento_maximo_porcentaje ?? 0);
-            $reglas['items.*.descuento_porcentaje'] = ['required', 'numeric', 'min:0', "max:{$descuentoMaximo}"];
-        }
-
-        $this->validate($reglas, [
-            'cliente_id.required' => 'Debe seleccionar un cliente.',
-            'vendedor_id.required' => 'Debe seleccionar un vendedor.',
-            'items.min' => 'La factura debe tener al menos una línea.',
-            'items.*.descripcion.required' => 'La descripción es obligatoria.',
-            'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
-            'items.*.descuento_porcentaje.max' => 'El descuento de la línea supera el máximo permitido para el vendedor.',
-        ]);
-
-        $factura = $this->facturaService->crear([
-            'cliente_id' => $this->cliente_id,
-            'vendedor_id' => $this->vendedor_id,
-            'fecha_emision' => $this->fecha_emision,
-            'fecha_vencimiento' => $this->fecha_vencimiento,
-            'descuento_porcentaje' => $this->descuento_porcentaje,
-            'notas' => $this->notas,
-            'items' => $this->items,
-        ]);
+        $factura = $this->form->guardar();
+        session()->flash('success', 'Factura creada exitosamente.');
 
         return redirect()->route('facturas.show', $factura->id);
     }

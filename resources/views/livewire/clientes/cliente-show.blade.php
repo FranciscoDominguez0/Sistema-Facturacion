@@ -68,7 +68,7 @@
         <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col justify-center shadow-sm">
             <h3 class="font-bold text-[11px] text-slate-500 uppercase tracking-wider mb-2">Saldo Pendiente</h3>
             @php
-                $pendientes = $facturas->where('estado', '!=', 'PAGADA');
+                $pendientes = $facturas->where('estado', \App\Enums\EstadoFactura::PENDIENTE);
             @endphp
             <div class="text-2xl font-bold text-red-600 mb-1">${{ number_format($pendientes->sum('total'), 2) }}</div>
             <div class="flex items-center text-slate-500 gap-1 text-sm font-medium mt-2">
@@ -123,10 +123,12 @@
                             ${{ number_format($factura->total, 2) }}
                         </td>
                         <td class="px-6 py-4 text-center">
-                            @if($factura->estado === 'PAGADA')
+                            @if($factura->estado === \App\Enums\EstadoFactura::PAGADA)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Pagada</span>
+                            @elseif($factura->estado === \App\Enums\EstadoFactura::ANULADA)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">Anulada</span>
                             @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">Pendiente</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">Pendiente</span>
                             @endif
                         </td>
                     </tr>

@@ -10,28 +10,12 @@ use Illuminate\Support\Facades\DB;
 class FacturaService
 {
     /**
-     * Genera un número correlativo seguro para la factura.
+     * Genera un número correlativo para la nueva factura (ej: FAC-000001).
      */
     public function generarNumero(): string
     {
         return DB::transaction(function () {
-            // Se asume que existe un solo registro de empresa
-            $empresa = Empresa::lockForUpdate()->first();
-
-            if (! $empresa) {
-                // Crear empresa por defecto para mantener la secuencia
-                $empresa = Empresa::create([
-                    'nombre' => 'Mi Empresa (No Configurada)',
-                    'identificacion_fiscal' => '000000000',
-                    'moneda' => 'USD',
-                    'simbolo_moneda' => '$',
-                    'impuesto_nombre' => 'ITBMS',
-                    'impuesto_porcentaje' => 7,
-                    'prefijo_factura' => 'FAC-',
-                    'siguiente_numero_factura' => 1,
-                    'color_primario' => '#000000',
-                ]);
-            }
+            $empresa = $this->obtenerOCrearEmpresaPorDefecto();
 
             $numero = $empresa->siguiente_numero_factura;
             $prefijo = $empresa->prefijo_factura;
@@ -39,14 +23,12 @@ class FacturaService
             $empresa->siguiente_numero_factura = $numero + 1;
             $empresa->save();
 
-            $numeroFormateado = $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
-
-            return $numeroFormateado;
+            return $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
         });
     }
 
     /**
-     * Calcula los totales de la factura.
+     * Calcula el subtotal, descuentos, impuestos y total de toda la factura.
      */
     public function calcularTotales(array $items, float $impuestoPorcentaje, float $descuentoPorcentaje = 0): array
     {
@@ -54,28 +36,21 @@ class FacturaService
         $subtotalGravable = 0;
 
         foreach ($items as &$item) {
-            $cantidad = floatval($item['cantidad'] ?? 0);
-            $precioUnitario = floatval($item['precio_unitario'] ?? 0);
-            $descuentoLineaPorcentaje = floatval($item['descuento_porcentaje'] ?? 0);
-            $aplicaImpuesto = boolval($item['aplica_impuesto'] ?? true);
+            $resultadoLinea = $this->calcularLinea($item);
 
-            $subtotalBrutoLinea = $cantidad * $precioUnitario;
-            $descuentoMontoLinea = $subtotalBrutoLinea * ($descuentoLineaPorcentaje / 100);
-            $subtotalLinea = $subtotalBrutoLinea - $descuentoMontoLinea;
+            $item['descuento_monto'] = $resultadoLinea['descuento_monto'];
+            $item['subtotal_linea'] = $resultadoLinea['subtotal_linea'];
 
-            $item['descuento_monto'] = $descuentoMontoLinea;
-            $item['subtotal_linea'] = $subtotalLinea;
-
-            $subtotal += $subtotalLinea;
-            if ($aplicaImpuesto) {
-                $subtotalGravable += $subtotalLinea;
+            $subtotal += $resultadoLinea['subtotal_linea'];
+            if ($resultadoLinea['aplica_impuesto']) {
+                $subtotalGravable += $resultadoLinea['subtotal_linea'];
             }
         }
 
         $descuentoTotalGlobal = $subtotal * ($descuentoPorcentaje / 100);
         $subtotalConDescuento = $subtotal - $descuentoTotalGlobal;
 
-        // El impuesto solo se calcula sobre la parte gravable, descontando la porción del descuento global si aplica.
+        // El impuesto solo aplica sobre lo gravable, y se descuenta su proporción del descuento global.
         $proporcionGravable = $subtotal > 0 ? ($subtotalGravable / $subtotal) : 0;
         $subtotalGravableConDescuento = $subtotalGravable - ($descuentoTotalGlobal * $proporcionGravable);
 
@@ -92,7 +67,7 @@ class FacturaService
     }
 
     /**
-     * Crea la factura y sus items.
+     * Crea una nueva factura con todas sus líneas de detalle en la base de datos.
      */
     public function crear(array $data): Factura
     {
@@ -101,7 +76,6 @@ class FacturaService
             $impuestoPorcentaje = $empresa ? floatval($empresa->impuesto_porcentaje) : 0;
 
             $numeroFactura = $this->generarNumero();
-
             $totales = $this->calcularTotales($data['items'], $impuestoPorcentaje, floatval($data['descuento_porcentaje'] ?? 0));
 
             $factura = Factura::create([
@@ -119,24 +93,14 @@ class FacturaService
                 'notas' => $data['notas'] ?? null,
             ]);
 
-            foreach ($totales['items_actualizados'] as $itemData) {
-                $factura->items()->create([
-                    'producto_id' => $itemData['producto_id'] ?? null,
-                    'descripcion' => $itemData['descripcion'],
-                    'cantidad' => $itemData['cantidad'],
-                    'precio_unitario' => $itemData['precio_unitario'],
-                    'descuento_porcentaje' => floatval($itemData['descuento_porcentaje'] ?? 0),
-                    'descuento_monto' => $itemData['descuento_monto'],
-                    'subtotal_linea' => $itemData['subtotal_linea'],
-                ]);
-            }
+            $this->guardarLineas($factura, $totales['items_actualizados']);
 
             return $factura;
         });
     }
 
     /**
-     * Actualiza una factura existente: reemplaza sus líneas y recalcula totales.
+     * Actualiza una factura, reemplazando todas sus líneas y recalculando totales.
      */
     public function actualizar(Factura $factura, array $data): Factura
     {
@@ -160,25 +124,14 @@ class FacturaService
             ]);
 
             $factura->items()->delete();
-
-            foreach ($totales['items_actualizados'] as $itemData) {
-                $factura->items()->create([
-                    'producto_id' => $itemData['producto_id'] ?? null,
-                    'descripcion' => $itemData['descripcion'],
-                    'cantidad' => $itemData['cantidad'],
-                    'precio_unitario' => $itemData['precio_unitario'],
-                    'descuento_porcentaje' => floatval($itemData['descuento_porcentaje'] ?? 0),
-                    'descuento_monto' => $itemData['descuento_monto'],
-                    'subtotal_linea' => $itemData['subtotal_linea'],
-                ]);
-            }
+            $this->guardarLineas($factura, $totales['items_actualizados']);
 
             return $factura;
         });
     }
 
     /**
-     * Anula una factura. Una factura ya anulada no se puede anular de nuevo.
+     * Marca una factura como anulada.
      */
     public function anular(Factura $factura): Factura
     {
@@ -190,7 +143,7 @@ class FacturaService
     }
 
     /**
-     * Transiciones de estado permitidas para una factura.
+     * Transiciones de estado permitidas para el flujo de la factura.
      */
     private const TRANSICIONES_PERMITIDAS = [
         'Pendiente' => [EstadoFactura::PAGADA, EstadoFactura::ANULADA],
@@ -199,7 +152,7 @@ class FacturaService
     ];
 
     /**
-     * Cambia el estado de una factura validando que la transición sea válida.
+     * Cambia el estado de una factura verificando que el cambio tenga sentido.
      */
     public function cambiarEstado(Factura $factura, EstadoFactura $nuevoEstado): Factura
     {
@@ -221,5 +174,68 @@ class FacturaService
         ]);
 
         return $factura;
+    }
+
+    /**
+     * Obtiene la empresa y bloquea la fila para evitar que dos facturas generen el mismo número simultáneamente.
+     */
+    private function obtenerOCrearEmpresaPorDefecto(): Empresa
+    {
+        $empresa = Empresa::lockForUpdate()->first();
+
+        if (! $empresa) {
+            $empresa = Empresa::create([
+                'nombre' => 'Mi Empresa (No Configurada)',
+                'identificacion_fiscal' => '000000000',
+                'moneda' => 'USD',
+                'simbolo_moneda' => '$',
+                'impuesto_nombre' => 'ITBMS',
+                'impuesto_porcentaje' => 7,
+                'prefijo_factura' => 'FAC-',
+                'siguiente_numero_factura' => 1,
+                'color_primario' => '#000000',
+            ]);
+        }
+
+        return $empresa;
+    }
+
+    /**
+     * Calcula el monto bruto, descuentos e impuestos para una sola línea (producto/servicio).
+     */
+    private function calcularLinea(array $item): array
+    {
+        $cantidad = floatval($item['cantidad'] ?? 0);
+        $precioUnitario = floatval($item['precio_unitario'] ?? 0);
+        $descuentoLineaPorcentaje = floatval($item['descuento_porcentaje'] ?? 0);
+        $aplicaImpuesto = boolval($item['aplica_impuesto'] ?? true);
+
+        $subtotalBrutoLinea = $cantidad * $precioUnitario;
+        $descuentoMontoLinea = $subtotalBrutoLinea * ($descuentoLineaPorcentaje / 100);
+        $subtotalLinea = $subtotalBrutoLinea - $descuentoMontoLinea;
+
+        return [
+            'descuento_monto' => $descuentoMontoLinea,
+            'subtotal_linea' => $subtotalLinea,
+            'aplica_impuesto' => $aplicaImpuesto,
+        ];
+    }
+
+    /**
+     * Guarda las líneas (ítems) calculadas en la base de datos vinculadas a una factura.
+     */
+    private function guardarLineas(Factura $factura, array $items): void
+    {
+        foreach ($items as $itemData) {
+            $factura->items()->create([
+                'producto_id' => $itemData['producto_id'] ?? null,
+                'descripcion' => $itemData['descripcion'],
+                'cantidad' => $itemData['cantidad'],
+                'precio_unitario' => $itemData['precio_unitario'],
+                'descuento_porcentaje' => floatval($itemData['descuento_porcentaje'] ?? 0),
+                'descuento_monto' => $itemData['descuento_monto'],
+                'subtotal_linea' => $itemData['subtotal_linea'],
+            ]);
+        }
     }
 }

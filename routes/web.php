@@ -3,17 +3,17 @@
 use App\Livewire\Clientes\ClienteIndex;
 use App\Livewire\Configuracion\EmpresaForm;
 use App\Livewire\Dashboard;
-use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Facturas\FacturaForm;
+use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Facturas\FacturaShow;
-use App\Models\Factura;
-use App\Models\Empresa;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
 use App\Livewire\Vendedores\VendedorForm;
 use App\Livewire\Vendedores\VendedorIndex;
+use App\Models\Empresa;
+use App\Models\Factura;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
@@ -71,7 +71,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('facturas.show');
 
     Route::get('facturas/{factura}/pdf', function (Factura $factura) {
-        if (!auth()->user()->can('facturas.ver')) {
+        if (! auth()->user()->can('facturas.ver')) {
             abort(403);
         }
         $empresa = Empresa::first() ?? new Empresa([
@@ -81,16 +81,16 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
             'simbolo_moneda' => '$',
             'impuesto_nombre' => 'Impuesto',
             'impuesto_porcentaje' => 0,
-            'color_primario' => '#000000'
+            'color_primario' => '#000000',
         ]);
         $factura->load(['cliente', 'vendedor.user', 'items']);
         $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
-        
+
         if (request()->has('print')) {
-            return $pdf->stream('factura-' . $factura->numero_factura . '.pdf');
+            return $pdf->stream('factura-'.$factura->numero_factura.'.pdf');
         }
-        
-        return $pdf->download('factura-' . $factura->numero_factura . '.pdf');
+
+        return $pdf->download('factura-'.$factura->numero_factura.'.pdf');
     })->name('facturas.pdf');
 
     Route::get('vendedores', VendedorIndex::class)

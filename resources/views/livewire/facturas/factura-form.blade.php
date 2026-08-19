@@ -78,7 +78,7 @@
                         <div class="flex items-center justify-between gap-4">
                             <label class="text-sm font-semibold text-slate-600 leading-tight">Fecha de<br>Factura <span class="text-red-500">*</span></label>
                             <div class="w-48 sm:w-56 lg:w-64">
-                                <input type="date" wire:model="fecha_emision" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                <input type="date" wire:model="form.fecha_emision" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 <x-input-error :messages="$errors->get('fecha_emision')" class="mt-1 text-xs" />
                             </div>
                         </div>
@@ -87,7 +87,7 @@
                         <div class="flex items-center justify-between gap-4">
                             <label class="text-sm font-semibold text-slate-600 leading-tight">Fecha de Pago</label>
                             <div class="w-48 sm:w-56 lg:w-64">
-                                <input type="date" wire:model="fecha_vencimiento" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" placeholder="mm/dd/aaaa">
+                                <input type="date" wire:model="form.fecha_vencimiento" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" placeholder="mm/dd/aaaa">
                                 <x-input-error :messages="$errors->get('fecha_vencimiento')" class="mt-1 text-xs" />
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                             <label class="text-sm font-semibold text-slate-600 leading-tight">Vendedor <span class="text-red-500">*</span></label>
                             <div class="w-48 sm:w-56 lg:w-64">
                                 @if(Gate::allows('facturas.vendedor.seleccionar'))
-                                    <select wire:model="vendedor_id" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <select wire:model="form.vendedor_id" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                         <option value="">Seleccione...</option>
                                         @foreach($vendedores as $vend)
                                             <option value="{{ $vend->id }}">{{ $vend->user->name }}</option>
@@ -136,7 +136,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @foreach($items as $index => $item)
+                            @foreach($form->items as $index => $item)
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="px-2 py-3 align-top">
                                     <div class="space-y-3">
@@ -220,7 +220,7 @@
                                 </td>
                             </tr>
                             @endforeach
-                            @if(count($items) === 0)
+                            @if(count($form->items) === 0)
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-slate-500 text-sm">
                                     No hay líneas en esta factura.
@@ -243,7 +243,7 @@
             <!-- Box Notas -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Notas (opcional)</label>
-                <textarea wire:model="notas" rows="2" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors resize-none" placeholder="Términos y condiciones, instrucciones de pago..."></textarea>
+                <textarea wire:model="form.notas" rows="2" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors resize-none" placeholder="Términos y condiciones, instrucciones de pago..."></textarea>
             </div>
             
         </div>
@@ -256,7 +256,7 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center text-sm text-slate-600">
                         <span>Subtotal</span>
-                        <span class="text-slate-900 font-medium">${{ number_format($subtotal, 2) }}</span>
+                        <span class="text-slate-900 font-medium">${{ number_format($form->subtotal, 2) }}</span>
                     </div>
                     
                     <div class="flex justify-between items-center text-sm text-slate-600">
@@ -265,9 +265,9 @@
                             <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="descuento_porcentaje" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                         </div>
                     </div>
-                    @if($descuento_total > 0)
+                    @if($form->descuento_total > 0)
                         <div class="flex justify-end text-sm text-slate-500 -mt-2">
-                            <span class="text-red-600 font-medium">-${{ number_format($descuento_total, 2) }}</span>
+                            <span class="text-red-600 font-medium">-${{ number_format($form->descuento_total, 2) }}</span>
                         </div>
                     @endif
 
@@ -276,12 +276,12 @@
                             Impuesto
                             <span class="material-symbols-outlined text-[14px] ml-1 text-slate-400 cursor-help" title="Configurado en empresa">info</span>
                         </span>
-                        <span class="text-slate-900 font-medium">${{ number_format($impuesto, 2) }}</span>
+                        <span class="text-slate-900 font-medium">${{ number_format($form->impuesto, 2) }}</span>
                     </div>
                     
                     <div class="border-t border-slate-100 pt-4 mt-6 flex justify-between items-end">
                         <span class="text-base font-bold text-slate-900">Total</span>
-                        <span class="text-2xl font-bold text-sovereign-blue tracking-tight">${{ number_format($total, 2) }}</span>
+                        <span class="text-2xl font-bold text-sovereign-blue tracking-tight">${{ number_format($form->total, 2) }}</span>
                     </div>
                 </div>
 

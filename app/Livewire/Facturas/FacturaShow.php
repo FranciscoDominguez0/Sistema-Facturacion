@@ -6,8 +6,8 @@ use App\Enums\EstadoFactura;
 use App\Models\Factura;
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 #[Layout('layouts.app')]
 class FacturaShow extends Component
@@ -21,12 +21,17 @@ class FacturaShow extends Component
 
     public function cambiarEstado(string $nuevoEstado, FacturaService $facturaService)
     {
-        if (!Gate::allows('facturas.estado.cambiar')) {
+        if (! Gate::allows('facturas.estado.cambiar')) {
             abort(403, 'No tiene permiso para cambiar el estado de la factura.');
         }
 
-        $estadoEnum = EstadoFactura::from($nuevoEstado);
-        $this->factura = $facturaService->cambiarEstado($this->factura, $estadoEnum);
+        try {
+            $estadoEnum = EstadoFactura::from($nuevoEstado);
+            $this->factura = $facturaService->cambiarEstado($this->factura, $estadoEnum);
+            session()->flash('success', 'Estado de la factura actualizado correctamente.');
+        } catch (\DomainException $e) {
+            session()->flash('error', $e->getMessage());
+        }
     }
 
     public function render()

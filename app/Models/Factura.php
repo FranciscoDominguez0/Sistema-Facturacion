@@ -36,18 +36,32 @@ class Factura extends Model
         'estado' => EstadoFactura::class,
     ];
 
+    // El cliente al que se le emitió esta factura
     public function cliente()
     {
         return $this->belongsTo(Cliente::class);
     }
 
+    // El vendedor que realizó la venta
     public function vendedor()
     {
         return $this->belongsTo(Vendedor::class);
     }
 
+    // Las líneas de detalle de la factura (productos o servicios vendidos)
     public function items()
     {
         return $this->hasMany(FacturaItem::class);
+    }
+
+    // Permite buscar facturas por número o por el nombre del cliente
+    public function scopeBuscar($query, $search)
+    {
+        if (strlen($search) > 0) {
+            $query->where('numero_factura', 'ilike', '%'.$search.'%')
+                ->orWhereHas('cliente', function ($q) use ($search) {
+                    $q->where('nombre', 'ilike', '%'.$search.'%');
+                });
+        }
     }
 }

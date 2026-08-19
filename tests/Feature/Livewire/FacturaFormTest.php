@@ -102,7 +102,7 @@ class FacturaFormTest extends TestCase
         $cliente = Cliente::where('nombre', 'Cliente Express')->firstOrFail();
 
         // El cliente queda seleccionado automáticamente en el formulario
-        $this->assertSame($cliente->id, $componente->get('cliente_id'));
+        $this->assertSame($cliente->id, $componente->get('form.cliente_id'));
         $this->assertSame('Cliente Express', $componente->get('cliente_seleccionado_nombre'));
 
         $this->assertDatabaseHas('clientes', [
@@ -142,12 +142,12 @@ class FacturaFormTest extends TestCase
         $componente = Livewire::actingAs($usuario)->test(FacturaForm::class);
 
         // El formulario inicia con una línea
-        $this->assertCount(1, $componente->get('items'));
+        $this->assertCount(1, $componente->get('form.items'));
 
         $componente->call('agregarLinea');
 
-        $this->assertCount(2, $componente->get('items'));
-        $this->assertSame(0, $componente->get('items.1.subtotal_linea'));
+        $this->assertCount(2, $componente->get('form.items'));
+        $this->assertSame(0, $componente->get('form.items.1.subtotal_linea'));
     }
 
     /**
@@ -159,13 +159,13 @@ class FacturaFormTest extends TestCase
 
         $componente = Livewire::actingAs($usuario)->test(FacturaForm::class);
         $componente->call('agregarLinea');
-        $this->assertCount(2, $componente->get('items'));
+        $this->assertCount(2, $componente->get('form.items'));
 
         $componente->call('eliminarLinea', 0);
 
-        $this->assertCount(1, $componente->get('items'));
+        $this->assertCount(1, $componente->get('form.items'));
         // El array se reindexa
-        $this->assertSame(0.0, $componente->get('items.0.subtotal_linea'));
+        $this->assertSame(0.0, $componente->get('form.items.0.subtotal_linea'));
     }
 
     /**
@@ -179,13 +179,13 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('items.0.descripcion', 'Producto A')
-            ->set('items.0.cantidad', 2)
-            ->set('items.0.precio_unitario', 100)
-            ->assertSet('items.0.subtotal_linea', 200.0)
-            ->assertSet('subtotal', 200.0)
-            ->assertSet('impuesto', 14.0)
-            ->assertSet('total', 214.0);
+            ->set('form.items.0.descripcion', 'Producto A')
+            ->set('form.items.0.cantidad', 2)
+            ->set('form.items.0.precio_unitario', 100)
+            ->assertSet('form.items.0.subtotal_linea', 200.0)
+            ->assertSet('form.subtotal', 200.0)
+            ->assertSet('form.impuesto', 14.0)
+            ->assertSet('form.total', 214.0);
     }
 
     /**
@@ -200,16 +200,16 @@ class FacturaFormTest extends TestCase
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
             ->call('seleccionarProducto', 0, $producto->id)
-            ->assertSet('items.0.producto_id', $producto->id)
-            ->assertSet('items.0.descripcion', 'Laptop Pro')
-            ->assertSet('items.0.precio_unitario', '150.50');
+            ->assertSet('form.items.0.producto_id', $producto->id)
+            ->assertSet('form.items.0.descripcion', 'Laptop Pro')
+            ->assertSet('form.items.0.precio_unitario', '150.50');
 
         // La descripción sigue siendo editable
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
             ->call('seleccionarProducto', 0, $producto->id)
-            ->set('items.0.descripcion', 'Laptop Pro 16GB RAM')
-            ->assertSet('items.0.descripcion', 'Laptop Pro 16GB RAM');
+            ->set('form.items.0.descripcion', 'Laptop Pro 16GB RAM')
+            ->assertSet('form.items.0.descripcion', 'Laptop Pro 16GB RAM');
     }
 
     // =====================================================================
@@ -228,11 +228,11 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('cliente_id', $cliente->id)
-            ->set('items.0.descripcion', 'Producto A')
-            ->set('items.0.cantidad', 1)
-            ->set('items.0.precio_unitario', 100)
-            ->set('items.0.descuento_porcentaje', 20)
+            ->set('form.cliente_id', $cliente->id)
+            ->set('form.items.0.descripcion', 'Producto A')
+            ->set('form.items.0.cantidad', 1)
+            ->set('form.items.0.precio_unitario', 100)
+            ->set('form.items.0.descuento_porcentaje', 20)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -262,11 +262,11 @@ class FacturaFormTest extends TestCase
         // Descuento dentro del límite (10%) sí se permite
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('cliente_id', $cliente->id)
-            ->set('items.0.descripcion', 'Producto A')
-            ->set('items.0.cantidad', 1)
-            ->set('items.0.precio_unitario', 100)
-            ->set('items.0.descuento_porcentaje', 5)
+            ->set('form.cliente_id', $cliente->id)
+            ->set('form.items.0.descripcion', 'Producto A')
+            ->set('form.items.0.cantidad', 1)
+            ->set('form.items.0.precio_unitario', 100)
+            ->set('form.items.0.descuento_porcentaje', 5)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -278,13 +278,13 @@ class FacturaFormTest extends TestCase
         // Descuento que supera el máximo (10%) falla la validación
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('cliente_id', $cliente->id)
-            ->set('items.0.descripcion', 'Producto B')
-            ->set('items.0.cantidad', 1)
-            ->set('items.0.precio_unitario', 100)
-            ->set('items.0.descuento_porcentaje', 15)
+            ->set('form.cliente_id', $cliente->id)
+            ->set('form.items.0.descripcion', 'Producto B')
+            ->set('form.items.0.cantidad', 1)
+            ->set('form.items.0.precio_unitario', 100)
+            ->set('form.items.0.descuento_porcentaje', 15)
             ->call('save')
-            ->assertHasErrors(['items.0.descuento_porcentaje' => 'max']);
+            ->assertHasErrors(['form.items.0.descuento_porcentaje' => 'max']);
 
         $this->assertDatabaseCount('facturas', 1);
     }
@@ -303,11 +303,11 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('items.0.descripcion', 'Producto A')
-            ->set('items.0.cantidad', 1)
-            ->set('items.0.precio_unitario', 100)
+            ->set('form.items.0.descripcion', 'Producto A')
+            ->set('form.items.0.cantidad', 1)
+            ->set('form.items.0.precio_unitario', 100)
             ->call('save')
-            ->assertHasErrors(['cliente_id' => 'required']);
+            ->assertHasErrors(['form.cliente_id' => 'required']);
 
         $this->assertDatabaseCount('facturas', 0);
     }
@@ -323,10 +323,10 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('cliente_id', $cliente->id)
+            ->set('form.cliente_id', $cliente->id)
             ->call('eliminarLinea', 0)
             ->call('save')
-            ->assertHasErrors(['items' => 'required']);
+            ->assertHasErrors(['form.items' => 'required']);
 
         $this->assertDatabaseCount('facturas', 0);
     }
@@ -343,10 +343,10 @@ class FacturaFormTest extends TestCase
 
         $componente = Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('cliente_id', $cliente->id)
-            ->set('items.0.descripcion', 'Producto A')
-            ->set('items.0.cantidad', 2)
-            ->set('items.0.precio_unitario', 100)
+            ->set('form.cliente_id', $cliente->id)
+            ->set('form.items.0.descripcion', 'Producto A')
+            ->set('form.items.0.cantidad', 2)
+            ->set('form.items.0.precio_unitario', 100)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -388,7 +388,7 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->assertSet('vendedor_id', $vendedor->id);
+            ->assertSet('form.vendedor_id', $vendedor->id);
     }
 
     /**
@@ -403,9 +403,9 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->assertSet('vendedor_id', null)
-            ->set('vendedor_id', $otroVendedor->id)
-            ->assertSet('vendedor_id', $otroVendedor->id);
+            ->assertSet('form.vendedor_id', null)
+            ->set('form.vendedor_id', $otroVendedor->id)
+            ->assertSet('form.vendedor_id', $otroVendedor->id);
     }
 
     /**
@@ -417,7 +417,7 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->assertSet('fecha_emision', date('Y-m-d'));
+            ->assertSet('form.fecha_emision', date('Y-m-d'));
     }
 
     // =====================================================================

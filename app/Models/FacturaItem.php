@@ -28,11 +28,13 @@ class FacturaItem extends Model
         'subtotal_linea' => 'decimal:2',
     ];
 
+    // La factura a la que pertenece esta línea
     public function factura()
     {
         return $this->belongsTo(Factura::class);
     }
 
+    // El producto o servicio que se está vendiendo en esta línea
     public function producto()
     {
         return $this->belongsTo(Producto::class);
