@@ -28,6 +28,10 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->middleware(['verified'])
         ->name('dashboard');
 
+    Route::get('/configuracion/empresa', \App\Livewire\Configuracion\EmpresaForm::class)
+        ->name('empresa.editar')
+        ->middleware('can:empresa.gestionar');
+
     Route::get('profile', Profile::class)
         ->name('profile');
 
@@ -74,15 +78,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         if (! auth()->user()->can('facturas.ver')) {
             abort(403);
         }
-        $empresa = Empresa::first() ?? new Empresa([
-            'nombre' => 'Mi Empresa (No Configurada)',
-            'identificacion_fiscal' => '000000000',
-            'moneda' => 'USD',
-            'simbolo_moneda' => '$',
-            'impuesto_nombre' => 'Impuesto',
-            'impuesto_porcentaje' => 0,
-            'color_primario' => '#000000',
-        ]);
+        $empresa = \App\Models\Empresa::actual();
         $factura->load(['cliente', 'vendedor.user', 'items']);
         $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
 

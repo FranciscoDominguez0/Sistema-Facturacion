@@ -17,6 +17,10 @@ class AdminUserSeeder extends Seeder
         // 1. Asegurar que el rol Administrador existe
         $roleAdmin = Role::firstOrCreate(['name' => 'Administrador']);
 
+        // Crear permisos
+        $permisoEmpresa = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'empresa.gestionar']);
+        $roleAdmin->givePermissionTo($permisoEmpresa);
+
         // 2. Crear al usuario
         $user = User::updateOrCreate(
             ['email' => 'dominguezf225@gmail.com'],

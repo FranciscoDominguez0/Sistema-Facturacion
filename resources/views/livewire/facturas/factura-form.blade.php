@@ -195,18 +195,18 @@
                                         @endif
                                         
                                         <!-- Descripción editable (aparece debajo) -->
-                                        <input type="text" wire:model.live.debounce.500ms="items.{{ $index }}.descripcion" placeholder="Descripción detallada..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors mt-2">
+                                        <input type="text" wire:model.live.debounce.500ms="form.items.{{ $index }}.descripcion" placeholder="Descripción detallada..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors mt-2">
                                         <x-input-error :messages="$errors->get('items.'.$index.'.descripcion')" class="mt-1 text-xs" />
                                     </div>
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
-                                    <input type="number" step="0.01" min="0.01" wire:model.live.debounce.500ms="items.{{ $index }}.cantidad" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <input type="number" step="0.01" min="0.01" wire:model.live.debounce.500ms="form.items.{{ $index }}.cantidad" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
-                                    <input type="number" step="0.01" min="0" wire:model.live.debounce.500ms="items.{{ $index }}.precio_unitario" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <input type="number" step="0.01" min="0" wire:model.live.debounce.500ms="form.items.{{ $index }}.precio_unitario" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
-                                    <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="items.{{ $index }}.descuento_porcentaje" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="form.items.{{ $index }}.descuento_porcentaje" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3 text-right">
                                     <span class="inline-block mt-1.5 font-medium text-slate-800 text-sm">
