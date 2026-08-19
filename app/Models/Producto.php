@@ -31,7 +31,6 @@ class Producto extends Model
         ];
     }
 
-    // El string vacío del formulario se guarda como null (regla: sin imagen = null)
     protected function imagenPath(): Attribute
     {
         return Attribute::set(fn ($value) => $value === '' ? null : $value);

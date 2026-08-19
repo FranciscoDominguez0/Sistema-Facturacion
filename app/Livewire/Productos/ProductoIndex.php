@@ -18,19 +18,11 @@ class ProductoIndex extends Component
 
     public string $filtroTipo = 'Todos';
 
-    public function updatingSearch()
+    public function updated($property)
     {
-        $this->resetPage();
-    }
-
-    public function updatingFiltroEstado()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingFiltroTipo()
-    {
-        $this->resetPage();
+        if (in_array($property, ['search', 'filtroEstado', 'filtroTipo'])) {
+            $this->resetPage();
+        }
     }
 
     public function toggleActivo(int $id)

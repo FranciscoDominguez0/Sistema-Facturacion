@@ -63,18 +63,9 @@ class ProductoForm extends Form
     public function store()
     {
         $this->normalizar();
-        $this->validate();
+        $validated = $this->validate();
 
-        Producto::create($this->only([
-            'nombre',
-            'descripcion',
-            'codigo',
-            'precio',
-            'tipo',
-            'aplica_impuesto',
-            'imagen_path',
-            'activo',
-        ]));
+        Producto::create($validated);
 
         $this->reset();
     }
@@ -82,17 +73,8 @@ class ProductoForm extends Form
     public function update()
     {
         $this->normalizar();
-        $this->validate();
+        $validated = $this->validate();
 
-        $this->producto->update($this->only([
-            'nombre',
-            'descripcion',
-            'codigo',
-            'precio',
-            'tipo',
-            'aplica_impuesto',
-            'imagen_path',
-            'activo',
-        ]));
+        $this->producto->update($validated);
     }
 }
