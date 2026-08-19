@@ -7,6 +7,7 @@ use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
+use App\Livewire\Vendedores\VendedorForm;
 use App\Livewire\Vendedores\VendedorIndex;
 use Illuminate\Support\Facades\Route;
 
@@ -57,7 +58,16 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('facturas');
 
     Route::get('vendedores', VendedorIndex::class)
+        ->middleware('can:vendedores.gestionar')
         ->name('vendedores');
+
+    Route::get('vendedores/create', VendedorForm::class)
+        ->middleware('can:vendedores.gestionar')
+        ->name('vendedores.create');
+
+    Route::get('vendedores/{vendedor}/edit', VendedorForm::class)
+        ->middleware('can:vendedores.gestionar')
+        ->name('vendedores.edit');
 
     Route::get('gastos', GastoIndex::class)
         ->name('gastos');

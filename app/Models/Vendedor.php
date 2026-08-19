@@ -15,4 +15,9 @@ class Vendedor extends Model
         'descuento_maximo_porcentaje',
         'activo',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
