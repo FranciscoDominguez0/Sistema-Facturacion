@@ -20,10 +20,16 @@ class FacturaService
             $numero = $empresa->siguiente_numero_factura;
             $prefijo = $empresa->prefijo_factura;
 
+            $numeroGenerado = $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
+            while (Factura::where('numero_factura', $numeroGenerado)->exists()) {
+                $numero++;
+                $numeroGenerado = $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
+            }
+
             $empresa->siguiente_numero_factura = $numero + 1;
             $empresa->save();
 
-            return $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
+            return $numeroGenerado;
         });
     }
 

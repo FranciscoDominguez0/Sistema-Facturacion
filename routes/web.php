@@ -28,7 +28,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->middleware(['verified'])
         ->name('dashboard');
 
-    Route::get('/configuracion/empresa', \App\Livewire\Configuracion\EmpresaForm::class)
+    Route::get('/configuracion/empresa', EmpresaForm::class)
         ->name('empresa.editar')
         ->middleware('can:empresa.gestionar');
 
@@ -75,18 +75,18 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('facturas.show');
 
     Route::get('facturas/{factura}/pdf', function (Factura $factura) {
-        if (! auth()->user()->can('facturas.ver')) {
+        if (!auth()->user()->can('facturas.ver')) {
             abort(403);
         }
-        $empresa = \App\Models\Empresa::actual();
+        $empresa = Empresa::actual();
         $factura->load(['cliente', 'vendedor.user', 'items']);
         $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
 
         if (request()->has('print')) {
-            return $pdf->stream('factura-'.$factura->numero_factura.'.pdf');
+            return $pdf->stream('factura-' . $factura->numero_factura . '.pdf');
         }
 
-        return $pdf->download('factura-'.$factura->numero_factura.'.pdf');
+        return $pdf->download('factura-' . $factura->numero_factura . '.pdf');
     })->name('facturas.pdf');
 
     Route::get('vendedores', VendedorIndex::class)
@@ -108,4 +108,4 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('empresa');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
