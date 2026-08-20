@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class AdminUserSeeder extends Seeder
@@ -18,8 +19,12 @@ class AdminUserSeeder extends Seeder
         $roleAdmin = Role::firstOrCreate(['name' => 'Administrador']);
 
         // Crear permisos
-        $permisoEmpresa = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'empresa.gestionar']);
+        $permisoEmpresa = Permission::firstOrCreate(['name' => 'empresa.gestionar']);
         $roleAdmin->givePermissionTo($permisoEmpresa);
+
+        $permisoGastosVer = Permission::firstOrCreate(['name' => 'gastos.ver']);
+        $permisoGastosGestionar = Permission::firstOrCreate(['name' => 'gastos.gestionar']);
+        $roleAdmin->givePermissionTo([$permisoGastosVer, $permisoGastosGestionar]);
 
         // 2. Crear al usuario
         $user = User::updateOrCreate(

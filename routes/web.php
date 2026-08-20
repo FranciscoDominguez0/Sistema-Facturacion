@@ -6,6 +6,7 @@ use App\Livewire\Dashboard;
 use App\Livewire\Facturas\FacturaForm;
 use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Facturas\FacturaShow;
+use App\Livewire\Gastos\GastoForm;
 use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
@@ -75,7 +76,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('facturas.show');
 
     Route::get('facturas/{factura}/pdf', function (Factura $factura) {
-        if (!auth()->user()->can('facturas.ver')) {
+        if (! auth()->user()->can('facturas.ver')) {
             abort(403);
         }
         $empresa = Empresa::actual();
@@ -83,10 +84,10 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
 
         if (request()->has('print')) {
-            return $pdf->stream('factura-' . $factura->numero_factura . '.pdf');
+            return $pdf->stream('factura-'.$factura->numero_factura.'.pdf');
         }
 
-        return $pdf->download('factura-' . $factura->numero_factura . '.pdf');
+        return $pdf->download('factura-'.$factura->numero_factura.'.pdf');
     })->name('facturas.pdf');
 
     Route::get('vendedores', VendedorIndex::class)
@@ -102,10 +103,15 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('vendedores.edit');
 
     Route::get('gastos', GastoIndex::class)
-        ->name('gastos');
+        ->name('gastos')
+        ->middleware('can:gastos.ver');
+
+    Route::get('gastos/crear', GastoForm::class)
+        ->name('gastos.crear')
+        ->middleware('can:gastos.gestionar');
 
     Route::get('empresa', EmpresaForm::class)
         ->name('empresa');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
