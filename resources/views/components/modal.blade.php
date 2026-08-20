@@ -1,3 +1,7 @@
+{{-- Ventana modal con fondo oscuro, animaciones y trampa de foco. Se abre/cierra vía eventos JS.
+     Props: name (requerido), show (bool), maxWidth (sm|md|lg|xl|2xl), focusable (atributo).
+     Abrir desde Livewire: $this->dispatch('open-modal', 'nombre-modal')
+     Cerrar desde Alpine: $dispatch('close') --}}
 @props([
     'name',
     'show' => false,

@@ -1,3 +1,7 @@
+{{-- Notificación flotante (arriba-centro, 4 segundos). Se coloca una sola vez en el layout.
+     Tipos: success (verde), error (rojo), info (azul).
+     Disparar desde Livewire: $this->dispatch('toast', message: 'Texto', type: 'success')
+     Disparar con flash:      return redirect()->with('success', 'Texto') --}}
 <div class="fixed top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex justify-center w-full max-w-sm">
     <div x-data="{ 
             show: false, 

@@ -1,3 +1,6 @@
+{{-- Menú desplegable. Slots requeridos: `trigger` (el botón que lo abre) y `content` (el menú). Se cierra al hacer clic fuera.
+     Props: align (left|right|top), width, contentClasses.
+     Uso: <x-dropdown><x-slot name="trigger">...</x-slot><x-slot name="content">...</x-slot></x-dropdown> --}}
 @props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white'])
 
 @php

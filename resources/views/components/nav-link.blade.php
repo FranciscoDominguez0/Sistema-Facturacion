@@ -1,3 +1,6 @@
+{{-- Enlace del menú de navegación principal. Marca como activo si coincide con la ruta actual.
+     Props: href (requerido), active (bool).
+     Uso: <x-nav-link href="{{ route('clientes.index') }}" :active="request()->routeIs('clientes.*')">Clientes</x-nav-link> --}}
 @props(['active'])
 
 @php

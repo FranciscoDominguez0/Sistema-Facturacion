@@ -1,3 +1,5 @@
+{{-- Muestra en rojo los errores de validación de un campo. Si no hay errores, no renderiza nada.
+     Uso: <x-input-error :messages="$errors->get('form.email')" class="mt-1" /> --}}
 @props(['messages'])
 
 @if ($messages)
