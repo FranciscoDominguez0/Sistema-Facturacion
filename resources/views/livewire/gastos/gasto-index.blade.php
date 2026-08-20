@@ -36,6 +36,7 @@
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Fecha</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Registrado por</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Comprobante</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right whitespace-nowrap">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -47,10 +48,16 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->fecha->format('d/m/Y') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->registradoPor->name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->comprobante ?? '—' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <a href="{{ route('gastos.show', $gasto) }}" wire:navigate
+                               class="text-slate-400 hover:text-sovereign-blue p-1 rounded transition-colors inline-flex" title="Ver">
+                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                            </a>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
+                        <td colspan="7" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-slate-500">
                                 <span class="material-symbols-outlined text-4xl mb-3 text-slate-300">receipt</span>
                                 <p class="text-base font-medium text-slate-800 mb-1">No hay gastos registrados</p>

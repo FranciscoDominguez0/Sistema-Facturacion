@@ -8,6 +8,7 @@ use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Facturas\FacturaShow;
 use App\Livewire\Gastos\GastoForm;
 use App\Livewire\Gastos\GastoIndex;
+use App\Livewire\Gastos\GastoShow;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
 use App\Livewire\Vendedores\VendedorForm;
@@ -109,6 +110,10 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('gastos/crear', GastoForm::class)
         ->name('gastos.crear')
         ->middleware('can:gastos.gestionar');
+
+    Route::get('gastos/{gasto}', GastoShow::class)
+        ->name('gastos.show')
+        ->middleware('can:gastos.ver');
 
     Route::get('empresa', EmpresaForm::class)
         ->name('empresa');
