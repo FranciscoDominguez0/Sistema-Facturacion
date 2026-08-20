@@ -1,3 +1,5 @@
+{{-- Migas de pan. Recibe un array de ítems con 'title' y 'url'. El último ítem es el actual (sin enlace).
+     Uso: <x-breadcrumbs :links="[['title'=>'Clientes','url'=>route('clientes.index')],['title'=>'Editar']]" /> --}}
 @props(['links' => []])
 
 <nav class="flex items-center gap-2 text-sm" aria-label="Breadcrumb">

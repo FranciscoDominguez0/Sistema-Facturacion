@@ -1,3 +1,5 @@
+{{-- Mensaje inline temporal. Aparece 2 segundos al recibir el evento Livewire indicado en `on`.
+     Uso: <x-action-message on="nombre-evento">Texto guardado.</x-action-message> --}}
 @props(['on'])
 
 <div x-data="{ shown: false, timeout: null }"

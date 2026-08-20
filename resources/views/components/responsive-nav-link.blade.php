@@ -1,3 +1,6 @@
+{{-- Igual que nav-link pero con estilos para el menú hamburguesa en pantallas pequeñas.
+     Props: href (requerido), active (bool).
+     Uso: <x-responsive-nav-link href="{{ route('facturas.index') }}" :active="request()->routeIs('facturas.*')">Facturas</x-responsive-nav-link> --}}
 @props(['active'])
 
 @php
