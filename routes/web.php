@@ -117,6 +117,21 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     Route::get('empresa', EmpresaForm::class)
         ->name('empresa');
+
+    Route::get('configuracion', \App\Livewire\Configuracion\ConfiguracionIndex::class)
+        ->name('configuracion.index');
+
+    Route::get('configuracion/facturacion', \App\Livewire\Configuracion\FacturacionIndex::class)
+        ->name('configuracion.facturacion');
+
+    Route::get('usuarios', \App\Livewire\Roles\UsuarioIndex::class)
+        ->name('usuarios.index');
+
+    Route::get('roles', \App\Livewire\Roles\RolIndex::class)
+        ->name('roles.index');
+
+    Route::get('seguridad', \App\Livewire\Configuracion\SeguridadIndex::class)
+        ->name('seguridad.index');
 });
 
 require __DIR__.'/auth.php';

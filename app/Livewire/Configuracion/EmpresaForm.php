@@ -21,8 +21,6 @@ class EmpresaForm extends Component
     public $simbolo_moneda;
     public $impuesto_nombre;
     public $impuesto_porcentaje;
-    public $prefijo_factura;
-    public $siguiente_numero_factura;
     public $color_primario;
     public $pie_pagina_pdf;
 
@@ -39,9 +37,7 @@ class EmpresaForm extends Component
         $this->simbolo_moneda = $empresa->simbolo_moneda;
         $this->impuesto_nombre = $empresa->impuesto_nombre;
         $this->impuesto_porcentaje = $empresa->impuesto_porcentaje;
-        $this->prefijo_factura = $empresa->prefijo_factura;
-        $this->siguiente_numero_factura = $empresa->siguiente_numero_factura;
-        $this->color_primario = $empresa->color_primario;
+        $this->color_primario = $empresa->color_primario ?? '#0f172a';
         $this->pie_pagina_pdf = $empresa->pie_pagina_pdf;
         
         $this->logo_path_actual = $empresa->logo_path;
@@ -54,19 +50,12 @@ class EmpresaForm extends Component
             'identificacion_fiscal' => 'nullable|string|max:255',
             'moneda' => 'required|string|max:50',
             'simbolo_moneda' => 'required|string|max:10',
-            'impuesto_nombre' => 'nullable|string|max:50',
+            'impuesto_nombre' => 'required|string|max:20',
             'impuesto_porcentaje' => 'required|numeric|min:0|max:100',
-            'prefijo_factura' => 'required|string|max:20',
-            'siguiente_numero_factura' => 'required|integer|min:1',
-            'color_primario' => 'required|string|regex:/^#[a-fA-F0-9]{6}$/',
+            'color_primario' => ['nullable', 'string', 'max:7', 'regex:/^#[a-fA-F0-9]{6}$/'],
             'pie_pagina_pdf' => 'nullable|string|max:1000',
             'logo' => 'nullable|image|max:2048', // Max 2MB
         ];
-    }
-
-    public function getNumeroFacturaPreviewProperty()
-    {
-        return $this->prefijo_factura . str_pad((int)$this->siguiente_numero_factura, 6, '0', STR_PAD_LEFT);
     }
 
     public function getImpuestoChipPreviewProperty()
@@ -97,8 +86,6 @@ class EmpresaForm extends Component
             'simbolo_moneda' => $this->simbolo_moneda,
             'impuesto_nombre' => $this->impuesto_nombre,
             'impuesto_porcentaje' => $this->impuesto_porcentaje,
-            'prefijo_factura' => $this->prefijo_factura,
-            'siguiente_numero_factura' => $this->siguiente_numero_factura,
             'color_primario' => $this->color_primario,
             'pie_pagina_pdf' => $this->pie_pagina_pdf,
             'logo_path' => $path,

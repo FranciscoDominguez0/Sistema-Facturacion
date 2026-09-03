@@ -9,8 +9,8 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Configuración general</h2>
-            <p class="text-slate-500 text-sm mt-1">Administra los datos, la numeración y el impuesto de tus facturas.</p>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Empresa y configuración general</h2>
+            <p class="text-slate-500 text-sm mt-1">Administra los datos fiscales, marca comercial y preferencias del PDF.</p>
         </div>
         <button wire:click="guardar" type="button" class="inline-flex items-center justify-center px-4 py-2 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm whitespace-nowrap">
             <span class="material-symbols-outlined text-[20px] mr-2">save</span>
@@ -20,21 +20,20 @@
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
         <!-- Left Navigation (Tabs) -->
+        <!-- Internal Nav -->
         <div class="md:col-span-3">
-            <nav class="flex flex-row overflow-x-auto md:flex-col gap-1 pb-2 md:pb-0 scrollbar-hide">
-                <button wire:click="$set('tabActiva', 'general')" type="button"
-                    class="text-left py-2 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 md:border-b-0 md:border-l-2 {{ $tabActiva === 'general' ? 'bg-slate-100 text-slate-900 border-sovereign-blue' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent' }}">
-                    General
-                </button>
-                <button wire:click="$set('tabActiva', 'numeracion')" type="button"
-                    class="text-left py-2 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 md:border-b-0 md:border-l-2 {{ $tabActiva === 'numeracion' ? 'bg-slate-100 text-slate-900 border-sovereign-blue' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent' }}">
-                    Numeración de facturas
-                </button>
-                <button wire:click="$set('tabActiva', 'impuestos')" type="button"
-                    class="text-left py-2 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 md:border-b-0 md:border-l-2 {{ $tabActiva === 'impuestos' ? 'bg-slate-100 text-slate-900 border-sovereign-blue' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent' }}">
-                    Impuesto y PDF
-                </button>
-            </nav>
+            <div class="sticky top-24">
+                <nav class="flex flex-row overflow-x-auto md:flex-col gap-1 pb-2 md:pb-0 scrollbar-hide">
+                    <button wire:click="$set('tabActiva', 'general')" type="button"
+                        class="text-left py-2 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 md:border-b-0 md:border-l-2 {{ $tabActiva === 'general' ? 'bg-slate-100 text-slate-900 border-sovereign-blue' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent' }}">
+                        General
+                    </button>
+                    <button wire:click="$set('tabActiva', 'impuestos')" type="button"
+                        class="text-left py-2 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap border-b-2 md:border-b-0 md:border-l-2 {{ $tabActiva === 'impuestos' ? 'bg-slate-100 text-slate-900 border-sovereign-blue' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent' }}">
+                        Impuesto y PDF
+                    </button>
+                </nav>
+            </div>
         </div>
 
         <!-- Forms Content -->
@@ -126,47 +125,7 @@
             </div>
             @endif
 
-            @if($tabActiva === 'numeracion')
-            <!-- Tab: Numeración de facturas -->
-            <div class="animate-fade-in-up">
-                <section>
-                    <h3 class="text-base font-semibold text-slate-700 mb-4">Numeración de facturas</h3>
-                    <div class="bg-white rounded-lg border border-slate-200 p-6 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-sm">
-                        <div class="flex flex-col gap-5">
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Prefijo</label>
-                                <input wire:model.live="prefijo_factura" class="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-900 focus:outline-none focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue transition-all" type="text" placeholder="FAC-"/>
-                                <span class="text-xs text-slate-400">Caracteres que preceden al número. Ej: FAC-, INV-, 2024-</span>
-                                @error('prefijo_factura') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Siguiente Número</label>
-                                <input wire:model.live="siguiente_numero_factura" class="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-900 focus:outline-none focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue transition-all" type="number" min="1"/>
-                                <span class="text-xs text-slate-400">Se incrementará automáticamente.</span>
-                                @error('siguiente_numero_factura') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Vista Previa de Secuencia</label>
-                            <div class="bg-slate-50 rounded-lg border border-slate-200 p-4 flex flex-col gap-3">
-                                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 opacity-60">
-                                    <span class="text-sm text-slate-500">Factura anterior</span>
-                                    <span class="font-medium text-slate-900">{{ $prefijo_factura }}{{ str_pad(max(1, (int)$siguiente_numero_factura - 1), 6, '0', STR_PAD_LEFT) }}</span>
-                                </div>
-                                <div class="flex justify-between items-center bg-blue-50 border border-blue-200 p-4 rounded-lg shadow-sm">
-                                    <span class="text-sm font-medium text-sovereign-blue">Próxima Factura</span>
-                                    <span class="font-bold text-lg text-sovereign-blue">{{ $this->numero_factura_preview }}</span>
-                                </div>
-                                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 opacity-60">
-                                    <span class="text-sm text-slate-500">Siguiente...</span>
-                                    <span class="font-medium text-slate-900">{{ $prefijo_factura }}{{ str_pad((int)$siguiente_numero_factura + 1, 6, '0', STR_PAD_LEFT) }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-            @endif
+
 
             @if($tabActiva === 'impuestos')
             <!-- Tab: Impuesto y Apariencia PDF -->
@@ -235,7 +194,7 @@
                                         @endif
                                         <div class="text-right">
                                             <div class="font-bold text-sm transition-colors" style="color: {{ $color_primario ?? '#1A2B44' }}">FACTURA</div>
-                                            <div class="text-xs text-gray-500 mt-1">{{ $this->numero_factura_preview }}</div>
+                                            <div class="text-xs text-gray-500 mt-1">FAC-000100</div>
                                         </div>
                                     </div>
                                     <div class="px-4 pb-4 flex justify-between text-[10px] text-gray-500">
