@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Administrador') ? true : null;
+        });
+
+        Event::listen(function (Login $event) {
+            $event->user->update([
+                'last_login_at' => now(),
+            ]);
         });
     }
 }

@@ -70,10 +70,17 @@
                             </td>
                             <td class="py-4 px-6 text-slate-700">{{ $usuario->email }}</td>
                             <td class="py-4 px-6">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-sovereign-blue text-xs uppercase font-semibold border border-blue-100">
-                                    <span class="material-symbols-outlined text-[14px]">shield_person</span>
-                                    Administrador
-                                </span>
+                                @forelse($usuario->getRoleNames() as $rolName)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-sovereign-blue text-xs uppercase font-semibold border border-blue-100 mb-1">
+                                        <span class="material-symbols-outlined text-[14px]">shield_person</span>
+                                        {{ $rolName }}
+                                    </span>
+                                @empty
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 text-slate-500 text-xs uppercase font-semibold border border-slate-200">
+                                        <span class="material-symbols-outlined text-[14px]">person</span>
+                                        Sin rol
+                                    </span>
+                                @endforelse
                             </td>
                             <td class="py-4 px-6">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
@@ -83,8 +90,13 @@
                             </td>
                             <td class="py-4 px-6">
                                 <div class="flex flex-col">
-                                    <span class="font-medium text-slate-900">N/A</span>
-                                    <span class="text-slate-500 uppercase text-[10px] tracking-wider">Sin registro</span>
+                                    @if($usuario->last_login_at)
+                                        <span class="font-medium text-slate-900">{{ $usuario->last_login_at->diffForHumans() }}</span>
+                                        <span class="text-slate-500 uppercase text-[10px] tracking-wider">{{ $usuario->last_login_at->format('d M Y, H:i') }}</span>
+                                    @else
+                                        <span class="font-medium text-slate-900">N/A</span>
+                                        <span class="text-slate-500 uppercase text-[10px] tracking-wider">Sin registro</span>
+                                    @endif
                                 </div>
                             </td>
                             <td class="py-4 px-6 text-right">
