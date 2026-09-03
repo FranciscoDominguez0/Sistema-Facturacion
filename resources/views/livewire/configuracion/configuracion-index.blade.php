@@ -7,8 +7,6 @@
 <div>
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
         <div class="flex flex-col gap-1.5">
-            <div class="flex items-center gap-2">
-            </div>
             <h1 class="text-3xl text-slate-900 tracking-tight font-bold">Configuración</h1>
             <p class="text-sm text-slate-500">Administra las opciones generales del sistema, accesos corporativos e identidades de usuario.</p>
         </div>
