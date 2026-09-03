@@ -107,9 +107,6 @@
                                 <div class="relative">
                                     <select wire:model="moneda" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-900 focus:outline-none focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue transition-all appearance-none pr-10">
                                         <option value="USD - Dólar">USD - Dólar</option>
-                                        <option value="EUR - Euro">EUR - Euro</option>
-                                        <option value="MXN - Peso">MXN - Peso</option>
-                                        <option value="PAB - Balboa">PAB - Balboa</option>
                                     </select>
                                 </div>
                                 @error('moneda') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
