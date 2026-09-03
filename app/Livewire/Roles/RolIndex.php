@@ -12,18 +12,27 @@ class RolIndex extends Component
     public $rolActivoId = null;
     public $modalRolVisible = false;
     public $nuevoRolNombre = '';
+    public $permisosAsignados = [];
 
     public function mount()
     {
+        $this->authorize('empresa.gestionar');
+        
         $primerRol = Role::first();
         if ($primerRol) {
-            $this->rolActivoId = $primerRol->id;
+            $this->seleccionarRol($primerRol->id);
         }
     }
 
     public function seleccionarRol($id)
     {
         $this->rolActivoId = $id;
+        $rol = Role::with('permissions')->find($id);
+        if ($rol) {
+            $this->permisosAsignados = $rol->permissions->pluck('name')->toArray();
+        } else {
+            $this->permisosAsignados = [];
+        }
     }
 
     public function abrirModalRol()
@@ -34,6 +43,8 @@ class RolIndex extends Component
 
     public function guardarRol()
     {
+        $this->authorize('empresa.gestionar');
+
         $this->validate([
             'nuevoRolNombre' => 'required|string|max:255|unique:roles,name'
         ]);
@@ -42,9 +53,22 @@ class RolIndex extends Component
         $this->modalRolVisible = false;
         
         // Seleccionamos automáticamente el rol recién creado
-        $this->rolActivoId = $nuevoRol->id;
+        $this->seleccionarRol($nuevoRol->id);
         
         $this->dispatch('toast', message: 'Rol creado exitosamente.', type: 'success');
+    }
+
+    public function guardarPermisos()
+    {
+        $this->authorize('empresa.gestionar');
+
+        if (!$this->rolActivoId) return;
+
+        $rol = Role::find($this->rolActivoId);
+        if ($rol) {
+            $rol->syncPermissions($this->permisosAsignados);
+            $this->dispatch('toast', message: 'Permisos actualizados correctamente.', type: 'success');
+        }
     }
 
     #[Layout('layouts.app')]
@@ -53,11 +77,9 @@ class RolIndex extends Component
         $roles = Role::withCount('users')->get();
         $rolActivo = Role::with('permissions')->find($this->rolActivoId);
         $permisosAgrupados = Permission::all()->groupBy(function($permiso) {
-            // Suponiendo que el nombre del permiso es "ver facturas" podemos agruparlo, 
-            // o si el sistema tiene módulos definidos, podemos agrupar por un campo extra.
-            // Para mantenerlo simple, usaremos un prefijo o la primera palabra.
-            $partes = explode(' ', $permiso->name);
-            return $partes[1] ?? 'General'; 
+            // Separa por punto si usa notación dot, o espacio. Tomamos la primera palabra como módulo.
+            $partes = preg_split('/[\s.]+/', $permiso->name);
+            return $partes[0] ?? 'General'; 
         });
 
         return view('livewire.roles.rol-index', compact('roles', 'rolActivo', 'permisosAgrupados'));

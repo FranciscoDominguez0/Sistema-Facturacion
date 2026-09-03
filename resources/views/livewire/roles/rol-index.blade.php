@@ -73,12 +73,7 @@
                 @endif
             @endforeach
             
-            <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-3 mt-2">
-                <span class="material-symbols-outlined text-sovereign-blue text-[20px] mt-0.5">verified_user</span>
-                <p class="text-sm text-slate-500">
-                    Las modificaciones de privilegios en el rol <strong class="text-slate-900 font-semibold">{{ $rolActivo ? $rolActivo->name : 'N/A' }}</strong> se aplicarán automáticamente tras la renovación de la sesión de los usuarios.
-                </p>
-            </div>
+
         </div>
 
         <!-- Columna Derecha: Matriz de Permisos -->
@@ -99,79 +94,33 @@
             <!-- Permission Modules Stack -->
             <div class="flex flex-col gap-8">
                 
-                <!-- Module 1: Facturación & Ventas -->
+                @forelse($permisosAgrupados as $grupo => $permisos)
                 <div class="flex flex-col gap-3">
                     <div class="flex items-center gap-2 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-lg">
-                        <span class="material-symbols-outlined text-sovereign-blue text-[20px]">receipt_long</span>
-                        <h4 class="text-base font-bold text-slate-900">Facturación & Ventas</h4>
-                        <span class="ml-auto text-sm font-semibold text-slate-500">3 / 4 concedidos</span>
+                        <span class="material-symbols-outlined text-sovereign-blue text-[20px]">
+                            {{ $grupo === 'facturas' ? 'receipt_long' : ($grupo === 'empresa' ? 'business' : 'tune') }}
+                        </span>
+                        <h4 class="text-base font-bold text-slate-900 capitalize">Módulo: {{ $grupo }}</h4>
+                        <span class="ml-auto text-sm font-semibold text-slate-500">{{ count($permisos) }} permisos</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                        @foreach($permisos as $permiso)
                         <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
-                            <input type="checkbox" checked class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
+                            <input type="checkbox" wire:model="permisosAsignados" value="{{ $permiso->name }}" class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
                             <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">Ver facturas</span>
-                                <span class="text-xs text-slate-500 mt-0.5">Acceso al historial de comprobantes de venta emitidos.</span>
+                                <span class="text-sm font-semibold text-slate-900">{{ ucfirst(str_replace(['.', '_'], ' ', $permiso->name)) }}</span>
+                                <span class="text-xs text-slate-500 mt-0.5 text-balance">Acceso a {{ str_replace(['.', '_'], ' ', $permiso->name) }} en el sistema.</span>
                             </div>
                         </label>
-                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
-                            <input type="checkbox" checked class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">Crear facturas</span>
-                                <span class="text-xs text-slate-500 mt-0.5">Generación de nuevas facturas electrónicas y cotizaciones.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
-                            <input type="checkbox" checked class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">Emitir notas de crédito</span>
-                                <span class="text-xs text-slate-500 mt-0.5">Modificación o anulación parcial de montos en facturas activas.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-100 rounded-lg opacity-80 cursor-pointer hover:opacity-100 transition-opacity">
-                            <input type="checkbox" class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
-                            <div class="flex flex-col">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-sm font-semibold text-slate-900">Anular facturas</span>
-                                    <span class="material-symbols-outlined text-[14px] text-slate-400">lock</span>
-                                </div>
-                                <span class="text-xs font-medium text-slate-500 mt-0.5">Requiere autorización superior para baja fiscal.</span>
-                            </div>
-                        </label>
+                        @endforeach
                     </div>
                 </div>
-
-                <!-- Module 2: Clientes & Directorio -->
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-lg">
-                        <span class="material-symbols-outlined text-sovereign-blue text-[20px]">contacts</span>
-                        <h4 class="text-base font-bold text-slate-900">Clientes & Directorio</h4>
-                        <span class="ml-auto text-sm font-semibold text-slate-500">2 / 3 concedidos</span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
-                            <input type="checkbox" checked class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">Ver clientes</span>
-                                <span class="text-xs text-slate-500 mt-0.5">Lectura del registro general y estados de cartera.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors shadow-sm">
-                            <input type="checkbox" checked class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">Crear y editar clientes</span>
-                                <span class="text-xs text-slate-500 mt-0.5">Alta y actualización de datos de contacto o condiciones comerciales.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-100 rounded-lg opacity-80 cursor-pointer hover:opacity-100 transition-opacity">
-                            <input type="checkbox" class="mt-1 w-4 h-4 text-sovereign-blue rounded focus:ring-sovereign-blue"/>
-                            <div class="flex flex-col">
-                                <span class="text-sm font-semibold text-slate-900">Exportar base de datos completa</span>
-                                <span class="text-xs text-slate-500 mt-0.5">Descarga masiva de listado en formato XLSX o CSV.</span>
-                            </div>
-                        </label>
-                    </div>
+                @empty
+                <div class="p-6 bg-slate-50 border border-slate-100 rounded-lg flex flex-col items-center justify-center text-center gap-3">
+                    <span class="material-symbols-outlined text-[32px] text-slate-300">security_update_warning</span>
+                    <p class="text-slate-500 text-sm">No hay permisos registrados en la base de datos.<br>Por favor, ejecuta los seeders de permisos.</p>
                 </div>
+                @endforelse
             </div>
 
             <!-- Card Footer Actions -->
@@ -179,7 +128,7 @@
                 <button type="button" class="px-5 py-2.5 rounded-lg bg-transparent text-slate-500 text-sm font-semibold hover:bg-slate-100 transition-colors">
                     Restablecer
                 </button>
-                <button type="button" class="px-6 py-2.5 rounded-lg bg-sovereign-blue text-white text-sm font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
+                <button type="button" wire:click="guardarPermisos" class="px-6 py-2.5 rounded-lg bg-sovereign-blue text-white text-sm font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">check</span>
                     Guardar permisos
                 </button>

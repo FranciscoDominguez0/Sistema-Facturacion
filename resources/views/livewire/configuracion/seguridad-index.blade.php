@@ -16,34 +16,9 @@
 
     @include('livewire.configuracion.partials.tabs', ['active' => 'seguridad'])
 
-    <!-- Visual Banner Informativo Ejecutivo -->
-    <div class="relative overflow-hidden rounded-xl bg-slate-800 text-white p-6 md:p-8 shadow-sm mb-8">
-        <div class="absolute -right-8 -bottom-8 w-64 h-64 bg-sovereign-blue/30 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div class="flex items-start gap-4 max-w-2xl">
-                <div class="p-3 bg-slate-700 rounded-xl text-white">
-                    <span class="material-symbols-outlined text-[28px]">lock</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-xs text-slate-300 uppercase tracking-widest font-bold">ESTADO DEL PERÍMETRO</span>
-                    <h2 class="text-xl font-bold text-white">Estándar de Seguridad Corporativa Activo</h2>
-                    <p class="text-sm text-slate-300">
-                        Las políticas globales protegen 48 puestos de trabajo y 12 terminales de facturación electrónica bajo cifrado AES-256 institucional.
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3 shrink-0 bg-slate-700/80 px-4 py-3 rounded-lg border border-slate-600">
-                <span class="material-symbols-outlined text-[20px] text-emerald-400">check_circle</span>
-                <div class="flex flex-col">
-                    <span class="text-[10px] uppercase font-bold text-slate-300">CUMPLIMIENTO ISO/IEC 27001</span>
-                    <span class="text-sm text-emerald-400 font-semibold">100% Homologado</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Grid Principal de Ajustes -->
-    <form class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <form wire:submit="guardarSeguridad" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-6">
         
         <!-- Columna Izquierda -->
         <div class="lg:col-span-8 flex flex-col gap-8">
@@ -64,12 +39,12 @@
                             <span class="text-xs text-slate-500">Recomendado para entornos auditables: 10 a 16 caracteres.</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1">
-                                <button type="button" class="w-8 h-8 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
+                            <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1" x-data="{ len: @entangle('password_length') }">
+                                <button type="button" @click="len = Math.max(8, len - 1)" class="w-8 h-8 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
                                     <span class="material-symbols-outlined text-[18px]">remove</span>
                                 </button>
-                                <input type="number" value="10" min="8" max="32" class="w-14 text-center bg-transparent border-none outline-none font-bold text-slate-900"/>
-                                <button type="button" class="w-8 h-8 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
+                                <input type="number" x-model="len" min="8" max="32" class="w-14 text-center bg-transparent border-none outline-none font-bold text-slate-900"/>
+                                <button type="button" @click="len = Math.min(32, len + 1)" class="w-8 h-8 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
                                     <span class="material-symbols-outlined text-[18px]">add</span>
                                 </button>
                             </div>
@@ -82,7 +57,7 @@
                             <span class="font-semibold text-slate-900 text-sm">Requerir al menos un carácter especial</span>
                             <span class="text-xs text-slate-500">Admite símbolos estándar (! @ # $ % ^ & *).</span>
                         </div>
-                        <input type="checkbox" checked class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5"/>
+                        <input type="checkbox" wire:model="password_special_char" class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5 cursor-pointer"/>
                     </div>
                     
                     <div class="flex items-center justify-between gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
@@ -90,7 +65,7 @@
                             <span class="font-semibold text-slate-900 text-sm">Requerir letras mayúsculas y minúsculas</span>
                             <span class="text-xs text-slate-500">Fuerza variación tipográfica para reducir vulnerabilidad a diccionarios.</span>
                         </div>
-                        <input type="checkbox" checked class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5"/>
+                        <input type="checkbox" wire:model="password_mixed_case" class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5 cursor-pointer"/>
                     </div>
                 </div>
             </section>
@@ -111,9 +86,9 @@
                             <label class="font-semibold text-slate-900 text-sm">Tiempo de inactividad para cierre de sesión automático</label>
                             <span class="text-xs text-slate-500">Desconecta estaciones desatendidas para prevenir usos no autorizados.</span>
                         </div>
-                        <select class="min-w-[240px] bg-white border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-900 font-medium outline-none">
+                        <select wire:model="session_timeout" class="min-w-[240px] bg-white border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-900 font-medium outline-none">
                             <option value="15">15 minutos</option>
-                            <option value="30" selected>30 minutos (Recomendado)</option>
+                            <option value="30">30 minutos (Recomendado)</option>
                             <option value="60">60 minutos (1 hora)</option>
                         </select>
                     </div>
@@ -123,7 +98,7 @@
                             <span class="font-semibold text-slate-900 text-sm">Cerrar todas las demás sesiones activas al cambiar contraseña</span>
                             <span class="text-xs text-slate-500">Invalida cookies de autenticación en otros terminales de inmediato.</span>
                         </div>
-                        <input type="checkbox" checked class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5"/>
+                        <input type="checkbox" wire:model="session_close_others" class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5 cursor-pointer"/>
                     </div>
                     
                     <div class="flex items-center justify-between gap-4 p-4 rounded-lg bg-slate-50 border border-slate-100">
@@ -131,7 +106,7 @@
                             <span class="font-semibold text-slate-900 text-sm">Bloqueo preventivo de cuenta tras 5 intentos fallidos consecutivos</span>
                             <span class="text-xs text-slate-500">Aplica un enfriamiento temporal de 15 minutos o requerimiento de reinicio por admin.</span>
                         </div>
-                        <input type="checkbox" checked class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5"/>
+                        <input type="checkbox" wire:model="login_lockout" class="rounded text-sovereign-blue focus:ring-sovereign-blue h-5 w-5 cursor-pointer"/>
                     </div>
                 </div>
             </section>
@@ -156,8 +131,8 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">DISPOSITIVO Y ORIGEN</span>
-                            <span class="text-sm font-semibold text-slate-900 mt-0.5">Chrome en macOS</span>
-                            <span class="text-xs text-slate-500 mt-0.5">IP: 190.140.22.84</span>
+                            <span class="text-sm font-semibold text-slate-900 mt-0.5" title="{{ request()->userAgent() }}">Tu navegador actual</span>
+                            <span class="text-xs text-slate-500 mt-0.5">IP: {{ request()->ip() }}</span>
                         </div>
                     </div>
 
@@ -168,8 +143,8 @@
                         <div class="flex flex-col">
                             <span class="text-[10px] font-bold uppercase text-slate-500 tracking-wider">ESTADO CRIPTOGRÁFICO</span>
                             <div class="flex items-center gap-2 mt-0.5">
-                                <span class="w-2 h-2 rounded-full bg-sovereign-blue"></span>
-                                <span class="text-sm font-semibold text-slate-900">TLS 1.3 Autenticado</span>
+                                <span class="w-2 h-2 rounded-full {{ request()->secure() ? 'bg-emerald-500' : 'bg-sovereign-blue' }}"></span>
+                                <span class="text-sm font-semibold text-slate-900">{{ request()->secure() ? 'Conexión Segura (HTTPS)' : 'Conexión No Segura (HTTP)' }}</span>
                             </div>
                         </div>
                     </div>
@@ -178,12 +153,12 @@
                 <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 flex flex-col gap-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold uppercase text-slate-700">ÍNDICE DE POSTURA</span>
-                        <span class="text-sm font-bold text-sovereign-blue">96 / 100</span>
+                        <span class="text-sm font-bold text-sovereign-blue">{{ $this->indicePostura }} / 100</span>
                     </div>
                     <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full rounded-full" style="width: 96%;"></div>
+                        <div class="{{ $this->indicePostura < 50 ? 'bg-red-500' : ($this->indicePostura < 80 ? 'bg-amber-500' : 'bg-emerald-500') }} h-full rounded-full transition-all duration-500" style="width: {{ $this->indicePostura }}%;"></div>
                     </div>
-                    <p class="text-[11px] text-slate-500">Su configuración cumple con directivas financieras internacionales de no-repudio.</p>
+                    <p class="text-[11px] text-slate-500">Evaluación automática según la rigurosidad de sus políticas activas.</p>
                 </div>
             </section>
         </div>
@@ -192,15 +167,17 @@
         <div class="lg:col-span-12 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
             <div class="flex items-center gap-2 text-slate-500 text-xs">
                 <span class="material-symbols-outlined text-[18px]">history</span>
-                <span>Última modificación guardada el 14 de Octubre por Alejandro Morales</span>
+                <span>Última modificación {{ $empresa->updated_at->diffForHumans() }}</span>
             </div>
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <button type="button" class="px-6 py-2.5 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-100 transition-colors">
                     Restaurar predeterminados
                 </button>
-                <button type="button" class="px-6 py-2.5 rounded-lg bg-sovereign-blue text-white text-sm font-bold shadow-sm hover:opacity-95 transition-all flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">save</span>
-                    <span>Guardar seguridad</span>
+                <button type="submit" class="px-6 py-2.5 rounded-lg bg-sovereign-blue text-white text-sm font-bold shadow-sm hover:opacity-95 transition-all flex items-center justify-center gap-2">
+                    <span wire:loading.remove wire:target="guardarSeguridad" class="material-symbols-outlined text-[18px]">save</span>
+                    <span wire:loading.remove wire:target="guardarSeguridad">Guardar seguridad</span>
+                    <span wire:loading wire:target="guardarSeguridad" class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+                    <span wire:loading wire:target="guardarSeguridad">Guardando...</span>
                 </button>
             </div>
         </div>

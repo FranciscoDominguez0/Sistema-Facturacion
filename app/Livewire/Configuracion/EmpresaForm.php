@@ -29,6 +29,8 @@ class EmpresaForm extends Component
 
     public function mount()
     {
+        $this->authorize('empresa.gestionar');
+        
         $empresa = Empresa::actual();
         
         $this->nombre = $empresa->nombre;
@@ -66,6 +68,7 @@ class EmpresaForm extends Component
 
     public function guardar()
     {
+        $this->authorize('empresa.gestionar');
         $this->validate();
 
         $empresa = Empresa::actual();

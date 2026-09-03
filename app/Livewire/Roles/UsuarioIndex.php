@@ -21,6 +21,11 @@ class UsuarioIndex extends Component
     public $usuarioAEliminarId = null;
     public $tituloModal = 'Nuevo Usuario';
 
+    public function mount()
+    {
+        $this->authorize('usuarios.ver');
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
@@ -55,6 +60,8 @@ class UsuarioIndex extends Component
 
     public function eliminarUsuario()
     {
+        $this->authorize('usuarios.eliminar');
+
         if ($this->usuarioAEliminarId && $this->usuarioAEliminarId !== auth()->id()) {
             User::findOrFail($this->usuarioAEliminarId)->delete();
             $this->dispatch('toast', message: 'Usuario eliminado exitosamente.', type: 'success');
@@ -68,6 +75,8 @@ class UsuarioIndex extends Component
 
     public function guardarUsuario()
     {
+        $this->authorize($this->form->usuario ? 'usuarios.editar' : 'usuarios.crear');
+
         $this->form->guardar();
         $this->modalVisible = false;
         $this->dispatch('toast', message: $this->form->usuario ? 'Usuario actualizado exitosamente.' : 'Usuario creado exitosamente.', type: 'success');
