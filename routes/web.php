@@ -11,8 +11,7 @@ use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Gastos\GastoShow;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
-use App\Livewire\Vendedores\VendedorForm;
-use App\Livewire\Vendedores\VendedorIndex;
+
 use App\Models\Empresa;
 use App\Models\Factura;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -81,7 +80,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
             abort(403);
         }
         $empresa = Empresa::actual();
-        $factura->load(['cliente', 'vendedor.user', 'items']);
+        $factura->load(['cliente', 'vendedor', 'items']);
         $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
 
         if (request()->has('print')) {
@@ -91,17 +90,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         return $pdf->download('factura-'.$factura->numero_factura.'.pdf');
     })->name('facturas.pdf');
 
-    Route::get('vendedores', VendedorIndex::class)
-        ->middleware('can:vendedores.gestionar')
-        ->name('vendedores');
 
-    Route::get('vendedores/create', VendedorForm::class)
-        ->middleware('can:vendedores.gestionar')
-        ->name('vendedores.create');
-
-    Route::get('vendedores/{vendedor}/edit', VendedorForm::class)
-        ->middleware('can:vendedores.gestionar')
-        ->name('vendedores.edit');
 
     Route::get('gastos', GastoIndex::class)
         ->name('gastos')

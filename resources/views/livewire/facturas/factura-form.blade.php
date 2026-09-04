@@ -93,19 +93,58 @@
                         </div>
 
                         <!-- Vendedor -->
-                        <div class="flex items-center justify-between gap-4">
-                            <label class="text-sm font-semibold text-slate-600 leading-tight">Vendedor <span class="text-red-500">*</span></label>
-                            <div class="w-48 sm:w-56 lg:w-64">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <label class="text-sm font-semibold text-slate-600 leading-tight block mb-1">Vendedor <span class="text-red-500">*</span></label>
                                 @if(Gate::allows('facturas.vendedor.seleccionar'))
-                                    <select wire:model="form.vendedor_id" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
-                                        <option value="">Seleccione...</option>
-                                        @foreach($vendedores as $vend)
-                                            <option value="{{ $vend->id }}">{{ $vend->user->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-input-error :messages="$errors->get('vendedor_id')" class="mt-1 text-xs" />
+                                    <button type="button" @click="$wire.set('mostrarModalVendedor', true)" class="text-[11px] font-medium text-sovereign-blue hover:text-slate-800 transition-colors flex items-center">
+                                        <span class="material-symbols-outlined text-[14px] mr-0.5">add</span>
+                                        Crear
+                                    </button>
+                                @endif
+                            </div>
+                            <div class="w-48 sm:w-56 lg:w-64 relative">
+                                @if(Gate::allows('facturas.vendedor.seleccionar'))
+                                    @if($form->vendedor_id)
+                                        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-lg">
+                                            <div class="flex items-center overflow-hidden">
+                                                <span class="material-symbols-outlined text-[16px] text-slate-400 mr-2 flex-shrink-0">person</span>
+                                                <span class="text-sm font-medium text-slate-800 truncate">{{ $vendedor_seleccionado_nombre }}</span>
+                                            </div>
+                                            <button wire:click="deseleccionarVendedor" class="text-slate-400 hover:text-red-500 transition-colors flex items-center ml-2 flex-shrink-0">
+                                                <span class="material-symbols-outlined text-[16px]">close</span>
+                                            </button>
+                                        </div>
+                                    @else
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                                <span class="material-symbols-outlined text-slate-400 text-[16px]">search</span>
+                                            </div>
+                                            <input type="text" wire:model.live.debounce.300ms="searchVendedor" class="pl-8 w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors placeholder-slate-400" placeholder="Buscar vendedor...">
+                                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">expand_more</span>
+                                        </div>
+
+                                        @if(!empty($searchVendedor))
+                                            <div class="absolute z-20 w-full mt-1 bg-white shadow-lg rounded-md border border-slate-200 max-h-60 overflow-auto">
+                                                @if(count($vendedores_sugeridos) > 0)
+                                                    <ul class="py-1">
+                                                        @foreach($vendedores_sugeridos as $sugerencia)
+                                                            <li>
+                                                                <button type="button" wire:click="seleccionarVendedor({{ $sugerencia['id'] }}, '{{ $sugerencia['name'] }}')" class="block w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                                                    {{ $sugerencia['name'] }}
+                                                                </button>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    <div class="px-3 py-2 text-sm text-slate-500">Sin resultados.</div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @endif
+                                    <x-input-error :messages="$errors->get('form.vendedor_id')" class="mt-1 text-xs" />
                                 @else
-                                    <div class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed">
+                                    <div class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed truncate">
                                         {{ Auth::user()->name }}
                                     </div>
                                 @endif
@@ -421,4 +460,37 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Nuevo Vendedor -->
+    <x-modal-action show="mostrarModalVendedor" title="Nuevo Vendedor" maxWidth="sm">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
+                <input type="text" wire:model="nuevo_vendedor_nombre" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" @keydown.enter="$wire.guardarVendedorExpress()">
+                <x-input-error :messages="$errors->get('nuevo_vendedor_nombre')" class="mt-1 text-xs" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Correo Electrónico (Opcional)</label>
+                <input type="email" wire:model="nuevo_vendedor_email" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" @keydown.enter="$wire.guardarVendedorExpress()">
+                <x-input-error :messages="$errors->get('nuevo_vendedor_email')" class="mt-1 text-xs" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Contraseña (Opcional)</label>
+                <input type="password" wire:model="nuevo_vendedor_password" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" @keydown.enter="$wire.guardarVendedorExpress()">
+                <x-input-error :messages="$errors->get('nuevo_vendedor_password')" class="mt-1 text-xs" />
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-50">
+            <button type="button" @click="mostrarModalVendedor = false" class="px-4 py-2 bg-white border border-slate-200 text-sm font-semibold rounded-lg text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                Cancelar
+            </button>
+            <button type="button" wire:click="guardarVendedorExpress" class="px-4 py-2 bg-sovereign-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-800 transition-colors shadow-sm" wire:loading.attr="disabled" wire:target="guardarVendedorExpress">
+                <span wire:loading.remove wire:target="guardarVendedorExpress">Guardar</span>
+                <span wire:loading wire:target="guardarVendedorExpress">Guardando...</span>
+            </button>
+        </div>
+    </x-modal-action>
 </div>

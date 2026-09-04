@@ -7,7 +7,7 @@ use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\FacturaItem;
-use App\Models\Vendedor;
+use App\Models\User;
 use App\Services\FacturaService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,7 +23,7 @@ class FacturaFactory extends Factory
         return [
             'numero_factura' => 'FAC-'.str_pad((string) fake()->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT),
             'cliente_id' => Cliente::factory(),
-            'vendedor_id' => Vendedor::factory(),
+            'vendedor_id' => User::factory(),
             'fecha_emision' => now(),
             'fecha_vencimiento' => null,
             'subtotal' => 0,

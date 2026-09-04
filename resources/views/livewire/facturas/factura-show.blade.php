@@ -163,7 +163,7 @@
                         <div>
                             <span class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Vendedor Asignado</span>
                             <div class="text-sm font-bold text-slate-800">
-                                {{ $factura->vendedor->user->name }}
+                                {{ $factura->vendedor->name }}
                             </div>
                         </div>
                     </div>

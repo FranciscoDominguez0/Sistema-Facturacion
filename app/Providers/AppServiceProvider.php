@@ -27,7 +27,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(function (Login $event) {
-            $event->user->update([
+            /** @var \App\Models\User $user */
+            $user = $event->user;
+            
+            $user->update([
                 'last_login_at' => now(),
             ]);
         });

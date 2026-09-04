@@ -7,7 +7,7 @@ use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\FacturaItem;
-use App\Models\Vendedor;
+use App\Models\User;
 use App\Services\FacturaService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -467,7 +467,7 @@ class FacturaServiceTest extends TestCase
     {
         return [
             'cliente_id' => Cliente::factory()->create()->id,
-            'vendedor_id' => Vendedor::factory()->create()->id,
+            'vendedor_id' => User::factory()->create()->id,
             'fecha_emision' => '2026-08-19',
             'fecha_vencimiento' => null,
             'descuento_porcentaje' => 0,

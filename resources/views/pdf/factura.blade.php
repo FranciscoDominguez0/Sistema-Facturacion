@@ -225,7 +225,7 @@
             <td>
                 <div class="section-title">Información Adicional</div>
                 <div class="customer-info">
-                    <strong>Vendedor:</strong> {{ $factura->vendedor->user->name }}<br>
+                    <strong>Vendedor:</strong> {{ $factura->vendedor->name }}<br>
                 </div>
             </td>
         </tr>

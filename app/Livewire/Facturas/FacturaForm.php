@@ -5,7 +5,7 @@ namespace App\Livewire\Facturas;
 use App\Livewire\Forms\FacturaForm as FacturaFormObject;
 use App\Models\Cliente;
 use App\Models\Producto;
-use App\Models\Vendedor;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -46,12 +46,21 @@ class FacturaForm extends Component
 
     public $linea_producto_actual = null;
 
-    // Para búsquedas
+    // Para la creación rápida de vendedor
+    public $mostrarModalVendedor = false;
+    public $nuevo_vendedor_nombre = '';
+    public $nuevo_vendedor_email = '';
+    public $nuevo_vendedor_password = '';
+
+    // Para búsquedas cliente
     public $searchCliente = '';
-
     public $clientes_sugeridos = [];
-
     public $cliente_seleccionado_nombre = '';
+
+    // Para búsquedas vendedor
+    public $searchVendedor = '';
+    public $vendedores_sugeridos = [];
+    public $vendedor_seleccionado_nombre = '';
 
     public function mount()
     {
@@ -59,10 +68,8 @@ class FacturaForm extends Component
 
         // Autoseleccionar vendedor si no puede elegirlo libremente
         if (! Gate::allows('facturas.vendedor.seleccionar')) {
-            $vendedor = Auth::user()->vendedor;
-            if ($vendedor) {
-                $this->form->vendedor_id = $vendedor->id;
-            }
+            $this->form->vendedor_id = Auth::id();
+            $this->vendedor_seleccionado_nombre = Auth::user()->name;
         }
 
         // Si viene un cliente_id por la URL
@@ -105,6 +112,33 @@ class FacturaForm extends Component
         $this->cliente_seleccionado_nombre = '';
     }
 
+    public function updatedSearchVendedor($value)
+    {
+        if (strlen($value) >= 2) {
+            $this->vendedores_sugeridos = User::role('Vendedor')
+                ->where('name', 'ilike', '%'.$value.'%')
+                ->take(5)
+                ->get()
+                ->toArray();
+        } else {
+            $this->vendedores_sugeridos = [];
+        }
+    }
+
+    public function seleccionarVendedor($id, $nombre)
+    {
+        $this->form->vendedor_id = $id;
+        $this->vendedor_seleccionado_nombre = $nombre;
+        $this->searchVendedor = '';
+        $this->vendedores_sugeridos = [];
+    }
+
+    public function deseleccionarVendedor()
+    {
+        $this->form->vendedor_id = null;
+        $this->vendedor_seleccionado_nombre = '';
+    }
+
     public function guardarClienteExpress()
     {
         $this->validate([
@@ -144,10 +178,15 @@ class FacturaForm extends Component
         $this->form->eliminarLinea($index);
     }
 
-    public function updated($property)
+    public function updated($property, $value)
     {
         if (str_starts_with($property, 'form.items') || $property === 'form.descuento_porcentaje') {
             $this->form->recalcularTotales();
+        }
+
+        if ($property === 'form.vendedor_id' && $value === 'nuevo_vendedor') {
+            $this->form->vendedor_id = null;
+            $this->mostrarModalVendedor = true;
         }
     }
 
@@ -208,18 +247,47 @@ class FacturaForm extends Component
         $this->linea_producto_actual = null;
     }
 
+    public function guardarVendedorExpress()
+    {
+        $this->validate([
+            'nuevo_vendedor_nombre' => 'required|string|max:255',
+            'nuevo_vendedor_email' => 'nullable|email|unique:users,email|max:255',
+            'nuevo_vendedor_password' => 'nullable|string|min:8',
+        ]);
+
+        $vendedor = User::create([
+            'name' => $this->nuevo_vendedor_nombre,
+            'email' => empty($this->nuevo_vendedor_email) ? null : $this->nuevo_vendedor_email,
+            'password' => empty($this->nuevo_vendedor_password) ? null : \Illuminate\Support\Facades\Hash::make($this->nuevo_vendedor_password),
+        ]);
+
+        $vendedor->assignRole('Vendedor');
+
+        $this->seleccionarVendedor($vendedor->id, $vendedor->name);
+        $this->mostrarModalVendedor = false;
+
+        $this->nuevo_vendedor_nombre = '';
+        $this->nuevo_vendedor_email = '';
+        $this->nuevo_vendedor_password = '';
+    }
+
     public function save()
     {
-        $factura = $this->form->guardar();
-        session()->flash('success', 'Factura creada exitosamente.');
+        try {
+            $factura = $this->form->guardar();
+            session()->flash('success', 'Factura creada exitosamente.');
 
-        return redirect()->route('facturas.show', $factura->id);
+            return redirect()->route('facturas.show', $factura->id);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('toast', message: 'Hay campos obligatorios vacíos o con errores. Por favor, revisa el formulario.', type: 'error');
+            throw $e;
+        }
     }
 
     public function render()
     {
         return view('livewire.facturas.factura-form', [
-            'vendedores' => Gate::allows('facturas.vendedor.seleccionar') ? Vendedor::with('user')->get() : collect(),
+            'vendedores' => Gate::allows('facturas.vendedor.seleccionar') ? User::role('Vendedor')->get() : collect(),
             'productos' => Producto::where('activo', true)->get(),
         ]);
     }

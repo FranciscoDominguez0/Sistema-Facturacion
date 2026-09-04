@@ -59,7 +59,7 @@ class RolIndexTest extends TestCase
         $this->assertDatabaseHas('roles', ['name' => 'Vendedor']);
 
         // Ahora asignamos permisos al rol activo
-        $rolVendedor = Role::where('name', 'Vendedor')->first();
+        $rolVendedor = Role::findByName('Vendedor');
         
         Livewire::actingAs($user)
             ->test(RolIndex::class)

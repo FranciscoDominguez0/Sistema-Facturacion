@@ -16,7 +16,7 @@ class FacturaShow extends Component
 
     public function mount(Factura $factura)
     {
-        $this->factura = $factura->load(['cliente', 'vendedor.user', 'items.producto']);
+        $this->factura = $factura->load(['cliente', 'vendedor', 'items.producto']);
     }
 
     public function cambiarEstado(string $nuevoEstado, FacturaService $facturaService)

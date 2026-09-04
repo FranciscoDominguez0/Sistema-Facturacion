@@ -3,7 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Empresa;
-use App\Models\Vendedor;
+
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
@@ -89,7 +89,7 @@ class FacturaForm extends Form
     {
         $reglas = [
             'cliente_id' => 'required|exists:clientes,id',
-            'vendedor_id' => 'required|exists:vendedores,id',
+            'vendedor_id' => 'required|exists:users,id',
             'fecha_emision' => 'required|date',
             'fecha_vencimiento' => 'nullable|date|after_or_equal:fecha_emision',
             'descuento_porcentaje' => 'nullable|numeric|min:0|max:100',
@@ -101,9 +101,8 @@ class FacturaForm extends Form
 
         // Validar descuentos si el usuario tiene permisos
         $puedeDescontar = Gate::allows('facturas.descuento');
-        if ($puedeDescontar && $this->vendedor_id) {
-            $descuentoMaximo = (float) (Vendedor::find($this->vendedor_id)?->descuento_maximo_porcentaje ?? 0);
-            $reglas['items.*.descuento_porcentaje'] = ['required', 'numeric', 'min:0', "max:{$descuentoMaximo}"];
+        if ($puedeDescontar) {
+            $reglas['items.*.descuento_porcentaje'] = ['required', 'numeric', 'min:0', 'max:100'];
         }
 
         return $reglas;
@@ -117,7 +116,7 @@ class FacturaForm extends Form
             'items.min' => 'La factura debe tener al menos una línea.',
             'items.*.descripcion.required' => 'La descripción es obligatoria.',
             'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
-            'items.*.descuento_porcentaje.max' => 'El descuento de la línea supera el máximo permitido para el vendedor.',
+            'items.*.descuento_porcentaje.max' => 'El descuento no puede superar el 100%.',
         ];
     }
 

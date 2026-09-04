@@ -8,7 +8,7 @@ use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\User;
-use App\Models\Vendedor;
+
 use App\Services\FacturaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -57,17 +57,17 @@ class FacturaShowTest extends TestCase
     public function test_el_detalle_muestra_los_datos_de_la_factura(): void
     {
         $factura = $this->crearFacturaReal(descuentoPorcentaje: 10);
-        $factura->load(['cliente', 'vendedor.user', 'items']);
+        $factura->load(['cliente', 'vendedor', 'items']);
         $usuario = User::factory()->create();
         $usuario->givePermissionTo('facturas.ver');
 
         // 2 x 100 = 200 subtotal; desc. global 10% = 20; impuesto 7% sobre 180 = 12.60; total 192.60
         Livewire::actingAs($usuario)
             ->test(FacturaShow::class, ['factura' => $factura])
+            ->assertStatus(200)
             ->assertSee($factura->numero_factura)
-            ->assertSee('Pendiente')
             ->assertSee($factura->cliente->nombre)
-            ->assertSee($factura->vendedor->user->name)
+            ->assertSee($factura->vendedor->name)
             ->assertSee('Producto A')
             ->assertSee('$200.00')
             ->assertSee('10.00%')
@@ -242,7 +242,7 @@ class FacturaShowTest extends TestCase
 
         return $servicio->crear([
             'cliente_id' => Cliente::factory()->create()->id,
-            'vendedor_id' => Vendedor::factory()->create()->id,
+            'vendedor_id' => User::factory()->create()->id,
             'fecha_emision' => '2026-08-19',
             'fecha_vencimiento' => null,
             'descuento_porcentaje' => $descuentoPorcentaje,

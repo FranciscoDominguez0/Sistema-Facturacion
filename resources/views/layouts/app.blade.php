@@ -108,12 +108,6 @@
                 <span class="text-sm tracking-wide {{ request()->routeIs('facturas*') ? 'font-bold' : 'font-medium' }}">Facturas</span>
             </a>
 
-            <a href="{{ route('vendedores') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('vendedores*') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('vendedores*') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('vendedores*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">badge</span>
-                </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('vendedores*') ? 'font-bold' : 'font-medium' }}">Vendedores</span>
-            </a>
 
             <a href="{{ route('gastos') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('gastos*') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
                 <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('gastos*') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">

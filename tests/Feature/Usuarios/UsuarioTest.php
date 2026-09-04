@@ -3,7 +3,7 @@
 namespace Tests\Feature\Usuarios;
 
 use App\Models\User;
-use App\Models\Vendedor;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -101,25 +101,6 @@ class UsuarioTest extends TestCase
         $this->assertNull(User::find($usuario->id));
     }
 
-    /**
-     * Al eliminar un usuario se elimina también su vendedor asociado (cascade).
-     */
-    public function test_al_eliminar_un_usuario_se_elimina_su_vendedor_asociado(): void
-    {
-        $usuario = User::factory()->create();
-
-        Vendedor::create([
-            'user_id' => $usuario->id,
-            'codigo' => 'V001',
-            'comision_porcentaje' => 5.00,
-            'descuento_maximo_porcentaje' => 10.00,
-            'activo' => true,
-        ]);
-
-        $usuario->delete();
-
-        $this->assertDatabaseMissing('vendedores', ['user_id' => $usuario->id]);
-    }
 
     // =====================================================================
     // Seguridad

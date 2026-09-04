@@ -15,16 +15,33 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Asegurar que el rol Administrador existe
+        // 1. Asegurar que los roles necesarios existen
         $roleAdmin = Role::firstOrCreate(['name' => 'Administrador']);
+        Role::firstOrCreate(['name' => 'Vendedor']);
 
-        // Crear permisos
-        $permisoEmpresa = Permission::firstOrCreate(['name' => 'empresa.gestionar']);
-        $roleAdmin->givePermissionTo($permisoEmpresa);
+        $permisos = [
+            'empresa.gestionar',
+            'usuarios.ver',
+            'usuarios.crear',
+            'usuarios.editar',
+            'usuarios.eliminar',
+            'clientes.ver',
+            'clientes.gestionar',
+            'productos.ver',
+            'productos.gestionar',
+            'facturas.ver',
+            'facturas.gestionar',
+            'facturas.estado.cambiar',
+            'facturas.vendedor.seleccionar',
+            'facturas.descuento',
+            'gastos.ver',
+            'gastos.gestionar',
+        ];
 
-        $permisoGastosVer = Permission::firstOrCreate(['name' => 'gastos.ver']);
-        $permisoGastosGestionar = Permission::firstOrCreate(['name' => 'gastos.gestionar']);
-        $roleAdmin->givePermissionTo([$permisoGastosVer, $permisoGastosGestionar]);
+        foreach ($permisos as $permiso) {
+            $p = Permission::firstOrCreate(['name' => $permiso]);
+            $roleAdmin->givePermissionTo($p);
+        }
 
         // 2. Crear al usuario
         $user = User::updateOrCreate(

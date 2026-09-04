@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('numero_factura')->unique();
             $table->foreignId('cliente_id')->constrained()->onDelete('restrict');
-            $table->foreignId('vendedor_id')->constrained('vendedores')->onDelete('restrict');
+            $table->foreignId('vendedor_id')->constrained('users')->onDelete('restrict');
             $table->date('fecha_emision');
             $table->date('fecha_vencimiento')->nullable();
             $table->decimal('subtotal', 12, 2);

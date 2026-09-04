@@ -45,7 +45,7 @@ class Factura extends Model
     // El vendedor que realizó la venta
     public function vendedor()
     {
-        return $this->belongsTo(Vendedor::class);
+        return $this->belongsTo(User::class, 'vendedor_id');
     }
 
     // Las líneas de detalle de la factura (productos o servicios vendidos)

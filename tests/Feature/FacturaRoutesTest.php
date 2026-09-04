@@ -6,7 +6,7 @@ use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\User;
-use App\Models\Vendedor;
+
 use App\Services\FacturaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -103,7 +103,7 @@ class FacturaRoutesTest extends TestCase
 
         return $servicio->crear([
             'cliente_id' => Cliente::factory()->create()->id,
-            'vendedor_id' => Vendedor::factory()->create()->id,
+            'vendedor_id' => User::factory()->create()->id,
             'fecha_emision' => '2026-08-19',
             'fecha_vencimiento' => null,
             'descuento_porcentaje' => 0,

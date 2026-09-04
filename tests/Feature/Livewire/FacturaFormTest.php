@@ -8,7 +8,7 @@ use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\Producto;
 use App\Models\User;
-use App\Models\Vendedor;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -224,7 +224,7 @@ class FacturaFormTest extends TestCase
     {
         Empresa::factory()->create(['impuesto_porcentaje' => 7]);
         $cliente = Cliente::factory()->create();
-        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar'], 10);
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar']);
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
@@ -249,45 +249,7 @@ class FacturaFormTest extends TestCase
         ]);
     }
 
-    /**
-     * Un usuario con permiso de descuento no puede superar el
-     * descuento_maximo_porcentaje configurado en su registro de vendedor.
-     */
-    public function test_usuario_con_permiso_de_descuento_no_supera_el_maximo_del_vendedor(): void
-    {
-        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
-        $cliente = Cliente::factory()->create();
-        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar', 'facturas.descuento'], 10);
 
-        // Descuento dentro del límite (10%) sí se permite
-        Livewire::actingAs($usuario)
-            ->test(FacturaForm::class)
-            ->set('form.cliente_id', $cliente->id)
-            ->set('form.items.0.descripcion', 'Producto A')
-            ->set('form.items.0.cantidad', 1)
-            ->set('form.items.0.precio_unitario', 100)
-            ->set('form.items.0.descuento_porcentaje', 5)
-            ->call('save')
-            ->assertHasNoErrors();
-
-        $this->assertDatabaseHas('factura_items', [
-            'descripcion' => 'Producto A',
-            'descuento_porcentaje' => 5,
-        ]);
-
-        // Descuento que supera el máximo (10%) falla la validación
-        Livewire::actingAs($usuario)
-            ->test(FacturaForm::class)
-            ->set('form.cliente_id', $cliente->id)
-            ->set('form.items.0.descripcion', 'Producto B')
-            ->set('form.items.0.cantidad', 1)
-            ->set('form.items.0.precio_unitario', 100)
-            ->set('form.items.0.descuento_porcentaje', 15)
-            ->call('save')
-            ->assertHasErrors(['form.items.0.descuento_porcentaje' => 'max']);
-
-        $this->assertDatabaseCount('facturas', 1);
-    }
 
     // =====================================================================
     // Guardado
@@ -399,7 +361,9 @@ class FacturaFormTest extends TestCase
     {
         $usuario = User::factory()->create();
         $usuario->givePermissionTo('facturas.vendedor.seleccionar');
-        $otroVendedor = Vendedor::factory()->create();
+        \Spatie\Permission\Models\Role::findOrCreate('Vendedor');
+        $otroVendedor = User::factory()->create();
+        $otroVendedor->assignRole('Vendedor');
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
@@ -425,20 +389,18 @@ class FacturaFormTest extends TestCase
     // =====================================================================
 
     /**
-     * Usuario con un vendedor asociado y los permisos indicados.
+     * Usuario con el rol vendedor asociado y los permisos indicados.
      *
-     * @return array{0: User, 1: Vendedor}
+     * @return array{0: User, 1: User}
      */
-    protected function usuarioConVendedor(array $permisos = [], float $descuentoMaximo = 10): array
+    protected function usuarioConVendedor(array $permisos = []): array
     {
+        \Spatie\Permission\Models\Role::findOrCreate('Vendedor');
         $usuario = User::factory()->create();
-        $vendedor = Vendedor::factory()->create([
-            'user_id' => $usuario->id,
-            'descuento_maximo_porcentaje' => $descuentoMaximo,
-        ]);
+        $usuario->assignRole('Vendedor');
 
         $usuario->givePermissionTo($permisos);
 
-        return [$usuario, $vendedor];
+        return [$usuario, $usuario];
     }
 }
