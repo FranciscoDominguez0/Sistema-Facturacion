@@ -9,7 +9,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
         <div class="flex flex-col gap-1.5">
-            <h1 class="text-3xl text-slate-900 tracking-tight font-bold">Roles y matriz de permisos</h1>
+            <h2 class="text-xl text-slate-900 tracking-tight font-bold">Roles y matriz de permisos</h2>
             <p class="text-sm text-slate-500">Define los privilegios operativos y restricciones de acceso para cada nivel de usuario de la entidad legal.</p>
         </div>
         <div class="flex items-center gap-3 self-start md:self-auto">
@@ -19,8 +19,6 @@
             </button>
         </div>
     </div>
-
-    @include('livewire.configuracion.partials.tabs', ['active' => 'roles'])
 
     <!-- Workspace Grid: Roles Selection & Permission Matrix -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

@@ -2,7 +2,7 @@
      Tipos: success (verde), error (rojo), info (azul).
      Disparar desde Livewire: $this->dispatch('toast', message: 'Texto', type: 'success')
      Disparar con flash:      return redirect()->with('success', 'Texto') --}}
-<div class="fixed top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex justify-center w-full max-w-sm">
+<div class="fixed top-8 inset-x-0 lg:left-64 z-50 pointer-events-none flex justify-center px-4">
     <div x-data="{ 
             show: false, 
             message: '', 
@@ -29,7 +29,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 -translate-y-8 scale-95"
-         class="pointer-events-auto bg-white border border-slate-200 shadow-xl rounded-xl p-4 flex items-center gap-4 w-full"
+         class="pointer-events-auto bg-white border border-slate-200 shadow-xl rounded-xl p-4 flex items-center gap-4 w-full max-w-sm"
          style="display: none;">
          
          <!-- Icon -->

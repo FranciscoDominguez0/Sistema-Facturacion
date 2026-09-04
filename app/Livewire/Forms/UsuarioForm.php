@@ -18,6 +18,8 @@ class UsuarioForm extends Form
     public $password = '';
 
     public $rol = '';
+    
+    public array $permisos = [];
 
     public function rules()
     {
@@ -25,7 +27,8 @@ class UsuarioForm extends Form
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email' . ($this->usuario ? ',' . $this->usuario->id : ''),
             'password' => $this->usuario ? 'nullable|string|min:8' : 'required|string|min:8',
-            'rol' => 'required|exists:roles,name',
+            'rol' => 'nullable|exists:roles,name',
+            'permisos' => 'array',
         ];
     }
 
@@ -36,6 +39,7 @@ class UsuarioForm extends Form
         $this->email = $usuario->email;
         // Asume un solo rol principal para simplificar
         $this->rol = $usuario->roles->first()?->name ?? '';
+        $this->permisos = $usuario->permissions->pluck('name')->toArray();
     }
 
     public function guardar()
@@ -64,7 +68,11 @@ class UsuarioForm extends Form
 
         if ($this->rol) {
             $user->syncRoles([$this->rol]);
+        } else {
+            $user->syncRoles([]);
         }
+
+        $user->syncPermissions($this->permisos);
 
         $this->reset();
     }

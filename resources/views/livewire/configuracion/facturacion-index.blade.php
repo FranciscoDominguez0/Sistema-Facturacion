@@ -1,31 +1,14 @@
-@section('breadcrumbs')
-    <x-breadcrumbs :links="[
-        ['title' => 'Configuración', 'url' => route('configuracion.index')],
-        ['title' => 'Facturación', 'url' => null],
-    ]" />
-@endsection
-
 <div>
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
-        <div class="flex flex-col gap-1.5">
-            <h1 class="text-3xl text-slate-900 tracking-tight font-bold">Configuración de facturación</h1>
-            <p class="text-sm text-slate-500">Administra la serie y correlativos de las facturas que se emiten en el sistema.</p>
-        </div>
-        <div class="flex items-center gap-3 self-start md:self-auto">
-            <button wire:click="guardar" type="button" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-sovereign-blue text-white font-medium shadow-sm hover:bg-slate-800 transition-all active:scale-[0.98]">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        <div class="px-6 py-5 flex items-center justify-between bg-white border-b border-slate-100">
+            <h2 class="text-xl text-slate-900 font-bold">Numeración de facturas</h2>
+            <button wire:click="guardar" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm whitespace-nowrap">
                 <span class="material-symbols-outlined text-[18px]">save</span>
-                <span>Guardar cambios</span>
+                Guardar cambios
             </button>
         </div>
-    </div>
 
-    @include('livewire.configuracion.partials.tabs', ['active' => 'facturacion'])
-
-    <div class="flex flex-col gap-8 animate-fade-in-up">
-        <section>
-            <h3 class="text-base font-semibold text-slate-700 mb-4">Numeración de facturas</h3>
-            <div class="bg-white rounded-lg border border-slate-200 p-6 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-sm">
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="flex flex-col gap-5">
                     <div class="flex flex-col gap-1.5">
                         <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Prefijo</label>
@@ -54,10 +37,9 @@
                         <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 opacity-60">
                             <span class="text-sm text-slate-500">Siguiente...</span>
                             <span class="font-medium text-slate-900">{{ $prefijo_factura }}{{ str_pad((int)$siguiente_numero_factura + 1, 6, '0', STR_PAD_LEFT) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+</div>
+        </div>
+    </div>
+</div>
     </div>
 </div>

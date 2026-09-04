@@ -12,7 +12,7 @@ class EmpresaForm extends Component
 {
     use WithFileUploads;
 
-    public string $tabActiva = 'general';
+    public string $tabActiva = 'detalles';
 
     // Propiedades del formulario
     public $nombre;
@@ -27,10 +27,11 @@ class EmpresaForm extends Component
     public $logo; // Para el nuevo archivo subido
     public $logo_path_actual; // Para mostrar el logo actual
 
-    public function mount()
+    public function mount(string $tab = 'detalles')
     {
         $this->authorize('empresa.gestionar');
-        
+        $this->tabActiva = $tab;
+
         $empresa = Empresa::actual();
         
         $this->nombre = $empresa->nombre;

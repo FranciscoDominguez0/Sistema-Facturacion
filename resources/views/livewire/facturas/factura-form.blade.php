@@ -11,61 +11,65 @@
         <p class="text-slate-500 text-sm mt-1">Registra una nueva factura de venta en el sistema.</p>
     </div>
 
-    <!-- Layout Principal en Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        <!-- Columna Izquierda: Formulario (ocupa 3 de 4) -->
-        <div class="lg:col-span-3 space-y-6">
+    <!-- Layout Principal en 1 columna -->
+    <div class="space-y-6">
             
             <!-- Top Section: Cliente y Fechas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Box Cliente -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-full">
-                    <div class="flex justify-between items-center mb-4">
-                        <label class="block text-sm font-semibold text-slate-700">Cliente <span class="text-red-500">*</span></label>
-                        <button type="button" @click="$wire.set('mostrarModalCliente', true)" class="text-xs font-medium text-sovereign-blue hover:text-slate-800 transition-colors flex items-center px-2 py-1.5 border border-sovereign-blue/20 bg-sovereign-blue/5 rounded-md">
-                            <span class="material-symbols-outlined text-[16px] mr-1">add</span>
-                            Crear
-                        </button>
-                    </div>
-                    
-                    <div class="relative">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Cliente <span class="text-red-500">*</span></label>
+
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                         @if($cliente_id)
+                            <!-- Seleccionado -->
                             <div class="flex items-center justify-between bg-slate-50 border border-slate-200 px-4 py-3 rounded-lg">
-                                <div class="flex items-center">
-                                    <span class="material-symbols-outlined text-[18px] text-slate-400 mr-2">person</span>
-                                    <span class="text-sm font-medium text-slate-800 mr-3">{{ $cliente_seleccionado_nombre }}</span>
+                                <div class="flex items-center overflow-hidden">
+                                    <span class="material-symbols-outlined text-[18px] text-slate-400 mr-2 flex-shrink-0">person</span>
+                                    <span class="text-sm font-medium text-slate-800 truncate">{{ $cliente_seleccionado_nombre }}</span>
                                 </div>
-                                <button wire:click="deseleccionarCliente" class="text-slate-400 hover:text-red-500 transition-colors flex items-center">
+                                <button wire:click="deseleccionarCliente" type="button" class="text-slate-400 hover:text-red-500 transition-colors ml-2 flex-shrink-0">
                                     <span class="material-symbols-outlined text-[18px]">close</span>
                                 </button>
                             </div>
                         @else
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="material-symbols-outlined text-slate-400 text-[18px]">search</span>
-                                </div>
-                                <input type="text" wire:model.live.debounce.300ms="searchCliente" class="pl-10 w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors placeholder-slate-400" placeholder="Nombre del cliente...">
-                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
-                            </div>
+                            <!-- Trigger -->
+                            <button type="button" @click="open = !open" class="w-full flex items-center justify-between bg-white border border-slate-200 hover:border-slate-300 rounded-lg px-4 py-3 text-sm text-slate-400 focus:outline-none focus:ring-1 focus:ring-sovereign-blue focus:border-sovereign-blue transition-colors">
+                                <span x-show="!open">Seleccione un cliente...</span>
+                                <span x-show="open" class="text-slate-700">Buscar cliente...</span>
+                                <span class="material-symbols-outlined text-slate-400 text-[20px] transition-transform duration-200" :class="open ? 'rotate-180' : ''">expand_more</span>
+                            </button>
 
-                            @if(!empty($searchCliente))
-                                <div class="absolute z-20 w-full mt-1 bg-white shadow-lg rounded-md border border-slate-200 max-h-60 overflow-auto">
-                                    @if(count($clientes_sugeridos) > 0)
-                                        <ul class="py-1">
-                                            @foreach($clientes_sugeridos as $sugerencia)
-                                                <li>
-                                                    <button type="button" wire:click="seleccionarCliente({{ $sugerencia['id'] }}, '{{ $sugerencia['nombre'] }}')" class="block w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-                                                        {{ $sugerencia['nombre'] }}
-                                                    </button>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <div class="px-4 py-3 text-sm text-slate-500">No se encontraron clientes.</div>
-                                    @endif
+                            <!-- Dropdown -->
+                            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="absolute z-30 w-full mt-1 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden" style="display:none">
+                                <!-- Search inside dropdown -->
+                                <div class="p-2 border-b border-slate-100">
+                                    <input type="text" wire:model.live.debounce.300ms="searchCliente" class="w-full bg-slate-50 border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none placeholder-slate-400" placeholder="Buscar..." @click.stop x-ref="clienteInput" x-init="$watch('open', v => v && $nextTick(() => $refs.clienteInput.focus()))">
                                 </div>
-                            @endif
+                                <!-- Results -->
+                                <ul class="max-h-48 overflow-y-auto py-1">
+                                    @if(count($clientes_sugeridos) > 0)
+                                        @foreach($clientes_sugeridos as $sugerencia)
+                                            <li>
+                                                <button type="button" wire:click="seleccionarCliente({{ $sugerencia['id'] }}, '{{ addslashes($sugerencia['nombre']) }}'); open = false" @click="open = false" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                                    {{ $sugerencia['nombre'] }}
+                                                </button>
+                                            </li>
+                                        @endforeach
+                                    @elseif(!empty($searchCliente))
+                                        <li class="px-4 py-3 text-sm text-slate-400">Sin resultados.</li>
+                                    @else
+                                        <li class="px-4 py-3 text-sm text-slate-400 italic">Escribe para buscar...</li>
+                                    @endif
+                                </ul>
+                                <!-- Crear nuevo -->
+                                <div class="border-t border-slate-100">
+                                    <button type="button" @click="$wire.set('mostrarModalCliente', true); open = false" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-sovereign-blue hover:bg-blue-50 transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">add</span>
+                                        Nuevo Cliente
+                                    </button>
+                                </div>
+                            </div>
                         @endif
                         <x-input-error :messages="$errors->get('cliente_id')" class="mt-2" />
                     </div>
@@ -73,78 +77,77 @@
 
                 <!-- Box Fechas y Vendedor -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-full flex flex-col justify-center">
-                    <div class="space-y-6">
+                    <div class="space-y-5">
                         <!-- Fecha Factura -->
-                        <div class="flex items-center justify-between gap-4">
-                            <label class="text-sm font-semibold text-slate-600 leading-tight">Fecha de<br>Factura <span class="text-red-500">*</span></label>
-                            <div class="w-48 sm:w-56 lg:w-64">
-                                <input type="date" wire:model="form.fecha_emision" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
-                                <x-input-error :messages="$errors->get('fecha_emision')" class="mt-1 text-xs" />
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fecha de Factura <span class="text-red-500">*</span></label>
+                            <input type="date" wire:model="form.fecha_emision" class="bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                            <x-input-error :messages="$errors->get('fecha_emision')" class="mt-1 text-xs" />
                         </div>
                         
                         <!-- Fecha Pago -->
-                        <div class="flex items-center justify-between gap-4">
-                            <label class="text-sm font-semibold text-slate-600 leading-tight">Fecha de Pago</label>
-                            <div class="w-48 sm:w-56 lg:w-64">
-                                <input type="date" wire:model="form.fecha_vencimiento" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" placeholder="mm/dd/aaaa">
-                                <x-input-error :messages="$errors->get('fecha_vencimiento')" class="mt-1 text-xs" />
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fecha de Pago</label>
+                            <input type="date" wire:model="form.fecha_vencimiento" class="bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                            <x-input-error :messages="$errors->get('fecha_vencimiento')" class="mt-1 text-xs" />
                         </div>
 
                         <!-- Vendedor -->
                         <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <label class="text-sm font-semibold text-slate-600 leading-tight block mb-1">Vendedor <span class="text-red-500">*</span></label>
-                                @if(Gate::allows('facturas.vendedor.seleccionar'))
-                                    <button type="button" @click="$wire.set('mostrarModalVendedor', true)" class="text-[11px] font-medium text-sovereign-blue hover:text-slate-800 transition-colors flex items-center">
-                                        <span class="material-symbols-outlined text-[14px] mr-0.5">add</span>
-                                        Crear
-                                    </button>
-                                @endif
-                            </div>
-                            <div class="w-48 sm:w-56 lg:w-64 relative">
+                            <label class="text-sm font-semibold text-slate-600 leading-tight pt-3">Vendedor <span class="text-red-500">*</span></label>
+                            <div class="w-48 sm:w-56 lg:w-64">
                                 @if(Gate::allows('facturas.vendedor.seleccionar'))
                                     @if($form->vendedor_id)
+                                        <!-- Seleccionado -->
                                         <div class="flex items-center justify-between bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-lg">
                                             <div class="flex items-center overflow-hidden">
                                                 <span class="material-symbols-outlined text-[16px] text-slate-400 mr-2 flex-shrink-0">person</span>
                                                 <span class="text-sm font-medium text-slate-800 truncate">{{ $vendedor_seleccionado_nombre }}</span>
                                             </div>
-                                            <button wire:click="deseleccionarVendedor" class="text-slate-400 hover:text-red-500 transition-colors flex items-center ml-2 flex-shrink-0">
+                                            <button wire:click="deseleccionarVendedor" type="button" class="text-slate-400 hover:text-red-500 transition-colors ml-2 flex-shrink-0">
                                                 <span class="material-symbols-outlined text-[16px]">close</span>
                                             </button>
                                         </div>
                                     @else
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                                                <span class="material-symbols-outlined text-slate-400 text-[16px]">search</span>
-                                            </div>
-                                            <input type="text" wire:model.live.debounce.300ms="searchVendedor" class="pl-8 w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-3 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors placeholder-slate-400" placeholder="Buscar vendedor...">
-                                            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">expand_more</span>
-                                        </div>
+                                        <!-- Dropdown vendedor -->
+                                        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                                            <button type="button" @click="open = !open" class="w-full flex items-center justify-between bg-white border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-400 focus:outline-none focus:ring-1 focus:ring-sovereign-blue focus:border-sovereign-blue transition-colors">
+                                                <span x-show="!open">Seleccione...</span>
+                                                <span x-show="open" class="text-slate-700">Buscar...</span>
+                                                <span class="material-symbols-outlined text-slate-400 text-[18px] transition-transform duration-200" :class="open ? 'rotate-180' : ''">expand_more</span>
+                                            </button>
 
-                                        @if(!empty($searchVendedor))
-                                            <div class="absolute z-20 w-full mt-1 bg-white shadow-lg rounded-md border border-slate-200 max-h-60 overflow-auto">
-                                                @if(count($vendedores_sugeridos) > 0)
-                                                    <ul class="py-1">
+                                            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="absolute z-30 w-full mt-1 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden" style="display:none">
+                                                <div class="p-2 border-b border-slate-100">
+                                                    <input type="text" wire:model.live.debounce.300ms="searchVendedor" class="w-full bg-slate-50 border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none placeholder-slate-400" placeholder="Buscar..." @click.stop x-ref="vendedorInput" x-init="$watch('open', v => v && $nextTick(() => $refs.vendedorInput.focus()))">
+                                                </div>
+                                                <ul class="max-h-40 overflow-y-auto py-1">
+                                                    @if(count($vendedores_sugeridos) > 0)
                                                         @foreach($vendedores_sugeridos as $sugerencia)
                                                             <li>
-                                                                <button type="button" wire:click="seleccionarVendedor({{ $sugerencia['id'] }}, '{{ $sugerencia['name'] }}')" class="block w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                                                <button type="button" wire:click="seleccionarVendedor({{ $sugerencia['id'] }}, '{{ addslashes($sugerencia['name']) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                                                                     {{ $sugerencia['name'] }}
                                                                 </button>
                                                             </li>
                                                         @endforeach
-                                                    </ul>
-                                                @else
-                                                    <div class="px-3 py-2 text-sm text-slate-500">Sin resultados.</div>
-                                                @endif
+                                                    @elseif(!empty($searchVendedor))
+                                                        <li class="px-3 py-2 text-sm text-slate-400">Sin resultados.</li>
+                                                    @else
+                                                        <li class="px-3 py-2 text-sm text-slate-400 italic">Escribe para buscar...</li>
+                                                    @endif
+                                                </ul>
+                                                <div class="border-t border-slate-100">
+                                                    <button type="button" @click="$wire.set('mostrarModalVendedor', true); open = false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-sovereign-blue hover:bg-blue-50 transition-colors">
+                                                        <span class="material-symbols-outlined text-[16px]">add</span>
+                                                        Nuevo Vendedor
+                                                    </button>
+                                                </div>
                                             </div>
-                                        @endif
+                                        </div>
                                     @endif
                                     <x-input-error :messages="$errors->get('form.vendedor_id')" class="mt-1 text-xs" />
                                 @else
-                                    <div class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed truncate">
+                                    <div class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-500 cursor-not-allowed truncate">
                                         {{ Auth::user()->name }}
                                     </div>
                                 @endif
@@ -153,7 +156,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Box Líneas -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
@@ -279,52 +281,53 @@
                 </div>
             </div>
 
-            <!-- Box Notas -->
+        <!-- Notas + Resumen al final, lado a lado -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Notas -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Notas (opcional)</label>
-                <textarea wire:model="form.notas" rows="2" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors resize-none" placeholder="Términos y condiciones, instrucciones de pago..."></textarea>
+                <textarea wire:model="form.notas" rows="5" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors resize-none" placeholder="Términos y condiciones, instrucciones de pago..."></textarea>
             </div>
-            
-        </div>
 
-        <!-- Columna Derecha: Resumen (ocupa 1 de 4) -->
-        <div class="lg:col-span-1">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 sticky top-6">
-                <h3 class="text-lg font-medium text-slate-800 mb-6 border-b border-slate-100 pb-3">Resumen</h3>
-                
-                <div class="space-y-4">
+            <!-- Resumen -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-base font-bold text-slate-800 mb-4 border-b border-slate-100 pb-3">Resumen</h3>
+
+                <div class="space-y-3">
                     <div class="flex justify-between items-center text-sm text-slate-600">
                         <span>Subtotal</span>
                         <span class="text-slate-900 font-medium">${{ number_format($form->subtotal, 2) }}</span>
                     </div>
-                    
+
                     <div class="flex justify-between items-center text-sm text-slate-600">
                         <span>Descuento global (%)</span>
-                        <div class="w-20">
-                            <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="descuento_porcentaje" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                        <div class="w-24">
+                            <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="form.descuento_porcentaje" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                         </div>
                     </div>
+
                     @if($form->descuento_total > 0)
-                        <div class="flex justify-end text-sm text-slate-500 -mt-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Ahorro</span>
                             <span class="text-red-600 font-medium">-${{ number_format($form->descuento_total, 2) }}</span>
                         </div>
                     @endif
 
                     <div class="flex justify-between items-center text-sm text-slate-600">
-                        <span class="flex items-center">
+                        <span class="flex items-center gap-1">
                             Impuesto
-                            <span class="material-symbols-outlined text-[14px] ml-1 text-slate-400 cursor-help" title="Configurado en empresa">info</span>
+                            <span class="material-symbols-outlined text-[14px] text-slate-400 cursor-help" title="Configurado en empresa">info</span>
                         </span>
                         <span class="text-slate-900 font-medium">${{ number_format($form->impuesto, 2) }}</span>
                     </div>
-                    
-                    <div class="border-t border-slate-100 pt-4 mt-6 flex justify-between items-end">
+
+                    <div class="border-t border-slate-100 pt-3 mt-2 flex justify-between items-end">
                         <span class="text-base font-bold text-slate-900">Total</span>
                         <span class="text-2xl font-bold text-sovereign-blue tracking-tight">${{ number_format($form->total, 2) }}</span>
                     </div>
                 </div>
 
-                <div class="mt-8 space-y-3">
+                <div class="mt-6 space-y-3">
                     <button wire:click="save" class="w-full flex justify-center items-center py-2.5 px-4 bg-sovereign-blue hover:bg-slate-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="save" class="material-symbols-outlined text-[18px] mr-2">save</span>
                         <span wire:loading wire:target="save" class="material-symbols-outlined text-[18px] mr-2 animate-spin">progress_activity</span>
@@ -336,6 +339,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Modal Nuevo Cliente -->
