@@ -129,9 +129,6 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     Route::get('roles', \App\Livewire\Roles\RolIndex::class)
         ->name('roles.index');
-
-    Route::get('seguridad', \App\Livewire\Configuracion\SeguridadIndex::class)
-        ->name('seguridad.index');
 });
 
 require __DIR__.'/auth.php';

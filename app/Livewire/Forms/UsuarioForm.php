@@ -3,7 +3,6 @@
 namespace App\Livewire\Forms;
 
 use Livewire\Form;
-use Livewire\Attributes\Validate;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -12,15 +11,12 @@ class UsuarioForm extends Form
 {
     public ?User $usuario = null;
 
-    #[Validate('required|string|max:255')]
     public $name = '';
 
     public $email = '';
 
-    #[Validate('required|string|min:8')]
     public $password = '';
 
-    #[Validate('required|exists:roles,name')]
     public $rol = '';
 
     public function rules()

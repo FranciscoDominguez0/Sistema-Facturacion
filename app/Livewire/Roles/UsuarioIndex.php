@@ -98,7 +98,7 @@ class UsuarioIndex extends Component
             $query->role($this->filtroRol);
         }
 
-        $usuarios = $query->paginate(10);
+        $usuarios = $query->latest()->paginate(10);
         $roles = Role::all();
 
         return view('livewire.roles.usuario-index', [

@@ -27,11 +27,4 @@
         @endif
     </a>
 
-    <a href="{{ route('seguridad.index') }}" wire:navigate class="py-4 text-sm font-medium transition-colors flex items-center gap-2 relative {{ $active === 'seguridad' ? 'text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900' }}">
-        <span class="material-symbols-outlined text-[18px] {{ $active === 'seguridad' ? 'text-sovereign-blue' : '' }}">security</span>
-        Seguridad
-        @if($active === 'seguridad')
-            <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-sovereign-blue rounded-full"></span>
-        @endif
-    </a>
 </div>

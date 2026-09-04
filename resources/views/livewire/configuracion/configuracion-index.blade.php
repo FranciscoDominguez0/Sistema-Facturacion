@@ -48,13 +48,6 @@
             <p class="text-sm text-slate-500">Controla las acciones permitidas y la matriz de permisos por perfil.</p>
         </a>
 
-        <!-- Tarjeta de Seguridad -->
-        <a href="{{ route('seguridad.index') }}" wire:navigate class="group block p-6 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all hover:border-sovereign-blue/30">
-            <div class="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center text-sovereign-blue mb-4 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-[24px]">security</span>
-            </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1">Seguridad</h3>
-            <p class="text-sm text-slate-500">Políticas de contraseñas, control de sesiones y protocolos de seguridad.</p>
-        </a>
+
     </div>
 </div>
