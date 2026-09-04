@@ -29,7 +29,7 @@ class FacturaFormTest extends TestCase
 
         // Permisos del módulo de facturas
         Permission::findOrCreate('facturas.ver');
-        Permission::findOrCreate('facturas.gestionar');
+        Permission::findOrCreate('facturas.crear');
         Permission::findOrCreate('facturas.estado.cambiar');
         Permission::findOrCreate('facturas.vendedor.seleccionar');
         Permission::findOrCreate('facturas.descuento');
@@ -45,7 +45,7 @@ class FacturaFormTest extends TestCase
     public function test_un_usuario_con_permiso_puede_ver_el_formulario_de_nueva_venta(): void
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('facturas.gestionar');
+        $usuario->givePermissionTo('facturas.crear');
 
         $this->actingAs($usuario)
             ->get(route('facturas.crear'))
@@ -224,7 +224,7 @@ class FacturaFormTest extends TestCase
     {
         Empresa::factory()->create(['impuesto_porcentaje' => 7]);
         $cliente = Cliente::factory()->create();
-        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar']);
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.crear']);
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
@@ -261,7 +261,7 @@ class FacturaFormTest extends TestCase
     public function test_guardar_sin_cliente_falla_la_validacion(): void
     {
         Empresa::factory()->create(['impuesto_porcentaje' => 7]);
-        [$usuario] = $this->usuarioConVendedor(['facturas.gestionar']);
+        [$usuario] = $this->usuarioConVendedor(['facturas.crear']);
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
@@ -281,7 +281,7 @@ class FacturaFormTest extends TestCase
     {
         Empresa::factory()->create(['impuesto_porcentaje' => 7]);
         $cliente = Cliente::factory()->create();
-        [$usuario] = $this->usuarioConVendedor(['facturas.gestionar']);
+        [$usuario] = $this->usuarioConVendedor(['facturas.crear']);
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
@@ -301,7 +301,7 @@ class FacturaFormTest extends TestCase
     {
         Empresa::factory()->create(['impuesto_porcentaje' => 7]);
         $cliente = Cliente::factory()->create();
-        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar']);
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.crear']);
 
         $componente = Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
@@ -346,7 +346,7 @@ class FacturaFormTest extends TestCase
      */
     public function test_el_vendedor_se_autoasigna_sin_permiso_de_seleccion(): void
     {
-        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.gestionar']);
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.crear']);
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)

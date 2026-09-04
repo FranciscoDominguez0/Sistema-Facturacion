@@ -36,7 +36,7 @@ class ProductoForm extends Component
 
     public function save(ProductoImagenService $imagenes)
     {
-        $this->authorize('productos.gestionar');
+        $this->authorize($this->isEdit ? 'productos.editar' : 'productos.crear');
 
         if ($this->imagen instanceof UploadedFile) {
             $this->form->imagen_path = $imagenes->guardar($this->imagen, $this->producto?->imagen_path);

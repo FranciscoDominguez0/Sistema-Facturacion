@@ -18,13 +18,13 @@ class GastoFormTest extends TestCase
         parent::setUp();
 
         Permission::findOrCreate('gastos.ver');
-        Permission::findOrCreate('gastos.gestionar');
+        Permission::findOrCreate('gastos.crear');
     }
 
     public function test_usuario_con_permiso_puede_ver_el_formulario(): void
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('gastos.gestionar');
+        $usuario->givePermissionTo('gastos.crear');
 
         $this->actingAs($usuario)
             ->get(route('gastos.crear'))
@@ -43,7 +43,7 @@ class GastoFormTest extends TestCase
     public function test_guardar_gasto_valido_crea_y_redirige(): void
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('gastos.gestionar');
+        $usuario->givePermissionTo('gastos.crear');
 
         Livewire::actingAs($usuario)
             ->test(GastoForm::class)
@@ -68,7 +68,7 @@ class GastoFormTest extends TestCase
     public function test_guardar_sin_concepto_falla_la_validacion(): void
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('gastos.gestionar');
+        $usuario->givePermissionTo('gastos.crear');
 
         Livewire::actingAs($usuario)
             ->test(GastoForm::class)
@@ -84,7 +84,7 @@ class GastoFormTest extends TestCase
     public function test_guardar_con_monto_invalido_falla_la_validacion(): void
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('gastos.gestionar');
+        $usuario->givePermissionTo('gastos.crear');
 
         Livewire::actingAs($usuario)
             ->test(GastoForm::class)

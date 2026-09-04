@@ -41,11 +41,11 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('clientes');
 
     Route::get('clientes/create', ClienteForm::class)
-        ->middleware('can:clientes.gestionar')
+        ->middleware('can:clientes.crear')
         ->name('clientes.create');
 
     Route::get('clientes/{cliente}/edit', ClienteForm::class)
-        ->middleware('can:clientes.gestionar')
+        ->middleware('can:clientes.editar')
         ->name('clientes.edit');
 
     Route::get('clientes/{cliente}', ClienteShow::class)
@@ -57,18 +57,18 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('productos.index');
 
     Route::get('productos/create', ProductoForm::class)
-        ->middleware('can:productos.gestionar')
+        ->middleware('can:productos.crear')
         ->name('productos.create');
 
     Route::get('productos/{producto}/edit', ProductoForm::class)
-        ->middleware('can:productos.gestionar')
+        ->middleware('can:productos.editar')
         ->name('productos.edit');
 
     Route::get('facturas', FacturaIndex::class)
         ->name('facturas');
 
     Route::get('facturas/crear', FacturaForm::class)
-        ->middleware('can:facturas.gestionar')
+        ->middleware('can:facturas.crear')
         ->name('facturas.crear');
 
     Route::get('facturas/{factura}', FacturaShow::class)
@@ -98,7 +98,7 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     Route::get('gastos/crear', GastoForm::class)
         ->name('gastos.crear')
-        ->middleware('can:gastos.gestionar');
+        ->middleware('can:gastos.crear');
 
     Route::get('gastos/{gasto}', GastoShow::class)
         ->name('gastos.show')

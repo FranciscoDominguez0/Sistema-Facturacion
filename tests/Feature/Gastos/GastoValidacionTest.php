@@ -19,7 +19,7 @@ class GastoValidacionTest extends TestCase
         parent::setUp();
 
         Permission::findOrCreate('gastos.ver');
-        Permission::findOrCreate('gastos.gestionar');
+        Permission::findOrCreate('gastos.crear');
     }
 
     private function datosValidos(): array
@@ -36,7 +36,7 @@ class GastoValidacionTest extends TestCase
     private function usuarioConPermiso(): User
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('gastos.gestionar');
+        $usuario->givePermissionTo('gastos.crear');
 
         return $usuario;
     }

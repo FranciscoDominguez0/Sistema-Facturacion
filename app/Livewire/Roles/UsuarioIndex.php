@@ -126,11 +126,12 @@ class UsuarioIndex extends Component
 
     public function guardarUsuario()
     {
-        $this->authorize($this->form->usuario ? 'usuarios.editar' : 'usuarios.crear');
+        $esEdicion = $this->form->usuario !== null;
+        $this->authorize($esEdicion ? 'usuarios.editar' : 'usuarios.crear');
 
         $this->form->guardar();
         $this->view = 'list';
-        $this->dispatch('toast', message: $this->form->usuario ? 'Usuario actualizado exitosamente.' : 'Usuario creado exitosamente.', type: 'success');
+        $this->dispatch('toast', message: $esEdicion ? 'Usuario actualizado exitosamente.' : 'Usuario creado exitosamente.', type: 'success');
     }
 
     #[Layout('layouts.app')]

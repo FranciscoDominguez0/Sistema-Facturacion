@@ -31,7 +31,7 @@ class ClienteIndex extends Component
      */
     public function toggleActivo(Cliente $cliente)
     {
-        $this->authorize('clientes.gestionar');
+        $this->authorize('clientes.editar');
 
         $cliente->update(['activo' => ! $cliente->activo]);
     }

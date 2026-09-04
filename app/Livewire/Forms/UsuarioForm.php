@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Forms;
 
-use Livewire\Form;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Livewire\Form;
 
 class UsuarioForm extends Form
 {
@@ -18,15 +17,15 @@ class UsuarioForm extends Form
     public $password = '';
 
     public $rol = '';
-    
+
     public array $permisos = [];
 
     public function rules()
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email' . ($this->usuario ? ',' . $this->usuario->id : ''),
-            'password' => $this->usuario ? 'nullable|string|min:8' : 'required|string|min:8',
+            'email' => 'nullable|string|email|max:255|unique:users,email'.($this->usuario ? ','.$this->usuario->id : ''),
+            'password' => 'nullable|string|min:8',
             'rol' => 'nullable|exists:roles,name',
             'permisos' => 'array',
         ];
@@ -49,21 +48,26 @@ class UsuarioForm extends Form
         if ($this->usuario) {
             $data = [
                 'name' => $this->name,
-                'email' => $this->email,
+                'email' => $this->email ?: null,
             ];
-            
-            if (!empty($this->password)) {
+
+            if (! empty($this->password)) {
                 $data['password'] = Hash::make($this->password);
             }
-            
+
             $this->usuario->update($data);
             $user = $this->usuario;
         } else {
-            $user = User::create([
+            $data = [
                 'name' => $this->name,
-                'email' => $this->email,
-                'password' => Hash::make($this->password),
-            ]);
+                'email' => $this->email ?: null,
+            ];
+
+            if (! empty($this->password)) {
+                $data['password'] = Hash::make($this->password);
+            }
+
+            $user = User::create($data);
         }
 
         if ($this->rol) {

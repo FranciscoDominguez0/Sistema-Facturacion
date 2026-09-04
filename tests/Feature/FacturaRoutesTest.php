@@ -27,7 +27,9 @@ class FacturaRoutesTest extends TestCase
         parent::setUp();
 
         Permission::findOrCreate('facturas.ver');
-        Permission::findOrCreate('facturas.gestionar');
+        Permission::findOrCreate('facturas.crear');
+        Permission::findOrCreate('facturas.editar');
+        Permission::findOrCreate('facturas.eliminar');
         Role::findOrCreate('Cajero');
     }
 
@@ -56,7 +58,7 @@ class FacturaRoutesTest extends TestCase
 
         $usuario = User::factory()->create();
         $usuario->assignRole('Cajero');
-        $usuario->givePermissionTo('facturas.ver', 'facturas.gestionar');
+        $usuario->givePermissionTo('facturas.ver', 'facturas.crear');
 
         $this->actingAs($usuario)->get(route('facturas.crear'))->assertOk();
         $this->actingAs($usuario)->get(route('facturas.show', $factura))->assertOk();

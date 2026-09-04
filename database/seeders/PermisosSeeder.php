@@ -44,6 +44,12 @@ class PermisosSeeder extends Seeder
             'productos.editar',
             'productos.eliminar',
 
+            // Gastos
+            'gastos.ver',
+            'gastos.crear',
+            'gastos.editar',
+            'gastos.eliminar',
+
             // Configuración general
             'empresa.gestionar',
             'reportes.ver',

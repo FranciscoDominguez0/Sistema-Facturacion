@@ -10,7 +10,7 @@
             <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Listado de Facturas</h2>
             <p class="text-slate-500 text-sm mt-1">Gestión del historial de ventas facturadas.</p>
         </div>
-        @can('facturas.gestionar')
+        @can('facturas.crear')
             <a href="{{ route('facturas.crear') }}" class="inline-flex items-center justify-center px-4 py-2 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm" wire:navigate>
                 <span class="material-symbols-outlined text-[20px] mr-2">add</span>
                 Nueva Venta

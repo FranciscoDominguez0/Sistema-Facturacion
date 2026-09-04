@@ -158,7 +158,7 @@
                     Notificaciones
                 </button>
                 <button wire:click="$set('tab', 'permisos')" class="{{ $tab === 'permisos' ? 'border-sovereign-blue text-sovereign-blue font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300' }} flex-shrink-0 px-1 py-4 text-sm border-b-2 transition-all">
-                    Permissions
+                    Permisos
                 </button>
             </div>
 
@@ -174,7 +174,7 @@
                         </div>
                         
                         <div class="flex items-center gap-6">
-                            <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Correo electrónico <span class="text-red-500">*</span></label>
+                            <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Correo electrónico</label>
                             <div class="flex-1">
                                 <input type="email" wire:model="form.email" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
                                 <x-input-error :messages="$errors->get('form.email')" class="mt-2 text-xs" />
@@ -182,7 +182,7 @@
                         </div>
 
                         <div class="flex items-center gap-6">
-                            <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Contraseña <span class="text-red-500">*</span></label>
+                            <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Contraseña</label>
                             <div class="flex-1">
                                 <input type="password" wire:model="form.password" placeholder="{{ $form->usuario ? 'Dejar en blanco para no cambiar' : '' }}" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
                                 <x-input-error :messages="$errors->get('form.password')" class="mt-2 text-xs" />
@@ -245,41 +245,41 @@
                                         <tr class="hover:bg-slate-50">
                                             <td class="py-3 text-slate-700 font-medium">Clientes</td>
                                             <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.ver" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.crear" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.editar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="clientes.eliminar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
                                         </tr>
                                         <!-- Productos -->
                                         <tr class="hover:bg-slate-50">
                                             <td class="py-3 text-slate-700 font-medium">Productos</td>
                                             <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.ver" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.crear" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.editar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="productos.eliminar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
                                         </tr>
                                         <!-- Facturas -->
                                         <tr class="hover:bg-slate-50">
                                             <td class="py-3 text-slate-700 font-medium">Facturas</td>
                                             <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.ver" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.crear" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.editar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="facturas.eliminar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
                                         </tr>
                                         <!-- Gastos -->
                                         <tr class="hover:bg-slate-50">
                                             <td class="py-3 text-slate-700 font-medium">Gastos</td>
                                             <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.ver" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.crear" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.editar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="gastos.eliminar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
                                         </tr>
                                         <!-- Empresa -->
                                         <tr class="hover:bg-slate-50">
                                             <td class="py-3 text-slate-700 font-medium">Empresa</td>
+                                            <td class="py-3 text-center text-slate-300">—</td>
                                             <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="empresa.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="empresa.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="empresa.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
-                                            <td class="py-3 text-center"><input type="checkbox" wire:model="form.permisos" value="empresa.gestionar" class="rounded border-slate-300 text-sovereign-blue shadow-sm cursor-pointer"></td>
+                                            <td class="py-3 text-center text-slate-300">—</td>
+                                            <td class="py-3 text-center text-slate-300">—</td>
                                         </tr>
                                     </tbody>
                                 </table>

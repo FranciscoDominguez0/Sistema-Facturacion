@@ -18,7 +18,7 @@ class GastoForm extends Component
 
     public function guardar()
     {
-        $this->authorize('gastos.gestionar');
+        $this->authorize('gastos.crear');
 
         $this->form->guardar();
 

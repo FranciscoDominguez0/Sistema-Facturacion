@@ -29,7 +29,9 @@ class ProductoTest extends TestCase
 
         // Permisos que deben existir en el sistema (se crean para el test)
         Permission::findOrCreate('productos.ver');
-        Permission::findOrCreate('productos.gestionar');
+        Permission::findOrCreate('productos.crear');
+        Permission::findOrCreate('productos.editar');
+        Permission::findOrCreate('productos.eliminar');
     }
 
     // =====================================================================
@@ -521,12 +523,12 @@ class ProductoTest extends TestCase
     // =====================================================================
 
     /**
-     * Usuario con el permiso para gestionar productos.
+     * Usuario con los permisos para gestionar productos.
      */
     protected function usuarioConGestion(): User
     {
         $usuario = User::factory()->create();
-        $usuario->givePermissionTo('productos.gestionar');
+        $usuario->givePermissionTo('productos.crear', 'productos.editar', 'productos.eliminar');
 
         return $usuario;
     }

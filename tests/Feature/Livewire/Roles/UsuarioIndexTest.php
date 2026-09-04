@@ -110,6 +110,22 @@ class UsuarioIndexTest extends TestCase
             ->assertDontSee($inactivo->name);
     }
 
+    public function test_crea_usuario_solo_con_nombre()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('usuarios.ver');
+        $user->givePermissionTo('usuarios.crear');
+
+        Livewire::actingAs($user)
+            ->test(UsuarioIndex::class)
+            ->call('crearUsuario')
+            ->set('form.name', 'Solo Nombre')
+            ->call('guardarUsuario')
+            ->assertDispatched('toast');
+
+        $this->assertDatabaseHas('users', ['name' => 'Solo Nombre', 'email' => null]);
+    }
+
     public function test_confirmar_eliminacion_masiva_abre_modal()
     {
         $user = User::factory()->create();
@@ -119,6 +135,40 @@ class UsuarioIndexTest extends TestCase
             ->test(UsuarioIndex::class)
             ->call('confirmarEliminacionMasiva')
             ->assertSet('modalEliminarMasivoVisible', true);
+    }
+
+    public function test_guardar_usuario_editado_muestra_mensaje_de_actualizacion()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('usuarios.ver');
+        $user->givePermissionTo('usuarios.editar');
+
+        $aEditar = User::factory()->create(['name' => 'Nombre Original']);
+
+        Livewire::actingAs($user)
+            ->test(UsuarioIndex::class)
+            ->call('editarUsuario', $aEditar->id)
+            ->set('form.name', 'Nombre Actualizado')
+            ->call('guardarUsuario')
+            ->assertDispatched('toast', message: 'Usuario actualizado exitosamente.');
+
+        $this->assertDatabaseHas('users', ['id' => $aEditar->id, 'name' => 'Nombre Actualizado']);
+    }
+
+    public function test_permisos_distintos_no_comparten_estado()
+    {
+        Permission::firstOrCreate(['name' => 'clientes.editar']);
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('usuarios.ver');
+
+        $aEditar = User::factory()->create();
+        $aEditar->givePermissionTo('clientes.editar');
+
+        Livewire::actingAs($user)
+            ->test(UsuarioIndex::class)
+            ->call('editarUsuario', $aEditar->id)
+            ->assertSet('form.permisos', ['clientes.editar']);
     }
 
     public function test_seleccionar_todos_marca_los_usuarios_de_la_pagina()

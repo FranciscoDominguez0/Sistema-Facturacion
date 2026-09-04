@@ -27,7 +27,7 @@ class ProductoIndex extends Component
 
     public function toggleActivo(int $id)
     {
-        $this->authorize('productos.gestionar');
+        $this->authorize('productos.editar');
 
         $producto = Producto::findOrFail($id);
         $producto->update(['activo' => ! $producto->activo]);

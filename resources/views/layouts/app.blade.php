@@ -120,13 +120,6 @@
                 <div class="h-px w-full bg-white/10 rounded-full"></div>
             </div>
 
-            <a href="{{ route('empresa') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('empresa') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('empresa') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('empresa') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">business</span>
-                </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('empresa') ? 'font-bold' : 'font-medium' }}">Empresa</span>
-            </a>
-
             @php
                 $isConfigActive = request()->routeIs('configuracion.*') || request()->routeIs('usuarios.*') || request()->routeIs('roles.*') || request()->routeIs('seguridad.*');
             @endphp
