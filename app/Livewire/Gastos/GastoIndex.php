@@ -31,7 +31,7 @@ class GastoIndex extends Component
                 });
             })
             ->recientes()
-            ->paginate(15);
+            ->paginate(config('paginacion.por_pagina'));
 
         return view('livewire.gastos.gasto-index', [
             'gastos' => $gastos,

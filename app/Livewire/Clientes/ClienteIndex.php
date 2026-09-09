@@ -50,7 +50,7 @@ class ClienteIndex extends Component
                 $query->where('activo', $this->filtroEstado === 'Activo');
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(config('paginacion.por_pagina'));
 
         return view('livewire.clientes.cliente-index', [
             'clientes' => $clientes,

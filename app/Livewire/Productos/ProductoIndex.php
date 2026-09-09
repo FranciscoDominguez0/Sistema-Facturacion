@@ -49,7 +49,7 @@ class ProductoIndex extends Component
                 $query->where('tipo', strtolower($this->filtroTipo));
             })
             ->orderBy('id', 'desc')
-            ->paginate(10);
+            ->paginate(config('paginacion.por_pagina'));
 
         return view('livewire.productos.producto-index', [
             'productos' => $productos,

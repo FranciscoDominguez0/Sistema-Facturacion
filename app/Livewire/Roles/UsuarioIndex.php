@@ -137,7 +137,7 @@ class UsuarioIndex extends Component
     #[Layout('layouts.app')]
     public function render()
     {
-        $usuarios = $this->consultaUsuarios()->latest()->paginate(10);
+        $usuarios = $this->consultaUsuarios()->latest()->paginate(config('paginacion.por_pagina'));
         $roles = Role::all();
 
         return view('livewire.roles.usuario-index', [

@@ -7,13 +7,7 @@
 
     <title>{{ config('app.name', 'VigiFact') }}</title>
 
-    <!-- Preload de fuentes para evitar FOUT en hard reload -->
-    <link rel="preload" href="/fonts/figtree/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/figtree/figtree-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/figtree/figtree-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/material-symbols/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
-
-    <!-- Fonts autoalojadas en /fonts (figtree y material symbols) -->
+    <!-- Fonts autoalojadas en /fonts (figtree y material symbols): las descarga el CSS -->
 
     <style>
         .material-symbols-outlined {
@@ -64,14 +58,24 @@
         });
     </script>
 </head>
-<body class="font-sans antialiased bg-slate-50 text-slate-900 h-screen flex overflow-hidden" x-data="{ sidebarOpen: false }">
-
-    <!-- Mobile sidebar backdrop -->
-    <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/50 lg:hidden" @click="sidebarOpen = false"></div>
+<body class="font-sans antialiased bg-slate-50 text-slate-900 h-screen flex overflow-hidden">
 
     @persist('sidebar')
-    <!-- SideNavBar -->
-    <aside x-data="{ currentPath: window.location.pathname }" x-on:livewire:navigated.document="currentPath = window.location.pathname" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
+    <!-- SideNavBar: el estado Alpine vive en este contenedor persistido para que
+         no se pierda al navegar (SPA) ni dependa de elementos que se recrean -->
+    <div
+        x-data="{ abierto: false, currentPath: window.location.pathname }"
+        x-on:livewire:navigated.document="currentPath = window.location.pathname; abierto = false"
+        x-on:abrir-sidebar.window="abierto = true"
+        class="flex-shrink-0"
+    >
+        <!-- Mobile sidebar backdrop: hermano del aside para que no tape sus enlaces -->
+        <div x-show="abierto" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/50 lg:hidden" style="display: none;" @click="abierto = false"></div>
+
+        <aside
+            :class="abierto ? 'translate-x-0' : '-translate-x-full'"
+            class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300"
+        >
         <!-- Header (Logo) -->
         <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-3">
             <div class="h-10 w-10 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-sm">
@@ -84,54 +88,31 @@
 
         <!-- Navigation Menu -->
         <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-hide">
-            
-            <a href="{{ route('dashboard') }}" @click="currentPath = '/dashboard'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath === '/dashboard' ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath === '/dashboard' ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
-                    <span class="material-symbols-outlined text-[20px]" :style="currentPath === '/dashboard' ? 'font-variation-settings: \'FILL\' 1;' : ''">home</span>
-                </div>
-                <span class="text-sm tracking-wide" :class="currentPath === '/dashboard' ? 'font-bold' : 'font-medium'">Inicio</span>
-            </a>
+            <x-sidebar-link href="{{ route('dashboard') }}" icono="home" :secciones="['/dashboard']">Inicio</x-sidebar-link>
 
-            <a href="{{ route('clientes') }}" @click="currentPath = '/clientes'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/clientes') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/clientes') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
-                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/clientes') ? 'font-variation-settings: \'FILL\' 1;' : ''">group</span>
-                </div>
-                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/clientes') ? 'font-bold' : 'font-medium'">Clientes</span>
-            </a>
-            
-            <a href="{{ route('productos.index') }}" @click="currentPath = '/productos'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/productos') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/productos') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
-                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/productos') ? 'font-variation-settings: \'FILL\' 1;' : ''">inventory_2</span>
-                </div>
-                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/productos') ? 'font-bold' : 'font-medium'">Productos</span>
-            </a>
-            
-            <a href="{{ route('facturas') }}" @click="currentPath = '/facturas'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/facturas') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/facturas') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
-                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/facturas') ? 'font-variation-settings: \'FILL\' 1;' : ''">receipt_long</span>
-                </div>
-                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/facturas') ? 'font-bold' : 'font-medium'">Facturas</span>
-            </a>
+            @canany(['clientes.ver', 'clientes.crear', 'clientes.editar', 'clientes.eliminar'])
+                <x-sidebar-link href="{{ route('clientes') }}" icono="group" :secciones="['/clientes']">Clientes</x-sidebar-link>
+            @endcanany
 
+            @canany(['productos.ver', 'productos.crear', 'productos.editar', 'productos.eliminar'])
+                <x-sidebar-link href="{{ route('productos.index') }}" icono="inventory_2" :secciones="['/productos']">Productos</x-sidebar-link>
+            @endcanany
 
-            <a href="{{ route('gastos') }}" @click="currentPath = '/gastos'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/gastos') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/gastos') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
-                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/gastos') ? 'font-variation-settings: \'FILL\' 1;' : ''">receipt</span>
+            @canany(['facturas.ver', 'facturas.crear', 'facturas.editar', 'facturas.eliminar'])
+                <x-sidebar-link href="{{ route('facturas') }}" icono="receipt_long" :secciones="['/facturas']">Facturas</x-sidebar-link>
+            @endcanany
+
+            @canany(['gastos.ver', 'gastos.crear', 'gastos.editar', 'gastos.eliminar'])
+                <x-sidebar-link href="{{ route('gastos') }}" icono="receipt" :secciones="['/gastos']">Gastos</x-sidebar-link>
+            @endcanany
+
+            @canany(['empresa.gestionar', 'usuarios.ver'])
+                <div class="pt-4 pb-2 px-2">
+                    <div class="h-px w-full bg-white/10 rounded-full"></div>
                 </div>
-                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/gastos') ? 'font-bold' : 'font-medium'">Gastos</span>
-            </a>
 
-            <div class="pt-4 pb-2 px-2">
-                <div class="h-px w-full bg-white/10 rounded-full"></div>
-            </div>
-
-            <a href="{{ route('settings.empresa') }}" @click="currentPath = '/settings'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
-                    <span class="material-symbols-outlined text-[20px]" :style="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'font-variation-settings: \'FILL\' 1;' : ''">settings</span>
-                </div>
-                <span class="text-sm tracking-wide" :class="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'font-bold' : 'font-medium'">Configuración</span>
-            </a>
-
+                <x-sidebar-link href="{{ route('settings.empresa') }}" icono="settings" :secciones="['/settings', '/usuarios', '/roles']">Configuración</x-sidebar-link>
+            @endcanany
         </nav>
 
         <!-- Footer Actions -->
@@ -147,6 +128,7 @@
             </form>
         </div>
     </aside>
+    </div>
     @endpersist
 
     <!-- Main Content Area Wrapper -->
@@ -155,7 +137,7 @@
         <!-- TopNavBar -->
         <header class="bg-white w-full h-16 border-b border-slate-200 flex justify-between items-center px-4 md:px-8 flex-shrink-0 z-10">
             <!-- Left: Menu Icon for collapse -->
-            <button @click="sidebarOpen = true" class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full lg:hidden focus:outline-none">
+            <button @click="$dispatch('abrir-sidebar')" class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full lg:hidden focus:outline-none">
                 <span class="material-symbols-outlined">menu</span>
             </button>
             <div class="flex-1 flex items-center ml-4 lg:ml-0 overflow-x-auto scrollbar-hide">

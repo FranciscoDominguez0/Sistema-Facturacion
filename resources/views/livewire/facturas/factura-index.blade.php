@@ -108,10 +108,7 @@
                 </tbody>
             </table>
         </div>
-        @if($facturas->hasPages())
-            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50">
-                {{ $facturas->links() }}
-            </div>
-        @endif
+        <!-- Paginación -->
+        <x-paginacion :paginador="$facturas" />
     </div>
 </div>

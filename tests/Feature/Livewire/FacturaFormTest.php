@@ -69,10 +69,10 @@ class FacturaFormTest extends TestCase
     // =====================================================================
 
     /**
-     * Buscar cliente por nombre filtra correctamente los resultados del
-     * autocompletado.
+     * El select de clientes recibe todos los clientes activos como opciones;
+     * el filtrado por nombre ocurre en el cliente dentro del componente Alpine.
      */
-    public function test_la_busqueda_de_cliente_filtra_por_nombre(): void
+    public function test_el_select_de_clientes_incluye_a_todos_los_clientes_activos(): void
     {
         Cliente::factory()->create(['nombre' => 'María Gómez']);
         Cliente::factory()->create(['nombre' => 'Carlos Pérez']);
@@ -80,9 +80,11 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->set('searchCliente', 'María')
-            ->assertSee('María Gómez')
-            ->assertDontSee('Carlos Pérez');
+            ->assertViewHas('clientes', function (array $clientes): bool {
+                return count($clientes) === 2
+                    && $clientes[0]['nombre'] === 'María Gómez'
+                    && $clientes[1]['nombre'] === 'Carlos Pérez';
+            });
     }
 
     /**
@@ -103,7 +105,7 @@ class FacturaFormTest extends TestCase
 
         // El cliente queda seleccionado automáticamente en el formulario
         $this->assertSame($cliente->id, $componente->get('form.cliente_id'));
-        $this->assertSame('Cliente Express', $componente->get('cliente_seleccionado_nombre'));
+        $this->assertSame($cliente->id, $componente->get('cliente_id'));
 
         $this->assertDatabaseHas('clientes', [
             'id' => $cliente->id,
@@ -199,7 +201,7 @@ class FacturaFormTest extends TestCase
 
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->call('seleccionarProducto', 0, $producto->id)
+            ->set('form.items.0.producto_id', $producto->id)
             ->assertSet('form.items.0.producto_id', $producto->id)
             ->assertSet('form.items.0.descripcion', '')
             ->assertSet('form.items.0.precio_unitario', '150.50');
@@ -207,7 +209,7 @@ class FacturaFormTest extends TestCase
         // La descripción se puede escribir sin problema
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
-            ->call('seleccionarProducto', 0, $producto->id)
+            ->set('form.items.0.producto_id', $producto->id)
             ->set('form.items.0.descripcion', 'Laptop Pro 16GB RAM')
             ->assertSet('form.items.0.descripcion', 'Laptop Pro 16GB RAM');
     }
@@ -228,7 +230,7 @@ class FacturaFormTest extends TestCase
             ->test(FacturaForm::class)
             ->set('form.cliente_id', $cliente->id)
             ->set('form.vendedor_id', $vendedor->id)
-            ->call('seleccionarProducto', 0, $producto->id)
+            ->set('form.items.0.producto_id', $producto->id)
             ->set('form.items.0.cantidad', 1)
             ->set('form.items.0.precio_unitario', 100)
             ->call('save')

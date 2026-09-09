@@ -3,6 +3,9 @@
 
 let graficos = [];
 let intentosSinApexCharts = 0;
+let generacion = 0;
+const reintentosPorContenedor = new Map();
+const MAX_REINTENTOS_POR_CONTENEDOR = 10;
 
 const opcionesSparkline = {
     chart: {
@@ -10,6 +13,9 @@ const opcionesSparkline = {
         height: 64,
         sparkline: { enabled: true },
         animations: { enabled: false },
+        // Evita que ApexCharts se redibuje solo con el ResizeObserver del padre:
+        // cada cambio de layout dispara update() y puede medir ancho 0 (NaN).
+        redrawOnParentResize: false,
     },
     stroke: { curve: 'smooth', width: 2 },
     fill: {
@@ -31,6 +37,7 @@ const opcionesPrincipal = {
         fontFamily: 'Inter, sans-serif',
         toolbar: { show: false },
         zoom: { enabled: false },
+        redrawOnParentResize: false,
     },
     stroke: { curve: 'smooth', width: [3, 2], dashArray: [0, 5] },
     fill: {
@@ -82,6 +89,11 @@ export function iniciar(datos) {
     graficos.forEach((grafico) => grafico.destroy());
     graficos = [];
 
+    // Marca esta pasada de dibujado: los reintentos de pasadas anteriores
+    // quedan obsoletos y no deben crear gráficas duplicadas.
+    generacion++;
+    const generacionActual = generacion;
+
     const sparklines = [
         ['#sparkVentas', datos.sparklineVentas, '#10B981'],
         ['#sparkFacturas', datos.sparklineFacturas, '#3B82F6'],
@@ -94,7 +106,7 @@ export function iniciar(datos) {
             ...opcionesSparkline,
             series: [{ data: serie }],
             colors: [color],
-        });
+        }, generacionActual);
     });
 
     crearGrafico('#chart', {
@@ -104,14 +116,36 @@ export function iniciar(datos) {
             { name: 'Facturas Emitidas', type: 'line', data: datos.chartData.volumen },
         ],
         labels: datos.chartData.meses,
-    });
+    }, generacionActual);
 }
 
-function crearGrafico(selector, opciones) {
+function crearGrafico(selector, opciones, generacionActual) {
     const elemento = document.querySelector(selector);
     if (!elemento) {
         return;
     }
+
+    // Si el contenedor aún no tiene ancho (layout en progreso o pestaña oculta),
+    // esperar a que lo tenga: ApexCharts dibuja con ancho 0 (NaN) e inunda la
+    // consola de errores. Se abandona tras varios intentos para no quedarse
+    // reintentando con un contenedor que nunca será visible.
+    if (elemento.clientWidth === 0) {
+        const intento = (reintentosPorContenedor.get(selector) ?? 0) + 1;
+        if (intento > MAX_REINTENTOS_POR_CONTENEDOR) {
+            reintentosPorContenedor.delete(selector);
+            return;
+        }
+        reintentosPorContenedor.set(selector, intento);
+        setTimeout(() => {
+            // Solo se dibuja si esta pasada sigue siendo la última: los reintentos
+            // de un filtrado anterior no deben crear gráficas duplicadas.
+            if (generacion === generacionActual) {
+                crearGrafico(selector, opciones, generacionActual);
+            }
+        }, 200);
+        return;
+    }
+    reintentosPorContenedor.delete(selector);
 
     // render() devuelve una Promise: se guarda la instancia para poder destruirla.
     const grafico = new ApexCharts(elemento, opciones);

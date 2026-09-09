@@ -422,10 +422,16 @@
 
     iniciarGraficas();
 
-    // Redibuja tras cada actualización de Livewire (filtros, etc.)
-    Livewire.hook('commit', ({ succeed }) => {
-        succeed(() => iniciarGraficas());
-    });
+    // Redibuja tras cada actualización de Livewire (filtros, etc.). El hook se
+    // registra una sola vez: este script se re-ejecuta en cada navegación al
+    // dashboard y, si se acumularan, cada commit dibujaría las gráficas varias
+    // veces al mismo tiempo (crea/destruye en paralelo → mediciones con NaN).
+    if (!window.__dashboardHookRegistrado) {
+        window.__dashboardHookRegistrado = true;
+        Livewire.hook('commit', ({ succeed }) => {
+            succeed(() => iniciarGraficas());
+        });
+    }
 </script>
 @endscript
 </div>

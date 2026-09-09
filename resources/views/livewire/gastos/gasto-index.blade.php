@@ -73,11 +73,7 @@
             </table>
         </div>
 
-        <!-- Pagination Footer -->
-        @if($gastos->hasPages())
-        <div class="bg-slate-50 px-6 py-3 border-t border-slate-200">
-            {{ $gastos->links() }}
-        </div>
-        @endif
+        <!-- Paginación -->
+        <x-paginacion :paginador="$gastos" />
     </div>
 </div>

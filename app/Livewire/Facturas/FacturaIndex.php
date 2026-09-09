@@ -32,7 +32,7 @@ class FacturaIndex extends Component
             ->buscar($this->search)
             ->when($this->filtroEstado !== 'Todos', fn ($query) => $query->where('estado', $this->filtroEstado))
             ->orderBy('id', 'desc')
-            ->paginate(15);
+            ->paginate(config('paginacion.por_pagina'));
 
         return view('livewire.facturas.factura-index', [
             'facturas' => $facturas,

@@ -109,25 +109,8 @@
                     </tbody>
                 </table>
                 
-                <!-- Pie de Tabla y Paginación -->
-                <div class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-sm text-slate-600 bg-white">
-                    <div>Resultados totales: {{ $usuarios->total() }}</div>
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1 border border-slate-200 rounded-md p-1">
-                            <button class="p-1 hover:bg-slate-50 text-slate-400" disabled><span class="material-symbols-outlined text-[16px]">keyboard_double_arrow_left</span></button>
-                            <button class="p-1 hover:bg-slate-50 text-slate-400" disabled><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
-                            <span class="px-2 bg-slate-50 rounded">{{ $usuarios->currentPage() }}</span> <span class="px-1">/ {{ $usuarios->lastPage() }}</span>
-                            <button class="p-1 hover:bg-slate-50 text-slate-600"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
-                            <button class="p-1 hover:bg-slate-50 text-slate-600"><span class="material-symbols-outlined text-[16px]">keyboard_double_arrow_right</span></button>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span>filas:</span>
-                        <select class="border border-slate-200 rounded-md text-sm py-1 pl-2 pr-6">
-                            <option>10</option>
-                        </select>
-                    </div>
-                </div>
+                <!-- Paginación -->
+                <x-paginacion :paginador="$usuarios" />
             </div>
         </div>
     @else

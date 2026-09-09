@@ -133,11 +133,7 @@
             </table>
         </div>
         
-        <!-- Pagination Footer -->
-        @if($productos->hasPages())
-        <div class="bg-slate-50 px-6 py-3 border-t border-slate-200">
-            {{ $productos->links() }}
-        </div>
-        @endif
+        <!-- Paginación -->
+        <x-paginacion :paginador="$productos" />
     </div>
 </div>
