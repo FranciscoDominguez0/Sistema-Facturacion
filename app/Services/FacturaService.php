@@ -102,6 +102,9 @@ class FacturaService
 
             $this->guardarLineas($factura, $totales['items_actualizados']);
 
+            // Asegura que el id y los timestamps generados por la BD estén cargados
+            $factura->refresh();
+
             return $factura;
         });
     }

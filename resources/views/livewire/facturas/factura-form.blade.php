@@ -1,4 +1,4 @@
-<div class="w-full space-y-6 pb-12" x-data="{ productosCatalogo: {{ Js::from($productos->map(fn($p) => ['id' => $p->id, 'nombre' => $p->nombre])->values()) }} }">
+<div class="w-full space-y-6 pb-12">
     @section('breadcrumbs')
         <x-breadcrumbs :links="[
             ['title' => 'Facturas', 'url' => route('facturas')],
@@ -20,58 +20,15 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <label class="block text-sm font-semibold text-slate-700 mb-3">Cliente <span class="text-red-500">*</span></label>
 
-                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                        @if($cliente_id)
-                            <!-- Seleccionado -->
-                            <div class="flex items-center justify-between bg-slate-50 border border-slate-200 px-4 py-3 rounded-lg">
-                                <div class="flex items-center overflow-hidden">
-                                    <span class="material-symbols-outlined text-[18px] text-slate-400 mr-2 flex-shrink-0">person</span>
-                                    <span class="text-sm font-medium text-slate-800 truncate">{{ $cliente_seleccionado_nombre }}</span>
-                                </div>
-                                <button wire:click="deseleccionarCliente" type="button" class="text-slate-400 hover:text-red-500 transition-colors ml-2 flex-shrink-0">
-                                    <span class="material-symbols-outlined text-[18px]">close</span>
-                                </button>
-                            </div>
-                        @else
-                            <!-- Trigger -->
-                            <button type="button" @click="open = !open" class="w-full flex items-center justify-between bg-white border border-slate-200 hover:border-slate-300 rounded-lg px-4 py-3 text-sm text-slate-400 focus:outline-none focus:ring-1 focus:ring-sovereign-blue focus:border-sovereign-blue transition-colors">
-                                <span x-show="!open">Seleccione un cliente...</span>
-                                <span x-show="open" class="text-slate-700">Buscar cliente...</span>
-                                <span class="material-symbols-outlined text-slate-400 text-[20px] transition-transform duration-200" :class="open ? 'rotate-180' : ''">expand_more</span>
-                            </button>
-
-                            <!-- Dropdown -->
-                            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="absolute z-30 w-full mt-1 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden" style="display:none">
-                                <!-- Search inside dropdown -->
-                                <div class="p-2 border-b border-slate-100">
-                                    <input type="text" wire:model.live.debounce.300ms="searchCliente" class="w-full bg-slate-50 border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none placeholder-slate-400" placeholder="Buscar..." @click.stop x-ref="clienteInput" x-init="$watch('open', v => v && $nextTick(() => $refs.clienteInput.focus()))">
-                                </div>
-                                <!-- Results -->
-                                <ul class="max-h-48 overflow-y-auto py-1">
-                                    @if(count($clientes_sugeridos) > 0)
-                                        @foreach($clientes_sugeridos as $sugerencia)
-                                            <li>
-                                                <button type="button" wire:click="seleccionarCliente({{ $sugerencia['id'] }}, '{{ addslashes($sugerencia['nombre']) }}'); open = false" @click="open = false" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                                    {{ $sugerencia['nombre'] }}
-                                                </button>
-                                            </li>
-                                        @endforeach
-                                    @elseif(!empty($searchCliente))
-                                        <li class="px-4 py-3 text-sm text-slate-400">Sin resultados.</li>
-                                    @else
-                                        <li class="px-4 py-3 text-sm text-slate-400 italic">Escribe para buscar...</li>
-                                    @endif
-                                </ul>
-                                <!-- Crear nuevo -->
-                                <div class="border-t border-slate-100">
-                                    <button type="button" @click="$wire.set('mostrarModalCliente', true); open = false" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-sovereign-blue hover:bg-blue-50 transition-colors">
-                                        <span class="material-symbols-outlined text-[18px]">add</span>
-                                        Nuevo Cliente
-                                    </button>
-                                </div>
-                            </div>
-                        @endif
-                        <x-input-error :messages="$errors->get('cliente_id')" class="mt-2" />
+                    <div>
+                        <x-select-searchable 
+                            wire:model="cliente_id" 
+                            :options="$clientes" 
+                            placeholder="Seleccione un cliente..." 
+                            action-text="Nuevo Cliente" 
+                            action-click="$wire.set('mostrarModalCliente', true)" 
+                        />
+                        <x-input-error :messages="$errors->get('cliente_id')" class="mt-2 text-xs" />
                     </div>
                 </div>
 
@@ -101,54 +58,13 @@
                             <label class="text-sm font-semibold text-slate-600 leading-tight">Vendedor <span class="text-red-500">*</span></label>
                             <div class="w-48 sm:w-56 lg:w-64">
                                 @if(Gate::allows('facturas.vendedor.seleccionar'))
-                                    @if($form->vendedor_id)
-                                        <!-- Seleccionado -->
-                                        <div class="flex items-center justify-between bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-lg">
-                                            <div class="flex items-center overflow-hidden">
-                                                <span class="material-symbols-outlined text-[16px] text-slate-400 mr-2 flex-shrink-0">person</span>
-                                                <span class="text-sm font-medium text-slate-800 truncate">{{ $vendedor_seleccionado_nombre }}</span>
-                                            </div>
-                                            <button wire:click="deseleccionarVendedor" type="button" class="text-slate-400 hover:text-red-500 transition-colors ml-2 flex-shrink-0">
-                                                <span class="material-symbols-outlined text-[16px]">close</span>
-                                            </button>
-                                        </div>
-                                    @else
-                                        <!-- Dropdown vendedor -->
-                                        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                                            <button type="button" @click="open = !open" class="w-full flex items-center justify-between bg-white border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-400 focus:outline-none focus:ring-1 focus:ring-sovereign-blue focus:border-sovereign-blue transition-colors">
-                                                <span x-show="!open">Seleccione...</span>
-                                                <span x-show="open" class="text-slate-700">Buscar...</span>
-                                                <span class="material-symbols-outlined text-slate-400 text-[18px] transition-transform duration-200" :class="open ? 'rotate-180' : ''">expand_more</span>
-                                            </button>
-
-                                            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1" class="absolute z-30 w-full mt-1 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden" style="display:none">
-                                                <div class="p-2 border-b border-slate-100">
-                                                    <input type="text" wire:model.live.debounce.300ms="searchVendedor" class="w-full bg-slate-50 border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none placeholder-slate-400" placeholder="Buscar..." @click.stop x-ref="vendedorInput" x-init="$watch('open', v => v && $nextTick(() => $refs.vendedorInput.focus()))">
-                                                </div>
-                                                <ul class="max-h-40 overflow-y-auto py-1">
-                                                    @if(count($vendedores_sugeridos) > 0)
-                                                        @foreach($vendedores_sugeridos as $sugerencia)
-                                                            <li>
-                                                                <button type="button" wire:click="seleccionarVendedor({{ $sugerencia['id'] }}, '{{ addslashes($sugerencia['name']) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                                                    {{ $sugerencia['name'] }}
-                                                                </button>
-                                                            </li>
-                                                        @endforeach
-                                                    @elseif(!empty($searchVendedor))
-                                                        <li class="px-3 py-2 text-sm text-slate-400">Sin resultados.</li>
-                                                    @else
-                                                        <li class="px-3 py-2 text-sm text-slate-400 italic">Escribe para buscar...</li>
-                                                    @endif
-                                                </ul>
-                                                <div class="border-t border-slate-100">
-                                                    <button type="button" @click="$wire.set('mostrarModalVendedor', true); open = false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-sovereign-blue hover:bg-blue-50 transition-colors">
-                                                        <span class="material-symbols-outlined text-[16px]">add</span>
-                                                        Nuevo Vendedor
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
+                                    <x-select-searchable 
+                                        wire:model="form.vendedor_id" 
+                                        :options="$vendedores" 
+                                        placeholder="Seleccione vendedor..." 
+                                        action-text="Nuevo Vendedor" 
+                                        action-click="$wire.set('mostrarModalVendedor', true)" 
+                                    />
                                     <x-input-error :messages="$errors->get('form.vendedor_id')" class="mt-1 text-xs" />
                                 @else
                                     <div class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-500 cursor-not-allowed truncate">
@@ -176,8 +92,8 @@
                 </div>
             </div>
             <!-- Box Líneas -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
                     <h3 class="text-lg font-medium text-slate-800 flex items-center">
                         <span class="material-symbols-outlined mr-2 text-slate-400">list_alt</span>
                         Líneas de Venta
@@ -201,58 +117,13 @@
                                 <td class="px-2 py-3 align-top">
                                     <div class="space-y-3">
                                         <!-- Selector de Producto (Autocomplete) -->
-                                        @if($item['producto_id'])
-                                            <div class="flex items-center justify-between w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm">
-                                                <span class="truncate font-medium text-slate-700">{{ collect($productos)->firstWhere('id', $item['producto_id'])->nombre ?? 'Producto seleccionado' }}</span>
-                                                <button type="button" wire:click="seleccionarProducto({{ $index }}, null)" class="text-slate-400 hover:text-red-500 transition-colors p-0.5 rounded hover:bg-slate-100" title="Cambiar producto">
-                                                    <span class="material-symbols-outlined text-[16px]">close</span>
-                                                </button>
-                                            </div>
-                                        @else
-                                            <div x-data="{
-                                                open: false,
-                                                search: '',
-                                                get filtered() {
-                                                    if (this.search === '') return productosCatalogo;
-                                                    return productosCatalogo.filter(p => p.nombre.toLowerCase().includes(this.search.toLowerCase()));
-                                                }
-                                            }" @click.away="open = false" class="relative">
-                                                <div class="relative">
-                                                    <input type="text" 
-                                                           x-model="search" 
-                                                           @focus="open = true" 
-                                                           placeholder="Buscar producto..."
-                                                           class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 pr-8 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors"
-                                                           autocomplete="off">
-                                                    <button type="button" x-show="search.length > 0" @click="search = ''" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors">
-                                                        <span class="material-symbols-outlined text-[16px]">close</span>
-                                                    </button>
-                                                </div>
-
-                                                <div x-show="open" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg">
-                                                    <ul class="max-h-48 overflow-auto py-1">
-                                                        <template x-for="prod in filtered" :key="prod.id">
-                                                            <li>
-                                                                <button type="button" @click="$wire.seleccionarProducto({{ $index }}, prod.id); open = false;"
-                                                                        class="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                                                    <span x-text="prod.nombre"></span>
-                                                                </button>
-                                                            </li>
-                                                        </template>
-                                                        <template x-if="filtered.length === 0">
-                                                            <li class="px-3 py-2 text-sm text-slate-500 text-center">No hay coincidencias</li>
-                                                        </template>
-                                                        <li class="border-t border-slate-100 mt-1">
-                                                            <button type="button" @click="$wire.seleccionarProducto({{ $index }}, 'nuevo_producto'); open = false;"
-                                                                    class="w-full text-left px-3 py-2 text-sm font-medium text-sovereign-blue hover:bg-slate-50 flex items-center transition-colors">
-                                                                <span class="material-symbols-outlined text-[18px] mr-1.5">add</span>
-                                                                Nuevo Producto
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        @endif
+                                        <x-select-searchable 
+                                            wire:model="form.items.{{ $index }}.producto_id" 
+                                            :options="$productos" 
+                                            placeholder="Buscar producto..." 
+                                            action-text="Nuevo Producto" 
+                                            action-click="$wire.set('linea_producto_actual', {{ $index }}); $wire.set('mostrarModalProducto', true);" 
+                                        />
                                         
                                         <!-- Descripción editable (aparece debajo) -->
                                         <input type="text" wire:model.live.debounce.500ms="form.items.{{ $index }}.descripcion" placeholder="Descripción detallada..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors mt-2">
@@ -292,7 +163,7 @@
                     <x-input-error :messages="$errors->get('items')" class="mt-2 px-2 pb-2" />
                 </div>
                 
-                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex justify-center">
+                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex justify-center rounded-b-xl">
                     <button type="button" wire:click="agregarLinea" class="text-sm font-medium text-sovereign-blue hover:text-slate-800 flex items-center transition-colors px-4 py-2 rounded-lg hover:bg-slate-200/50">
                         <span class="material-symbols-outlined text-[18px] mr-1">add</span>
                         Añadir Línea

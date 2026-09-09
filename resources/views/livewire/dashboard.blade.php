@@ -40,63 +40,59 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         <!-- KPI 1: Ventas Totales -->
-        <div class="bg-white rounded-card p-5 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between group hover:border-emerald-200 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold tracking-wider text-slate-500 uppercase">Ventas Totales</span>
-              <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                @if($ventasCrecimiento >= 0)<span class="material-symbols-outlined text-xs">trending_up</span> +{{ number_format($ventasCrecimiento, 1) }}%@else<span class="material-symbols-outlined text-xs">trending_down</span> {{ number_format($ventasCrecimiento, 1) }}%@endif
-              </span>
+        <div class="bg-white rounded-card p-4 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all group">
+          <div class="flex justify-between items-start relative z-10">
+            <div>
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ventas Totales</span>
+              <div class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">${{ number_format($ventasTotales, 2) }}</div>
             </div>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 tracking-tight">${{ number_format($ventasTotales, 2) }}</div>
-            
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $ventasCrecimiento >= 0 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200' }}">
+              {{ $ventasCrecimiento >= 0 ? '+' : '' }}{{ number_format($ventasCrecimiento, 1) }}%
+            </span>
           </div>
-          <div id="sparkVentas" class="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity" wire:ignore></div>
+          <div id="sparkVentas" class="mt-2 h-14 relative z-0 w-full -mx-1" wire:ignore></div>
         </div>
 
         <!-- KPI 2: Total de Facturas -->
-        <div class="bg-white rounded-card p-5 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between group hover:border-emerald-200 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold tracking-wider text-slate-500 uppercase">Total de Facturas</span>
-              <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                @if($facturasCrecimiento >= 0)<span class="material-symbols-outlined text-xs">trending_up</span> +{{ number_format($facturasCrecimiento, 1) }}%@else<span class="material-symbols-outlined text-xs">trending_down</span> {{ number_format($facturasCrecimiento, 1) }}%@endif
-              </span>
+        <div class="bg-white rounded-card p-4 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all group">
+          <div class="flex justify-between items-start relative z-10">
+            <div>
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total de Facturas</span>
+              <div class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{{ $totalFacturas }}</div>
             </div>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 tracking-tight">{{ $totalFacturas }}</div>
-            
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $facturasCrecimiento >= 0 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200' }}">
+              {{ $facturasCrecimiento >= 0 ? '+' : '' }}{{ number_format($facturasCrecimiento, 1) }}%
+            </span>
           </div>
-          <div id="sparkFacturas" class="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity" wire:ignore></div>
+          <div id="sparkFacturas" class="mt-2 h-14 relative z-0 w-full -mx-1" wire:ignore></div>
         </div>
 
         <!-- KPI 3: Nuevos Clientes -->
-        <div class="bg-white rounded-card p-5 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between group hover:border-emerald-200 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold tracking-wider text-slate-500 uppercase">Nuevos Clientes</span>
-              <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                @if($clientesCrecimiento >= 0)<span class="material-symbols-outlined text-xs">trending_up</span> +{{ number_format($clientesCrecimiento, 1) }}%@else<span class="material-symbols-outlined text-xs">trending_down</span> {{ number_format($clientesCrecimiento, 1) }}%@endif
-              </span>
+        <div class="bg-white rounded-card p-4 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all group">
+          <div class="flex justify-between items-start relative z-10">
+            <div>
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Nuevos Clientes</span>
+              <div class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">{{ $nuevosClientes }}</div>
             </div>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 tracking-tight">{{ $nuevosClientes }}</div>
-            
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $clientesCrecimiento >= 0 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200' }}">
+              {{ $clientesCrecimiento >= 0 ? '+' : '' }}{{ number_format($clientesCrecimiento, 1) }}%
+            </span>
           </div>
-          <div id="sparkClientes" class="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity" wire:ignore></div>
+          <div id="sparkClientes" class="mt-2 h-14 relative z-0 w-full -mx-1" wire:ignore></div>
         </div>
 
         <!-- KPI 4: Gastos del Periodo -->
-        <div class="bg-white rounded-card p-5 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between group hover:border-rose-200 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold tracking-wider text-slate-500 uppercase">Gastos del Periodo</span>
-              <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold {{ $gastosCrecimiento > 0 ? 'text-rose-600 bg-rose-50 border-rose-100' : 'text-emerald-600 bg-emerald-50 border-emerald-100' }} px-2 py-0.5 rounded-full border">
-                @if($gastosCrecimiento > 0)<span class="material-symbols-outlined text-xs">trending_up</span> +{{ number_format($gastosCrecimiento, 1) }}%@elseif($gastosCrecimiento < 0)<span class="material-symbols-outlined text-xs">trending_down</span> {{ number_format($gastosCrecimiento, 1) }}%@else<span class="material-symbols-outlined text-xs">trending_flat</span> 0%@endif
-              </span>
+        <div class="bg-white rounded-card p-4 border border-slate-200/80 shadow-subtle relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all group">
+          <div class="flex justify-between items-start relative z-10">
+            <div>
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Gastos del Periodo</span>
+              <div class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">${{ number_format($gastosTotales, 2) }}</div>
             </div>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 tracking-tight">${{ number_format($gastosTotales, 2) }}</div>
-            
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $gastosCrecimiento > 0 ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200' }}">
+              @if($gastosCrecimiento > 0)+{{ number_format($gastosCrecimiento, 1) }}%@elseif($gastosCrecimiento < 0){{ number_format($gastosCrecimiento, 1) }}%@else0%@endif
+            </span>
           </div>
-          <div id="sparkGastos" class="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity" wire:ignore></div>
+          <div id="sparkGastos" class="mt-2 h-14 relative z-0 w-full -mx-1" wire:ignore></div>
         </div>
 
       </div>

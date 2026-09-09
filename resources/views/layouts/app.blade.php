@@ -7,10 +7,13 @@
 
     <title>{{ config('app.name', 'VigiFact') }}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Preload de fuentes para evitar FOUT en hard reload -->
+    <link rel="preload" href="/fonts/figtree/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/figtree/figtree-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/figtree/figtree-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/material-symbols/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Fonts autoalojadas en /fonts (figtree y material symbols) -->
 
     <style>
         .material-symbols-outlined {
@@ -66,8 +69,9 @@
     <!-- Mobile sidebar backdrop -->
     <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/50 lg:hidden" @click="sidebarOpen = false"></div>
 
+    @persist('sidebar')
     <!-- SideNavBar -->
-    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
+    <aside x-data="{ currentPath: window.location.pathname }" x-on:livewire:navigated.document="currentPath = window.location.pathname" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
         <!-- Header (Logo) -->
         <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-3">
             <div class="h-10 w-10 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-sm">
@@ -81,54 +85,51 @@
         <!-- Navigation Menu -->
         <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-hide">
             
-            <a href="{{ route('dashboard') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('dashboard') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('dashboard') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('dashboard') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">home</span>
+            <a href="{{ route('dashboard') }}" @click="currentPath = '/dashboard'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath === '/dashboard' ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
+                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath === '/dashboard' ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
+                    <span class="material-symbols-outlined text-[20px]" :style="currentPath === '/dashboard' ? 'font-variation-settings: \'FILL\' 1;' : ''">home</span>
                 </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('dashboard') ? 'font-bold' : 'font-medium' }}">Inicio</span>
+                <span class="text-sm tracking-wide" :class="currentPath === '/dashboard' ? 'font-bold' : 'font-medium'">Inicio</span>
             </a>
 
-            <a href="{{ route('clientes') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('clientes*') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('clientes*') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('clientes*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">group</span>
+            <a href="{{ route('clientes') }}" @click="currentPath = '/clientes'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/clientes') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
+                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/clientes') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
+                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/clientes') ? 'font-variation-settings: \'FILL\' 1;' : ''">group</span>
                 </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('clientes*') ? 'font-bold' : 'font-medium' }}">Clientes</span>
+                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/clientes') ? 'font-bold' : 'font-medium'">Clientes</span>
             </a>
             
-            <a href="{{ route('productos.index') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('productos.*') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('productos.*') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('productos.*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">inventory_2</span>
+            <a href="{{ route('productos.index') }}" @click="currentPath = '/productos'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/productos') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
+                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/productos') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
+                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/productos') ? 'font-variation-settings: \'FILL\' 1;' : ''">inventory_2</span>
                 </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('productos.*') ? 'font-bold' : 'font-medium' }}">Productos</span>
+                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/productos') ? 'font-bold' : 'font-medium'">Productos</span>
             </a>
             
-            <a href="{{ route('facturas') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('facturas*') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('facturas*') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('facturas*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt_long</span>
+            <a href="{{ route('facturas') }}" @click="currentPath = '/facturas'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/facturas') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
+                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/facturas') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
+                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/facturas') ? 'font-variation-settings: \'FILL\' 1;' : ''">receipt_long</span>
                 </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('facturas*') ? 'font-bold' : 'font-medium' }}">Facturas</span>
+                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/facturas') ? 'font-bold' : 'font-medium'">Facturas</span>
             </a>
 
 
-            <a href="{{ route('gastos') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ request()->routeIs('gastos*') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ request()->routeIs('gastos*') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ request()->routeIs('gastos*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">receipt</span>
+            <a href="{{ route('gastos') }}" @click="currentPath = '/gastos'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="currentPath.startsWith('/gastos') ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
+                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="currentPath.startsWith('/gastos') ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
+                    <span class="material-symbols-outlined text-[20px]" :style="currentPath.startsWith('/gastos') ? 'font-variation-settings: \'FILL\' 1;' : ''">receipt</span>
                 </div>
-                <span class="text-sm tracking-wide {{ request()->routeIs('gastos*') ? 'font-bold' : 'font-medium' }}">Gastos</span>
+                <span class="text-sm tracking-wide" :class="currentPath.startsWith('/gastos') ? 'font-bold' : 'font-medium'">Gastos</span>
             </a>
 
             <div class="pt-4 pb-2 px-2">
                 <div class="h-px w-full bg-white/10 rounded-full"></div>
             </div>
 
-            @php
-                $isConfigActive = request()->routeIs('settings.*') || request()->routeIs('usuarios.*') || request()->routeIs('roles.*') || request()->routeIs('seguridad.*');
-            @endphp
-            <a href="{{ route('settings.empresa') }}" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all {{ $isConfigActive ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white' }}" wire:navigate>
-                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all {{ $isConfigActive ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white' }}">
-                    <span class="material-symbols-outlined text-[20px]" style="{{ $isConfigActive ? 'font-variation-settings: \'FILL\' 1;' : '' }}">settings</span>
+            <a href="{{ route('settings.empresa') }}" @click="currentPath = '/settings'" class="group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all" :class="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10' : 'text-white/70 hover:bg-white/10 hover:text-white'" wire:navigate>
+                <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all" :class="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'bg-white/20 text-white shadow-sm' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white'">
+                    <span class="material-symbols-outlined text-[20px]" :style="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'font-variation-settings: \'FILL\' 1;' : ''">settings</span>
                 </div>
-                <span class="text-sm tracking-wide {{ $isConfigActive ? 'font-bold' : 'font-medium' }}">Configuración</span>
+                <span class="text-sm tracking-wide" :class="(currentPath.startsWith('/settings') || currentPath.startsWith('/usuarios') || currentPath.startsWith('/roles') || currentPath.startsWith('/seguridad')) ? 'font-bold' : 'font-medium'">Configuración</span>
             </a>
 
         </nav>
@@ -146,6 +147,7 @@
             </form>
         </div>
     </aside>
+    @endpersist
 
     <!-- Main Content Area Wrapper -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">

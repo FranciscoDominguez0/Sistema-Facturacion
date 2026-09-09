@@ -28,7 +28,8 @@ class ClienteForm extends Component
             session()->flash('success', 'El registro ha sido creado exitosamente.');
         }
 
-        return redirect()->route('clientes');
+        // navigate: solo se actualiza el contenido, el sidebar no se recarga
+        return $this->redirectRoute('clientes', navigate: true);
     }
 
     #[Layout('layouts.app')]

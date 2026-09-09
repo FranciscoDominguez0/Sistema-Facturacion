@@ -58,19 +58,7 @@ class FacturaForm extends Component
 
     public $nuevo_vendedor_password = '';
 
-    // Para búsquedas cliente
-    public $searchCliente = '';
 
-    public $clientes_sugeridos = [];
-
-    public $cliente_seleccionado_nombre = '';
-
-    // Para búsquedas vendedor
-    public $searchVendedor = '';
-
-    public $vendedores_sugeridos = [];
-
-    public $vendedor_seleccionado_nombre = '';
 
     public $numero_factura_preview = '';
 
@@ -90,7 +78,6 @@ class FacturaForm extends Component
         // Autoseleccionar vendedor si no puede elegirlo libremente
         if (! Gate::allows('facturas.vendedor.seleccionar')) {
             $this->form->vendedor_id = Auth::id();
-            $this->vendedor_seleccionado_nombre = Auth::user()->name;
         }
 
         // Si viene un cliente_id por la URL
@@ -98,67 +85,17 @@ class FacturaForm extends Component
             $cliente = Cliente::find($this->cliente_id);
             if ($cliente) {
                 $this->form->cliente_id = $cliente->id;
-                $this->cliente_seleccionado_nombre = $cliente->nombre;
             } else {
                 $this->cliente_id = null;
             }
         }
     }
 
-    public function updatedSearchCliente($value)
-    {
-        if (strlen($value) >= 2) {
-            $this->clientes_sugeridos = Cliente::where('nombre', 'ilike', '%'.$value.'%')
-                ->take(5)
-                ->get()
-                ->toArray();
-        } else {
-            $this->clientes_sugeridos = [];
-        }
-    }
 
-    public function seleccionarCliente($id, $nombre)
-    {
-        $this->form->cliente_id = $id;
-        $this->cliente_id = $id;
-        $this->cliente_seleccionado_nombre = $nombre;
-        $this->searchCliente = '';
-        $this->clientes_sugeridos = [];
-    }
 
-    public function deseleccionarCliente()
-    {
-        $this->form->cliente_id = null;
-        $this->cliente_id = null;
-        $this->cliente_seleccionado_nombre = '';
-    }
 
-    public function updatedSearchVendedor($value)
-    {
-        if (strlen($value) >= 2) {
-            $this->vendedores_sugeridos = User::role('Vendedor')
-                ->where('name', 'ilike', '%'.$value.'%')
-                ->take(5)
-                ->get()
-                ->toArray();
-        } else {
-            $this->vendedores_sugeridos = [];
-        }
-    }
 
-    public function seleccionarVendedor($id, $nombre)
-    {
-        $this->form->vendedor_id = $id;
-        $this->vendedor_seleccionado_nombre = $nombre;
-        $this->searchVendedor = '';
-        $this->vendedores_sugeridos = [];
-    }
 
-    public function deseleccionarVendedor()
-    {
-        $this->form->vendedor_id = null;
-        $this->vendedor_seleccionado_nombre = '';
-    }
 
     public function guardarClienteExpress()
     {
@@ -179,7 +116,8 @@ class FacturaForm extends Component
             'activo' => true,
         ]);
 
-        $this->seleccionarCliente($cliente->id, $cliente->nombre);
+        $this->form->cliente_id = $cliente->id;
+        $this->cliente_id = $cliente->id;
         $this->mostrarModalCliente = false;
 
         $this->nuevo_cliente_nombre = '';
@@ -202,6 +140,25 @@ class FacturaForm extends Component
     public function updated($property, $value)
     {
         if (str_starts_with($property, 'form.items') || $property === 'form.descuento_porcentaje') {
+            if (str_ends_with($property, '.producto_id')) {
+                preg_match('/form\.items\.(\d+)\.producto_id/', $property, $matches);
+                if (isset($matches[1])) {
+                    $index = $matches[1];
+                    if ($value === 'nuevo_producto') {
+                        $this->form->items[$index]['producto_id'] = null;
+                        $this->linea_producto_actual = $index;
+                        $this->mostrarModalProducto = true;
+                    } elseif ($value) {
+                        $producto = Producto::find($value);
+                        if ($producto) {
+                            $this->form->items[$index]['precio_unitario'] = $producto->precio;
+                            $this->form->items[$index]['aplica_impuesto'] = $producto->aplica_impuesto;
+                        }
+                    } else {
+                        $this->form->items[$index]['precio_unitario'] = 0;
+                    }
+                }
+            }
             $this->form->recalcularTotales();
         }
 
@@ -211,28 +168,7 @@ class FacturaForm extends Component
         }
     }
 
-    public function seleccionarProducto($index, $productoId)
-    {
-        if ($productoId === 'nuevo_producto') {
-            $this->form->items[$index]['producto_id'] = null;
-            $this->linea_producto_actual = $index;
-            $this->mostrarModalProducto = true;
 
-            return;
-        }
-
-        if ($productoId) {
-            $producto = Producto::find($productoId);
-            if ($producto) {
-                $this->form->items[$index]['producto_id'] = $producto->id;
-                $this->form->items[$index]['precio_unitario'] = $producto->precio;
-                $this->form->items[$index]['aplica_impuesto'] = $producto->aplica_impuesto;
-            }
-        } else {
-            $this->form->items[$index]['producto_id'] = null;
-        }
-        $this->form->recalcularTotales();
-    }
 
     public function guardarProductoExpress()
     {
@@ -282,7 +218,7 @@ class FacturaForm extends Component
 
         $vendedor->assignRole('Vendedor');
 
-        $this->seleccionarVendedor($vendedor->id, $vendedor->name);
+        $this->form->vendedor_id = $vendedor->id;
         $this->mostrarModalVendedor = false;
 
         $this->nuevo_vendedor_nombre = '';
@@ -296,7 +232,8 @@ class FacturaForm extends Component
             $factura = $this->form->guardar();
             session()->flash('success', 'Factura creada exitosamente.');
 
-            return redirect()->route('facturas.show', $factura->id);
+            // navigate: solo se actualiza el contenido, el sidebar no se recarga
+            return $this->redirectRoute('facturas.show', $factura->id, navigate: true);
         } catch (ValidationException $e) {
             $this->dispatch('toast', message: 'Hay campos obligatorios vacíos o con errores. Por favor, revisa el formulario.', type: 'error');
             throw $e;
@@ -306,8 +243,9 @@ class FacturaForm extends Component
     public function render()
     {
         return view('livewire.facturas.factura-form', [
-            'vendedores' => Gate::allows('facturas.vendedor.seleccionar') ? User::role('Vendedor')->get() : collect(),
-            'productos' => Producto::where('activo', true)->get(),
+            'clientes' => Cliente::where('activo', true)->get(['id', 'nombre'])->toArray(),
+            'vendedores' => Gate::allows('facturas.vendedor.seleccionar') ? User::role('Vendedor')->get(['id', 'name as nombre'])->toArray() : [],
+            'productos' => Producto::where('activo', true)->get(['id', 'nombre', 'precio', 'aplica_impuesto'])->toArray(),
         ]);
     }
 }
