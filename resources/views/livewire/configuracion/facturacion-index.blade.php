@@ -1,4 +1,11 @@
-<div>
+@section('breadcrumbs')
+    <x-breadcrumbs :links="[
+        ['title' => 'Configuración', 'url' => route('settings.empresa')],
+        ['title' => 'Numeración', 'url' => null],
+    ]" />
+@endsection
+
+<x-settings-layout activa="facturacion">
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
         <div class="px-6 py-5 flex items-center justify-between bg-white border-b border-slate-100">
             <h2 class="text-xl text-slate-900 font-bold">Numeración de facturas</h2>
@@ -34,12 +41,14 @@
                             <span class="text-sm font-medium text-sovereign-blue">Próxima Factura</span>
                             <span class="font-bold text-lg text-sovereign-blue">{{ $this->numero_factura_preview }}</span>
                         </div>
+                        </div>
                         <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 opacity-60">
                             <span class="text-sm text-slate-500">Siguiente...</span>
                             <span class="font-medium text-slate-900">{{ $prefijo_factura }}{{ str_pad((int)$siguiente_numero_factura + 1, 6, '0', STR_PAD_LEFT) }}</span>
-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-    </div>
-</div>
+</x-settings-layout>

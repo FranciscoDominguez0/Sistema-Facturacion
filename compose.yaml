@@ -1,0 +1,50 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vigifact_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - vigifact_network
+
+  web:
+    image: nginx:alpine
+    container_name: vigifact_web
+    restart: unless-stopped
+    ports:
+      # Se expone en el puerto 8088 para evitar conflictos con los puertos en uso (80, 8080, 8082, 8087, 8000, etc.)
+      - "8088:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - vigifact_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: vigifact_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-Sistema-Facturacion}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-12345678}
+    ports:
+      # El puerto 5432 no estaba en la lista de puertos en conflicto
+      - "5432:5432"
+    volumes:
+      - vigifact_db_data:/var/lib/postgresql/data
+    networks:
+      - vigifact_network
+
+networks:
+  vigifact_network:
+    driver: bridge
+
+volumes:
+  vigifact_db_data:

@@ -1,6 +1,6 @@
 @section('breadcrumbs')
     <x-breadcrumbs :links="[
-        ['title' => 'Configuración', 'url' => route('configuracion.index')],
+        ['title' => 'Configuración', 'url' => route('settings.empresa')],
         ['title' => 'Roles y permisos', 'url' => null],
     ]" />
 @endsection

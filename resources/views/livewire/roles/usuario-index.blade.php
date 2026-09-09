@@ -1,11 +1,11 @@
 @section('breadcrumbs')
     <x-breadcrumbs :links="[
-        ['title' => 'Configuración', 'url' => route('configuracion.index')],
+        ['title' => 'Configuración', 'url' => route('settings.empresa')],
         ['title' => 'Usuarios', 'url' => null],
     ]" />
 @endsection
 
-<div>
+<x-settings-layout activa="usuarios">
     @if($view === 'list')
         <div class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
             <div class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -324,4 +324,4 @@
             </button>
         </div>
     </x-modal-danger>
-</div>
+</x-settings-layout>

@@ -29,10 +29,6 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->middleware(['verified'])
         ->name('dashboard');
 
-    Route::get('/configuracion/empresa', EmpresaForm::class)
-        ->name('empresa.editar')
-        ->middleware('can:empresa.gestionar');
-
     Route::get('profile', Profile::class)
         ->name('profile');
 
@@ -107,17 +103,27 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('empresa', EmpresaForm::class)
         ->name('empresa');
 
-    Route::get('configuracion', \App\Livewire\Configuracion\ConfiguracionIndex::class)
-        ->name('configuracion.index');
-
-    Route::get('configuracion/facturacion', \App\Livewire\Configuracion\FacturacionIndex::class)
-        ->name('configuracion.facturacion');
-
     Route::get('usuarios', \App\Livewire\Roles\UsuarioIndex::class)
         ->name('usuarios.index');
 
     Route::get('roles', \App\Livewire\Roles\RolIndex::class)
         ->name('roles.index');
+
+    // Pantallas de Configuración: cada opción es una página propia con sidebar compartido
+    Route::redirect('configuracion', 'settings/empresa');
+
+    Route::get('settings', fn () => redirect()->route('settings.empresa'))
+        ->name('settings.index');
+
+    Route::get('settings/empresa', EmpresaForm::class)
+        ->name('settings.empresa')
+        ->middleware('can:empresa.gestionar');
+
+    Route::get('settings/facturacion', \App\Livewire\Configuracion\FacturacionIndex::class)
+        ->name('settings.facturacion');
+
+    Route::get('settings/usuarios', \App\Livewire\Roles\UsuarioIndex::class)
+        ->name('settings.usuarios');
 });
 
 require __DIR__.'/auth.php';

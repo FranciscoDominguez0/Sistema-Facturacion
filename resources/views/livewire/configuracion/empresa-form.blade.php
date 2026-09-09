@@ -1,4 +1,11 @@
-<div>
+@section('breadcrumbs')
+    <x-breadcrumbs :links="[
+        ['title' => 'Configuración', 'url' => route('settings.empresa')],
+        ['title' => 'Detalles de la Empresa', 'url' => null],
+    ]" />
+@endsection
+
+<x-settings-layout activa="empresa">
     <!-- Sub-tabs -->
     <div x-data="{ tab: '{{ $tabActiva }}' }" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         
@@ -167,4 +174,4 @@
     </div>
 
     <style>[x-cloak] { display: none !important; }</style>
-</div>
+</x-settings-layout>
