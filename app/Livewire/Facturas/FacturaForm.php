@@ -62,9 +62,20 @@ class FacturaForm extends Component
     public $vendedores_sugeridos = [];
     public $vendedor_seleccionado_nombre = '';
 
+    public $numero_factura_preview = '';
+
     public function mount()
     {
         $this->form->init();
+
+        $empresa = \App\Models\Empresa::first();
+        if ($empresa) {
+            $numero = $empresa->siguiente_numero_factura;
+            $prefijo = $empresa->prefijo_factura;
+            $this->numero_factura_preview = $prefijo . str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
+        } else {
+            $this->numero_factura_preview = 'FAC-000001';
+        }
 
         // Autoseleccionar vendedor si no puede elegirlo libremente
         if (! Gate::allows('facturas.vendedor.seleccionar')) {

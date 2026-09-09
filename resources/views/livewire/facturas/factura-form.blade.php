@@ -14,10 +14,10 @@
     <!-- Layout Principal en 1 columna -->
     <div class="space-y-6">
             
-            <!-- Top Section: Cliente y Fechas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Top Section: Cliente, Fechas, y Extras -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                 <!-- Box Cliente -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-full">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <label class="block text-sm font-semibold text-slate-700 mb-3">Cliente <span class="text-red-500">*</span></label>
 
                     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Box Fechas y Vendedor -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-full flex flex-col justify-center">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div class="space-y-5">
                         <!-- Fecha Factura -->
                         <div>
@@ -152,6 +152,25 @@
                                     </div>
                                 @endif
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Box Factura y Descuento -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div class="space-y-5">
+                        <!-- Factura # -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Factura #</label>
+                            <div class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-700 shadow-sm tracking-wide">
+                                {{ $numero_factura_preview }}
+                            </div>
+                        </div>
+
+                        <!-- Descuento -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Descuento Global (%)</label>
+                            <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="form.descuento_porcentaje" placeholder="0.00" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                         </div>
                     </div>
                 </div>
@@ -299,16 +318,9 @@
                         <span class="text-slate-900 font-medium">${{ number_format($form->subtotal, 2) }}</span>
                     </div>
 
-                    <div class="flex justify-between items-center text-sm text-slate-600">
-                        <span>Descuento global (%)</span>
-                        <div class="w-24">
-                            <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="form.descuento_porcentaje" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
-                        </div>
-                    </div>
-
-                    @if($form->descuento_total > 0)
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-500">Ahorro</span>
+                    @if($form->descuento_porcentaje > 0)
+                        <div class="flex justify-between items-center text-sm text-slate-600">
+                            <span>Descuento global ({{ $form->descuento_porcentaje }}%)</span>
                             <span class="text-red-600 font-medium">-${{ number_format($form->descuento_total, 2) }}</span>
                         </div>
                     @endif
