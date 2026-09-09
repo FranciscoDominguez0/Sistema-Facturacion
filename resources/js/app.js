@@ -1,1 +1,1 @@
-//
+import './dashboard-charts.js';

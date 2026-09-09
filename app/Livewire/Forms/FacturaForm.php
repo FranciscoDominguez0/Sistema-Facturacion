@@ -3,7 +3,6 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Empresa;
-
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
@@ -94,7 +93,7 @@ class FacturaForm extends Form
             'fecha_vencimiento' => 'nullable|date|after_or_equal:fecha_emision',
             'descuento_porcentaje' => 'nullable|numeric|min:0|max:100',
             'items' => 'required|array|min:1',
-            'items.*.descripcion' => 'required|string',
+            'items.*.descripcion' => 'nullable|string',
             'items.*.cantidad' => 'required|numeric|min:0.01',
             'items.*.precio_unitario' => 'required|numeric|min:0',
         ];
@@ -114,7 +113,6 @@ class FacturaForm extends Form
             'cliente_id.required' => 'Debe seleccionar un cliente.',
             'vendedor_id.required' => 'Debe seleccionar un vendedor.',
             'items.min' => 'La factura debe tener al menos una línea.',
-            'items.*.descripcion.required' => 'La descripción es obligatoria.',
             'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
             'items.*.descuento_porcentaje.max' => 'El descuento no puede superar el 100%.',
         ];

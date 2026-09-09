@@ -2,41 +2,44 @@
 
 namespace App\Livewire\Configuracion;
 
+use App\Livewire\Forms\FacturacionForm;
 use App\Models\Empresa;
-use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class FacturacionIndex extends Component
 {
-    public $prefijo_factura;
-    public $siguiente_numero_factura;
+    public FacturacionForm $form;
 
     public function mount()
     {
-        $empresa = Empresa::actual();
-        $this->prefijo_factura = $empresa->prefijo_factura;
-        $this->siguiente_numero_factura = $empresa->siguiente_numero_factura;
-    }
+        $this->authorize('empresa.gestionar');
 
-    public function guardar()
-    {
-        $this->validate([
-            'prefijo_factura' => 'nullable|string|max:10',
-            'siguiente_numero_factura' => 'required|integer|min:1',
-        ]);
-
-        $empresa = Empresa::actual();
-        $empresa->update([
-            'prefijo_factura' => $this->prefijo_factura,
-            'siguiente_numero_factura' => $this->siguiente_numero_factura,
-        ]);
-
-        $this->dispatch('toast', message: 'Configuración de facturación actualizada con éxito.', type: 'success');
+        $this->form->setEmpresa(Empresa::actual());
     }
 
     public function getNumeroFacturaPreviewProperty()
     {
-        return $this->prefijo_factura . str_pad((int)$this->siguiente_numero_factura, 6, '0', STR_PAD_LEFT);
+        return $this->form->numeroPreview();
+    }
+
+    public function getNumeroPreviewAnteriorProperty()
+    {
+        return $this->form->numeroPreviewAnterior();
+    }
+
+    public function getNumeroPreviewSiguienteProperty()
+    {
+        return $this->form->numeroPreviewSiguiente();
+    }
+
+    public function guardar()
+    {
+        $this->authorize('empresa.gestionar');
+
+        $this->form->guardar();
+
+        $this->dispatch('toast', message: 'Configuración de facturación actualizada con éxito.', type: 'success');
     }
 
     #[Layout('layouts.app')]

@@ -7,8 +7,8 @@
 
 <x-settings-layout activa="empresa">
     <!-- Sub-tabs -->
-    <div x-data="{ tab: '{{ $tabActiva }}' }" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        
+    <div x-data="{ tab: 'detalles' }" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+
         <div class="px-6 py-5 flex items-center justify-between bg-white border-b border-slate-100">
             <h2 class="text-xl text-slate-900 font-bold">Empresa</h2>
             <button wire:click="guardar" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm whitespace-nowrap">
@@ -36,16 +36,16 @@
             <div class="flex items-center gap-6 px-6 py-4">
                 <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Nombre de Empresa <span class="text-red-500">*</span></label>
                 <div class="flex-1">
-                    <input wire:model="nombre" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
-                    @error('nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    <input wire:model="form.nombre" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    @error('form.nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
             <div class="flex items-center gap-6 px-6 py-4">
                 <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Identificación Fiscal</label>
                 <div class="flex-1">
-                    <input wire:model="identificacion_fiscal" type="text" placeholder="RUC, NIF, CUIT..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
-                    @error('identificacion_fiscal') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    <input wire:model="form.identificacion_fiscal" type="text" placeholder="RUC, NIF, CUIT..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    @error('form.identificacion_fiscal') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -108,7 +108,7 @@
                     <div class="flex items-center gap-6 flex-1 min-w-0">
                         <label class="w-32 flex-shrink-0 text-sm text-slate-600 font-medium">Código</label>
                         <div class="flex-1">
-                            <select wire:model="moneda" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                            <select wire:model="form.moneda" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
                                 <option value="USD - Dólar">USD - Dólar</option>
                                 <option value="EUR - Euro">EUR - Euro</option>
                                 <option value="COP - Peso Colombiano">COP - Peso Colombiano</option>
@@ -116,19 +116,19 @@
                                 <option value="PEN - Sol Peruano">PEN - Sol Peruano</option>
                                 <option value="ARS - Peso Argentino">ARS - Peso Argentino</option>
                             </select>
-                            @error('moneda') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            @error('form.moneda') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="flex items-center gap-6">
                         <label class="w-16 flex-shrink-0 text-sm text-slate-600 font-medium">Símbolo</label>
                         <div class="w-20">
-                            <input wire:model.live="simbolo_moneda" type="text" placeholder="$" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
-                            @error('simbolo_moneda') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            <input wire:model.live="form.simbolo_moneda" type="text" placeholder="$" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
+                            @error('form.simbolo_moneda') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2">
                         <span class="text-xs text-slate-500">Vista previa:</span>
-                        <span class="text-base font-bold text-sovereign-blue">{{ $simbolo_moneda }}1,250.00</span>
+                        <span class="text-base font-bold text-sovereign-blue">{{ $form->simbolo_moneda }}1,250.00</span>
                     </div>
                 </div>
             </div>
@@ -140,15 +140,15 @@
                     <div class="flex items-center gap-6 flex-1 min-w-0">
                         <label class="w-32 flex-shrink-0 text-sm text-slate-600 font-medium">Nombre</label>
                         <div class="flex-1">
-                            <input wire:model.live="impuesto_nombre" type="text" placeholder="ITBMS, IVA..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
-                            @error('impuesto_nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            <input wire:model.live="form.impuesto_nombre" type="text" placeholder="ITBMS, IVA..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                            @error('form.impuesto_nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <div class="flex items-center gap-6">
                         <label class="w-16 flex-shrink-0 text-sm text-slate-600 font-medium">Porcentaje</label>
                         <div class="w-24">
-                            <input wire:model.live="impuesto_porcentaje" type="number" step="0.01" min="0" max="100" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
-                            @error('impuesto_porcentaje') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            <input wire:model.live="form.impuesto_porcentaje" type="number" step="0.01" min="0" max="100" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
+                            @error('form.impuesto_porcentaje') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     <span class="inline-flex items-center bg-blue-50 text-sovereign-blue text-sm font-medium px-3 py-1.5 rounded-full border border-blue-200">
@@ -163,8 +163,8 @@
                 <div class="flex gap-6">
                     <label class="w-32 flex-shrink-0 text-sm text-slate-600 font-medium pt-2">Pie de página</label>
                     <div class="flex-1">
-                        <textarea wire:model="pie_pagina_pdf" rows="3" placeholder="Ej. Gracias por su negocio. El pago vence en 30 días." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all resize-none"></textarea>
-                        @error('pie_pagina_pdf') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        <textarea wire:model="form.pie_pagina_pdf" rows="3" placeholder="Ej. Gracias por su negocio. El pago vence en 30 días." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all resize-none"></textarea>
+                        @error('form.pie_pagina_pdf') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
             </div>

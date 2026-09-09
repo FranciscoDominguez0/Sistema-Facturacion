@@ -68,7 +68,7 @@
                             </th>
                             <th class="py-3 px-4 font-medium text-slate-500 w-1/2">
                                 <div class="flex items-center gap-1 cursor-pointer">
-                                    name
+                                    Nombre
                                     <div class="flex flex-col">
                                         <span class="material-symbols-outlined text-[10px] leading-none">expand_less</span>
                                         <span class="material-symbols-outlined text-[10px] leading-none -mt-1">expand_more</span>
@@ -77,7 +77,7 @@
                             </th>
                             <th class="py-3 px-4 font-medium text-slate-500">
                                 <div class="flex items-center gap-1 cursor-pointer">
-                                    email
+                                    Correo
                                     <div class="flex flex-col">
                                         <span class="material-symbols-outlined text-[10px] leading-none">expand_less</span>
                                         <span class="material-symbols-outlined text-[10px] leading-none -mt-1">expand_more</span>

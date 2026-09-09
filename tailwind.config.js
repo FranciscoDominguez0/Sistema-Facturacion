@@ -73,7 +73,18 @@ export default {
                 "outline": "#75777e",
                 "surface": "#fbf9f4",
                 "tertiary-fixed": "#ffddb6",
-                "ivory-base": "#F9F7F2"
+                "ivory-base": "#F9F7F2",
+                "brand": {
+                  DEFAULT: '#10B981',
+                  50: '#ecfdf5',
+                  100: '#d1fae5',
+                  200: '#a7f3d0',
+                  500: '#10B981',
+                  600: '#059669',
+                  700: '#047857',
+                  900: '#064e3b',
+                },
+                "sidebar": '#0F172A',
             },
             spacing: {
                 "margin-mobile": "16px",
@@ -81,6 +92,13 @@ export default {
                 "margin-tablet": "32px",
                 "gutter": "24px",
                 "margin-desktop": "48px"
+            },
+            boxShadow: {
+                'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
+                'subtle': '0 4px 20px -2px rgba(16, 24, 40, 0.05)',
+            },
+            borderRadius: {
+                'card': '16px',
             }
         },
     },

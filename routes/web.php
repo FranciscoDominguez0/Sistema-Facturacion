@@ -11,7 +11,6 @@ use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Gastos\GastoShow;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
-
 use App\Models\Empresa;
 use App\Models\Factura;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -22,7 +21,10 @@ Route::redirect('/', '/login');
 use App\Http\Middleware\PreventBackHistory;
 use App\Livewire\Clientes\ClienteForm;
 use App\Livewire\Clientes\ClienteShow;
+use App\Livewire\Configuracion\FacturacionIndex;
 use App\Livewire\Productos\ProductoForm;
+use App\Livewire\Roles\RolIndex;
+use App\Livewire\Roles\UsuarioIndex;
 
 Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('dashboard', Dashboard::class)
@@ -86,8 +88,6 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         return $pdf->download('factura-'.$factura->numero_factura.'.pdf');
     })->name('facturas.pdf');
 
-
-
     Route::get('gastos', GastoIndex::class)
         ->name('gastos')
         ->middleware('can:gastos.ver');
@@ -103,10 +103,11 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('empresa', EmpresaForm::class)
         ->name('empresa');
 
-    Route::get('usuarios', \App\Livewire\Roles\UsuarioIndex::class)
+    Route::get('usuarios', UsuarioIndex::class)
+        ->middleware('can:usuarios.ver')
         ->name('usuarios.index');
 
-    Route::get('roles', \App\Livewire\Roles\RolIndex::class)
+    Route::get('roles', RolIndex::class)
         ->name('roles.index');
 
     // Pantallas de Configuración: cada opción es una página propia con sidebar compartido
@@ -119,11 +120,13 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('settings.empresa')
         ->middleware('can:empresa.gestionar');
 
-    Route::get('settings/facturacion', \App\Livewire\Configuracion\FacturacionIndex::class)
-        ->name('settings.facturacion');
+    Route::get('settings/facturacion', FacturacionIndex::class)
+        ->name('settings.facturacion')
+        ->middleware('can:empresa.gestionar');
 
-    Route::get('settings/usuarios', \App\Livewire\Roles\UsuarioIndex::class)
-        ->name('settings.usuarios');
+    Route::get('settings/usuarios', UsuarioIndex::class)
+        ->name('settings.usuarios')
+        ->middleware('can:usuarios.ver');
 });
 
 require __DIR__.'/auth.php';

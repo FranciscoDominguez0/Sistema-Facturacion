@@ -10,14 +10,15 @@ class UsuarioForm extends Form
 {
     public ?User $usuario = null;
 
-    public $name = '';
+    public string $name = '';
 
-    public $email = '';
+    public ?string $email = null;
 
-    public $password = '';
+    public string $password = '';
 
-    public $rol = '';
+    public string $rol = '';
 
+    /** @var array<int, string> */
     public array $permisos = [];
 
     public function rules()
@@ -28,6 +29,7 @@ class UsuarioForm extends Form
             'password' => 'nullable|string|min:8',
             'rol' => 'nullable|exists:roles,name',
             'permisos' => 'array',
+            'permisos.*' => 'string',
         ];
     }
 
@@ -43,41 +45,43 @@ class UsuarioForm extends Form
 
     public function guardar()
     {
+        $this->normalizar();
         $this->validate();
 
-        if ($this->usuario) {
-            $data = [
-                'name' => $this->name,
-                'email' => $this->email ?: null,
-            ];
+        $usuario = $this->usuario
+            ? tap($this->usuario)->update($this->datos())
+            : User::create($this->datos());
 
-            if (! empty($this->password)) {
-                $data['password'] = Hash::make($this->password);
-            }
-
-            $this->usuario->update($data);
-            $user = $this->usuario;
-        } else {
-            $data = [
-                'name' => $this->name,
-                'email' => $this->email ?: null,
-            ];
-
-            if (! empty($this->password)) {
-                $data['password'] = Hash::make($this->password);
-            }
-
-            $user = User::create($data);
-        }
-
-        if ($this->rol) {
-            $user->syncRoles([$this->rol]);
-        } else {
-            $user->syncRoles([]);
-        }
-
-        $user->syncPermissions($this->permisos);
+        $usuario->syncRoles($this->rol ? [$this->rol] : []);
+        $usuario->syncPermissions($this->permisos);
 
         $this->reset();
+    }
+
+    /**
+     * Limpia los campos antes de validar: sin espacios al inicio/final
+     * y email en minúsculas (o null si está vacío).
+     */
+    private function normalizar(): void
+    {
+        $this->name = trim($this->name);
+        $this->email = $this->email ? strtolower(trim($this->email)) : null;
+    }
+
+    /**
+     * Datos que se guardan, compartidos entre alta y edición.
+     */
+    private function datos(): array
+    {
+        $datos = [
+            'name' => $this->name,
+            'email' => $this->email,
+        ];
+
+        if ($this->password) {
+            $datos['password'] = Hash::make($this->password);
+        }
+
+        return $datos;
     }
 }

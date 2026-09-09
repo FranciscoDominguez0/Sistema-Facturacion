@@ -49,6 +49,7 @@
     <!-- Scripts -->
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 
     <script>
         // Impide que el navegador restaure desde la caché una página autenticada
@@ -198,7 +199,7 @@
 
         <!-- Main Canvas Area -->
         <main class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
-            <div class="max-w-7xl mx-auto">
+            <div class="w-full">
                 {{ $slot }}
             </div>
         </main>

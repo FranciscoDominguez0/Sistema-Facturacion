@@ -4,10 +4,13 @@ namespace App\Livewire\Facturas;
 
 use App\Livewire\Forms\FacturaForm as FacturaFormObject;
 use App\Models\Cliente;
+use App\Models\Empresa;
 use App\Models\Producto;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -48,18 +51,25 @@ class FacturaForm extends Component
 
     // Para la creación rápida de vendedor
     public $mostrarModalVendedor = false;
+
     public $nuevo_vendedor_nombre = '';
+
     public $nuevo_vendedor_email = '';
+
     public $nuevo_vendedor_password = '';
 
     // Para búsquedas cliente
     public $searchCliente = '';
+
     public $clientes_sugeridos = [];
+
     public $cliente_seleccionado_nombre = '';
 
     // Para búsquedas vendedor
     public $searchVendedor = '';
+
     public $vendedores_sugeridos = [];
+
     public $vendedor_seleccionado_nombre = '';
 
     public $numero_factura_preview = '';
@@ -68,11 +78,11 @@ class FacturaForm extends Component
     {
         $this->form->init();
 
-        $empresa = \App\Models\Empresa::first();
+        $empresa = Empresa::first();
         if ($empresa) {
             $numero = $empresa->siguiente_numero_factura;
             $prefijo = $empresa->prefijo_factura;
-            $this->numero_factura_preview = $prefijo . str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
+            $this->numero_factura_preview = $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
         } else {
             $this->numero_factura_preview = 'FAC-000001';
         }
@@ -215,7 +225,6 @@ class FacturaForm extends Component
             $producto = Producto::find($productoId);
             if ($producto) {
                 $this->form->items[$index]['producto_id'] = $producto->id;
-                $this->form->items[$index]['descripcion'] = $producto->nombre;
                 $this->form->items[$index]['precio_unitario'] = $producto->precio;
                 $this->form->items[$index]['aplica_impuesto'] = $producto->aplica_impuesto;
             }
@@ -243,7 +252,6 @@ class FacturaForm extends Component
 
         if ($this->linea_producto_actual !== null) {
             $this->form->items[$this->linea_producto_actual]['producto_id'] = $producto->id;
-            $this->form->items[$this->linea_producto_actual]['descripcion'] = $producto->nombre;
             $this->form->items[$this->linea_producto_actual]['precio_unitario'] = $producto->precio;
             $this->form->items[$this->linea_producto_actual]['aplica_impuesto'] = $producto->aplica_impuesto;
             $this->form->recalcularTotales();
@@ -269,7 +277,7 @@ class FacturaForm extends Component
         $vendedor = User::create([
             'name' => $this->nuevo_vendedor_nombre,
             'email' => empty($this->nuevo_vendedor_email) ? null : $this->nuevo_vendedor_email,
-            'password' => empty($this->nuevo_vendedor_password) ? null : \Illuminate\Support\Facades\Hash::make($this->nuevo_vendedor_password),
+            'password' => empty($this->nuevo_vendedor_password) ? null : Hash::make($this->nuevo_vendedor_password),
         ]);
 
         $vendedor->assignRole('Vendedor');
@@ -289,7 +297,7 @@ class FacturaForm extends Component
             session()->flash('success', 'Factura creada exitosamente.');
 
             return redirect()->route('facturas.show', $factura->id);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->dispatch('toast', message: 'Hay campos obligatorios vacíos o con errores. Por favor, revisa el formulario.', type: 'error');
             throw $e;
         }

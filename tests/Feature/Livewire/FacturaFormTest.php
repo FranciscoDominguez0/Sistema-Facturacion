@@ -8,10 +8,10 @@ use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\Producto;
 use App\Models\User;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -189,10 +189,10 @@ class FacturaFormTest extends TestCase
     }
 
     /**
-     * Seleccionar un producto del catálogo autocompleta la descripción y el
-     * precio, pero permite editarlos después.
+     * Seleccionar un producto del catálogo completa el precio y el impuesto,
+     * pero NO la descripción: el usuario la escribe manualmente.
      */
-    public function test_seleccionar_producto_autocompleta_y_permite_editar(): void
+    public function test_seleccionar_producto_no_autocompleta_la_descripcion(): void
     {
         $producto = Producto::factory()->create(['nombre' => 'Laptop Pro', 'precio' => 150.50]);
         $usuario = User::factory()->create();
@@ -201,15 +201,43 @@ class FacturaFormTest extends TestCase
             ->test(FacturaForm::class)
             ->call('seleccionarProducto', 0, $producto->id)
             ->assertSet('form.items.0.producto_id', $producto->id)
-            ->assertSet('form.items.0.descripcion', 'Laptop Pro')
+            ->assertSet('form.items.0.descripcion', '')
             ->assertSet('form.items.0.precio_unitario', '150.50');
 
-        // La descripción sigue siendo editable
+        // La descripción se puede escribir sin problema
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
             ->call('seleccionarProducto', 0, $producto->id)
             ->set('form.items.0.descripcion', 'Laptop Pro 16GB RAM')
             ->assertSet('form.items.0.descripcion', 'Laptop Pro 16GB RAM');
+    }
+
+    /**
+     * La descripción no es obligatoria: si la línea queda sin descripción y
+     * tiene producto, al guardar se usa el nombre (o descripción) del producto.
+     */
+    public function test_guardar_sin_descripcion_usa_la_del_producto(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.crear']);
+
+        $producto = Producto::factory()->create(['nombre' => 'Laptop Pro', 'descripcion' => null]);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            ->set('form.cliente_id', $cliente->id)
+            ->set('form.vendedor_id', $vendedor->id)
+            ->call('seleccionarProducto', 0, $producto->id)
+            ->set('form.items.0.cantidad', 1)
+            ->set('form.items.0.precio_unitario', 100)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('factura_items', [
+            'descripcion' => 'Laptop Pro',
+            'producto_id' => $producto->id,
+        ]);
     }
 
     // =====================================================================
@@ -248,8 +276,6 @@ class FacturaFormTest extends TestCase
             'descuento_total' => 0,
         ]);
     }
-
-
 
     // =====================================================================
     // Guardado
@@ -361,7 +387,7 @@ class FacturaFormTest extends TestCase
     {
         $usuario = User::factory()->create();
         $usuario->givePermissionTo('facturas.vendedor.seleccionar');
-        \Spatie\Permission\Models\Role::findOrCreate('Vendedor');
+        Role::findOrCreate('Vendedor');
         $otroVendedor = User::factory()->create();
         $otroVendedor->assignRole('Vendedor');
 
@@ -395,7 +421,7 @@ class FacturaFormTest extends TestCase
      */
     protected function usuarioConVendedor(array $permisos = []): array
     {
-        \Spatie\Permission\Models\Role::findOrCreate('Vendedor');
+        Role::findOrCreate('Vendedor');
         $usuario = User::factory()->create();
         $usuario->assignRole('Vendedor');
 

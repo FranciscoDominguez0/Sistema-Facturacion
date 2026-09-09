@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto w-full space-y-6">
+<div class="w-full space-y-6">
     @section('breadcrumbs')
         <x-breadcrumbs :links="[
             ['title' => 'Facturas', 'url' => route('facturas')],

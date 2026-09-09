@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\EstadoFactura;
 use App\Models\Empresa;
 use App\Models\Factura;
+use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
 
 class FacturaService
@@ -235,7 +236,7 @@ class FacturaService
         foreach ($items as $itemData) {
             $factura->items()->create([
                 'producto_id' => $itemData['producto_id'] ?? null,
-                'descripcion' => $itemData['descripcion'],
+                'descripcion' => $this->resolverDescripcion($itemData),
                 'cantidad' => $itemData['cantidad'],
                 'precio_unitario' => $itemData['precio_unitario'],
                 'descuento_porcentaje' => floatval($itemData['descuento_porcentaje'] ?? 0),
@@ -243,5 +244,22 @@ class FacturaService
                 'subtotal_linea' => $itemData['subtotal_linea'],
             ]);
         }
+    }
+
+    /**
+     * Si la línea quedó sin descripción escrita y tiene producto,
+     * se usa la del producto para que la línea no quede en blanco.
+     */
+    private function resolverDescripcion(array $itemData): string
+    {
+        $descripcion = trim((string) ($itemData['descripcion'] ?? ''));
+
+        if ($descripcion !== '') {
+            return $descripcion;
+        }
+
+        $producto = Producto::find($itemData['producto_id'] ?? null);
+
+        return $producto ? ($producto->descripcion ?: $producto->nombre) : '';
     }
 }
