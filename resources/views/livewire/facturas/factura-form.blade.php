@@ -143,6 +143,11 @@
                                     <span class="inline-block mt-1.5 font-medium text-slate-800 text-sm">
                                         ${{ number_format($item['subtotal_linea'], 2) }}
                                     </span>
+                                    @if(isset($item['impuesto_monto']) && $item['impuesto_monto'] > 0)
+                                    <div class="text-[10px] text-slate-500 mt-0.5">
+                                        +${{ number_format($item['impuesto_monto'], 2) }}
+                                    </div>
+                                    @endif
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3 text-center">
                                     <button type="button" wire:click="eliminarLinea({{ $index }})" class="mt-1 text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50" title="Eliminar línea">
@@ -203,13 +208,12 @@
                         </div>
                     @endif
 
-                    <div class="flex justify-between items-center text-sm text-slate-600">
-                        <span class="flex items-center gap-1">
-                            Impuesto
-                            <span class="material-symbols-outlined text-[14px] text-slate-400 cursor-help" title="Configurado en empresa">info</span>
-                        </span>
-                        <span class="text-slate-900 font-medium">${{ number_format($form->impuesto, 2) }}</span>
-                    </div>
+                    @foreach($form->desglose_impuestos as $nombreImpuesto => $montoImpuesto)
+                        <div class="flex justify-between items-center text-sm text-slate-600">
+                            <span>{{ $nombreImpuesto }}</span>
+                            <span class="text-slate-900 font-medium">${{ number_format($montoImpuesto, 2) }}</span>
+                        </div>
+                    @endforeach
 
                     <div class="border-t border-slate-100 pt-3 mt-2 flex justify-between items-end">
                         <span class="text-base font-bold text-slate-900">Total</span>
@@ -334,12 +338,7 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label class="flex items-center space-x-2 mt-4 cursor-pointer">
-                            <input type="checkbox" wire:model="nuevo_producto_aplica_impuesto" class="rounded border-slate-300 text-sovereign-blue shadow-sm focus:ring-sovereign-blue">
-                            <span class="text-sm font-medium text-slate-700">Aplica Impuesto</span>
-                        </label>
-                    </div>
+
                 </div>
 
                 <div class="mt-6 flex justify-end gap-4 pt-4 border-t border-slate-50">

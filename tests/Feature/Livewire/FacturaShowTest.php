@@ -8,7 +8,6 @@ use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\User;
-
 use App\Services\FacturaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -171,8 +170,6 @@ class FacturaShowTest extends TestCase
             ->test(FacturaShow::class, ['factura' => $factura])
             ->call('cambiarEstado', 'Pagada');
 
-
-
         $this->assertDatabaseHas('facturas', [
             'id' => $factura->id,
             'estado' => 'Anulada',
@@ -254,7 +251,8 @@ class FacturaShowTest extends TestCase
                     'cantidad' => 2,
                     'precio_unitario' => 100,
                     'descuento_porcentaje' => 0,
-                    'aplica_impuesto' => true,
+                    'impuesto_porcentaje' => 7,
+                    'impuesto_nombre' => 'ITBMS',
                 ],
             ],
         ]);

@@ -3,6 +3,7 @@
 namespace App\Livewire\Productos;
 
 use App\Livewire\Forms\ProductoForm as ProductoFormObject;
+use App\Models\Impuesto;
 use App\Models\Producto;
 use App\Services\ProductoImagenService;
 use Illuminate\Http\UploadedFile;
@@ -55,6 +56,8 @@ class ProductoForm extends Component
 
     public function render()
     {
-        return view('livewire.productos.producto-form');
+        return view('livewire.productos.producto-form', [
+            'impuestos' => Impuesto::where('activo', true)->get(),
+        ]);
     }
 }

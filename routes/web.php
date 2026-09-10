@@ -2,6 +2,7 @@
 
 use App\Livewire\Clientes\ClienteIndex;
 use App\Livewire\Configuracion\EmpresaForm;
+use App\Livewire\Configuracion\ImpuestoIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\Facturas\FacturaForm;
 use App\Livewire\Facturas\FacturaIndex;
@@ -122,6 +123,10 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
 
     Route::get('settings/facturacion', FacturacionIndex::class)
         ->name('settings.facturacion')
+        ->middleware('can:empresa.gestionar');
+
+    Route::get('settings/impuestos', ImpuestoIndex::class)
+        ->name('configuracion.impuestos')
         ->middleware('can:empresa.gestionar');
 
     Route::get('settings/usuarios', UsuarioIndex::class)

@@ -133,29 +133,6 @@
                 </div>
             </div>
 
-            <!-- Impuesto -->
-            <div class="px-6 py-4">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Impuesto predeterminado</h3>
-                <div class="flex flex-wrap gap-6 items-end">
-                    <div class="flex items-center gap-6 flex-1 min-w-0">
-                        <label class="w-32 flex-shrink-0 text-sm text-slate-600 font-medium">Nombre</label>
-                        <div class="flex-1">
-                            <input wire:model.live="form.impuesto_nombre" type="text" placeholder="ITBMS, IVA..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
-                            @error('form.impuesto_nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-6">
-                        <label class="w-16 flex-shrink-0 text-sm text-slate-600 font-medium">Porcentaje</label>
-                        <div class="w-24">
-                            <input wire:model.live="form.impuesto_porcentaje" type="number" step="0.01" min="0" max="100" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
-                            @error('form.impuesto_porcentaje') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-                    <span class="inline-flex items-center bg-blue-50 text-sovereign-blue text-sm font-medium px-3 py-1.5 rounded-full border border-blue-200">
-                        {{ $this->impuesto_chip_preview }}
-                    </span>
-                </div>
-            </div>
 
             <!-- Pie de página PDF -->
             <div class="px-6 py-4">

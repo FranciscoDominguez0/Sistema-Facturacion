@@ -33,7 +33,7 @@ class RolIndexTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('empresa.gestionar');
-        
+
         Role::firstOrCreate(['name' => 'Administrador']);
 
         Livewire::actingAs($user)
@@ -46,7 +46,7 @@ class RolIndexTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('empresa.gestionar');
-        
+
         $permisoFacturas = Permission::firstOrCreate(['name' => 'facturas.ver']);
 
         Livewire::actingAs($user)
@@ -60,7 +60,7 @@ class RolIndexTest extends TestCase
 
         // Ahora asignamos permisos al rol activo
         $rolVendedor = Role::findByName('Vendedor');
-        
+
         Livewire::actingAs($user)
             ->test(RolIndex::class)
             ->call('seleccionarRol', $rolVendedor->id)

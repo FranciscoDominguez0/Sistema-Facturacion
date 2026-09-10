@@ -43,7 +43,7 @@ class FacturaForm extends Component
 
     public $nuevo_producto_tipo = 'bien';
 
-    public $nuevo_producto_aplica_impuesto = true;
+    public $nuevo_producto_impuesto_id = null;
 
     public $mostrarModalProducto = false;
 
@@ -57,8 +57,6 @@ class FacturaForm extends Component
     public $nuevo_vendedor_email = '';
 
     public $nuevo_vendedor_password = '';
-
-
 
     public $numero_factura_preview = '';
 
@@ -90,12 +88,6 @@ class FacturaForm extends Component
             }
         }
     }
-
-
-
-
-
-
 
     public function guardarClienteExpress()
     {
@@ -149,10 +141,12 @@ class FacturaForm extends Component
                         $this->linea_producto_actual = $index;
                         $this->mostrarModalProducto = true;
                     } elseif ($value) {
-                        $producto = Producto::find($value);
+                        $producto = Producto::with('impuesto')->find($value);
                         if ($producto) {
                             $this->form->items[$index]['precio_unitario'] = $producto->precio;
-                            $this->form->items[$index]['aplica_impuesto'] = $producto->aplica_impuesto;
+                            $this->form->items[$index]['impuesto_id'] = $producto->impuesto_id;
+                            $this->form->items[$index]['impuesto_nombre'] = $producto->impuesto ? $producto->impuesto->nombre : null;
+                            $this->form->items[$index]['impuesto_porcentaje'] = $producto->impuesto ? $producto->impuesto->porcentaje : 0;
                         }
                     } else {
                         $this->form->items[$index]['precio_unitario'] = 0;
@@ -168,8 +162,6 @@ class FacturaForm extends Component
         }
     }
 
-
-
     public function guardarProductoExpress()
     {
         $this->validate([
@@ -181,15 +173,18 @@ class FacturaForm extends Component
         $producto = Producto::create([
             'nombre' => $this->nuevo_producto_nombre,
             'precio' => $this->nuevo_producto_precio,
-            'aplica_impuesto' => $this->nuevo_producto_aplica_impuesto,
+            'impuesto_id' => $this->nuevo_producto_impuesto_id,
             'tipo' => $this->nuevo_producto_tipo,
             'activo' => true,
         ]);
 
         if ($this->linea_producto_actual !== null) {
+            $producto->load('impuesto');
             $this->form->items[$this->linea_producto_actual]['producto_id'] = $producto->id;
             $this->form->items[$this->linea_producto_actual]['precio_unitario'] = $producto->precio;
-            $this->form->items[$this->linea_producto_actual]['aplica_impuesto'] = $producto->aplica_impuesto;
+            $this->form->items[$this->linea_producto_actual]['impuesto_id'] = $producto->impuesto_id;
+            $this->form->items[$this->linea_producto_actual]['impuesto_nombre'] = $producto->impuesto ? $producto->impuesto->nombre : null;
+            $this->form->items[$this->linea_producto_actual]['impuesto_porcentaje'] = $producto->impuesto ? $producto->impuesto->porcentaje : 0;
             $this->form->recalcularTotales();
         }
 
@@ -198,7 +193,7 @@ class FacturaForm extends Component
         $this->nuevo_producto_nombre = '';
         $this->nuevo_producto_precio = '';
         $this->nuevo_producto_tipo = 'bien';
-        $this->nuevo_producto_aplica_impuesto = true;
+        $this->nuevo_producto_impuesto_id = null;
         $this->linea_producto_actual = null;
     }
 
@@ -245,7 +240,7 @@ class FacturaForm extends Component
         return view('livewire.facturas.factura-form', [
             'clientes' => Cliente::where('activo', true)->get(['id', 'nombre'])->toArray(),
             'vendedores' => Gate::allows('facturas.vendedor.seleccionar') ? User::role('Vendedor')->get(['id', 'name as nombre'])->toArray() : [],
-            'productos' => Producto::where('activo', true)->get(['id', 'nombre', 'precio', 'aplica_impuesto'])->toArray(),
+            'productos' => Producto::where('activo', true)->get(['id', 'nombre', 'precio', 'impuesto_id'])->toArray(),
         ]);
     }
 }

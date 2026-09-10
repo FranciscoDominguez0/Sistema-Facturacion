@@ -6,7 +6,6 @@ use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\User;
-
 use App\Services\FacturaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -117,7 +116,8 @@ class FacturaRoutesTest extends TestCase
                     'cantidad' => 2,
                     'precio_unitario' => 100,
                     'descuento_porcentaje' => 0,
-                    'aplica_impuesto' => true,
+                    'impuesto_porcentaje' => 7,
+                    'impuesto_nombre' => 'ITBMS',
                 ],
             ],
         ]);

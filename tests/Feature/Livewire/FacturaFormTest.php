@@ -182,6 +182,7 @@ class FacturaFormTest extends TestCase
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
             ->set('form.items.0.descripcion', 'Producto A')
+            ->set('form.items.0.impuesto_porcentaje', 7)
             ->set('form.items.0.cantidad', 2)
             ->set('form.items.0.precio_unitario', 100)
             ->assertSet('form.items.0.subtotal_linea', 200.0)
@@ -337,6 +338,7 @@ class FacturaFormTest extends TestCase
             ->set('form.items.0.descripcion', 'Producto A')
             ->set('form.items.0.cantidad', 2)
             ->set('form.items.0.precio_unitario', 100)
+            ->set('form.items.0.impuesto_porcentaje', 7)
             ->call('save')
             ->assertHasNoErrors();
 

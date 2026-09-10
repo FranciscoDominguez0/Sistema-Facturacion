@@ -18,7 +18,16 @@ class FacturaItem extends Model
         'descuento_porcentaje',
         'descuento_monto',
         'subtotal_linea',
+        'impuesto_id',
+        'impuesto_nombre',
+        'impuesto_porcentaje',
+        'impuesto_monto',
     ];
+
+    public function impuesto()
+    {
+        return $this->belongsTo(Impuesto::class);
+    }
 
     protected $casts = [
         'cantidad' => 'decimal:2',

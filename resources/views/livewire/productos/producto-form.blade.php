@@ -89,15 +89,19 @@
             <!-- Toggles (Aplica Impuesto y Activo) -->
             <div class="pt-4 border-t border-slate-100 flex flex-col md:flex-row gap-6">
                 
-                <!-- Toggle Aplica Impuesto -->
-                <div class="flex items-center gap-3">
-                    <button type="button" wire:click="$toggle('form.aplica_impuesto')" class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sovereign-blue focus:ring-offset-2 {{ $form->aplica_impuesto ? 'bg-sovereign-blue' : 'bg-slate-200' }}" role="switch" aria-checked="{{ $form->aplica_impuesto ? 'true' : 'false' }}">
-                        <span aria-hidden="true" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $form->aplica_impuesto ? 'translate-x-4' : 'translate-x-0' }}"></span>
-                    </button>
-                    <div>
-                        <span class="block text-sm font-semibold text-slate-700 cursor-pointer" wire:click="$toggle('form.aplica_impuesto')">Aplica Impuesto</span>
-                        <span class="block text-xs text-slate-500">¿Este ítem incluye impuestos en la factura?</span>
+                <!-- Select Impuesto -->
+                <div class="flex-1">
+                    <label for="impuesto" class="block text-sm font-semibold text-slate-700 mb-1">Impuesto Aplicable</label>
+                    <div class="relative">
+                        <select id="impuesto" wire:model="form.impuesto_id" class="w-full appearance-none bg-white border @error('form.impuesto_id') border-red-300 focus:border-red-500 focus:ring-red-500 @else border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue @enderror rounded-lg pl-4 pr-10 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 transition-colors cursor-pointer">
+                            <option value="">Seleccione un impuesto...</option>
+                            @foreach($impuestos as $impuesto)
+                                <option value="{{ $impuesto->id }}">{{ $impuesto->nombre }} ({{ number_format($impuesto->porcentaje, 2) }}%)</option>
+                            @endforeach
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
                     </div>
+                    @error('form.impuesto_id') <span class="text-red-500 text-xs mt-1 block font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span>{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Toggle Activo -->

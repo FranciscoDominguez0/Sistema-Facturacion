@@ -99,7 +99,14 @@
                                 <td class="px-2 py-4 text-right text-slate-600">
                                     {{ $item->descuento_porcentaje > 0 ? $item->descuento_porcentaje . '%' : '-' }}
                                 </td>
-                                <td class="px-2 py-4 text-right font-semibold text-slate-800">${{ number_format($item->subtotal_linea, 2) }}</td>
+                                <td class="px-2 py-4 text-right font-semibold text-slate-800">
+                                    ${{ number_format($item->subtotal_linea, 2) }}
+                                    @if($item->impuesto_monto > 0)
+                                    <div class="text-[10px] text-slate-500 font-normal mt-0.5">
+                                        +${{ number_format($item->impuesto_monto, 2) }}
+                                    </div>
+                                    @endif
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -120,10 +127,12 @@
                         </div>
                         @endif
 
-                        <div class="flex justify-between items-center text-sm text-slate-600 pb-4 border-b border-slate-100">
-                            <span class="font-medium">Impuesto:</span>
-                            <span class="font-semibold text-slate-800 text-base">${{ number_format($factura->impuesto, 2) }}</span>
+                        @foreach($desglose_impuestos as $nombreImpuesto => $montoImpuesto)
+                        <div class="flex justify-between items-center text-sm text-slate-600 pb-2">
+                            <span class="font-medium">{{ $nombreImpuesto }}:</span>
+                            <span class="font-semibold text-slate-800 text-base">${{ number_format($montoImpuesto, 2) }}</span>
                         </div>
+                        @endforeach
                         
                         <div class="flex justify-between items-center text-xl font-bold text-slate-900 pt-2">
                             <span>Total:</span>

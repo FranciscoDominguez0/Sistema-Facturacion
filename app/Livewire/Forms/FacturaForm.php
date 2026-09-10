@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Forms;
 
-use App\Models\Empresa;
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
@@ -34,6 +33,8 @@ class FacturaForm extends Form
 
     public $total = 0;
 
+    public array $desglose_impuestos = [];
+
     public function init()
     {
         if (! $this->fecha_emision) {
@@ -54,7 +55,10 @@ class FacturaForm extends Form
             'descuento_porcentaje' => 0,
             'descuento_monto' => 0,
             'subtotal_linea' => 0,
-            'aplica_impuesto' => true,
+            'impuesto_id' => null,
+            'impuesto_nombre' => null,
+            'impuesto_porcentaje' => 0,
+            'impuesto_monto' => 0,
         ];
     }
 
@@ -68,18 +72,16 @@ class FacturaForm extends Form
     public function recalcularTotales()
     {
         $facturaService = app(FacturaService::class);
-        $empresa = Empresa::first();
-        $impuestoPorcentaje = $empresa ? floatval($empresa->impuesto_porcentaje) : 0;
 
         $resultado = $facturaService->calcularTotales(
             $this->items,
-            $impuestoPorcentaje,
             floatval($this->descuento_porcentaje ?: 0)
         );
 
         $this->subtotal = $resultado['subtotal'];
         $this->descuento_total = $resultado['descuento_total'];
         $this->impuesto = $resultado['impuesto'];
+        $this->desglose_impuestos = $resultado['desglose_impuestos'] ?? [];
         $this->total = $resultado['total'];
         $this->items = $resultado['items_actualizados'];
     }

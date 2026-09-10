@@ -37,37 +37,54 @@ class FacturaService
     /**
      * Calcula el subtotal, descuentos, impuestos y total de toda la factura.
      */
-    public function calcularTotales(array $items, float $impuestoPorcentaje, float $descuentoPorcentaje = 0): array
+    public function calcularTotales(array $items, float $descuentoPorcentaje = 0): array
     {
         $subtotal = 0;
-        $subtotalGravable = 0;
+        $impuestoTotal = 0;
+        $desgloseImpuestos = [];
 
         foreach ($items as &$item) {
             $resultadoLinea = $this->calcularLinea($item);
 
             $item['descuento_monto'] = $resultadoLinea['descuento_monto'];
             $item['subtotal_linea'] = $resultadoLinea['subtotal_linea'];
+            $item['impuesto_monto'] = $resultadoLinea['impuesto_monto'];
 
             $subtotal += $resultadoLinea['subtotal_linea'];
-            if ($resultadoLinea['aplica_impuesto']) {
-                $subtotalGravable += $resultadoLinea['subtotal_linea'];
+            $impuestoTotal += $resultadoLinea['impuesto_monto'];
+
+            // Desglose
+            if ($item['impuesto_porcentaje'] > 0) {
+                $nombre = $item['impuesto_nombre'] ?? 'Impuesto';
+                $porc = number_format($item['impuesto_porcentaje'], 2).'%';
+                $llave = "$nombre ($porc)";
+
+                if (! isset($desgloseImpuestos[$llave])) {
+                    $desgloseImpuestos[$llave] = 0;
+                }
+                $desgloseImpuestos[$llave] += $resultadoLinea['impuesto_monto'];
             }
         }
 
         $descuentoTotalGlobal = $subtotal * ($descuentoPorcentaje / 100);
         $subtotalConDescuento = $subtotal - $descuentoTotalGlobal;
 
-        // El impuesto solo aplica sobre lo gravable, y se descuenta su proporción del descuento global.
-        $proporcionGravable = $subtotal > 0 ? ($subtotalGravable / $subtotal) : 0;
-        $subtotalGravableConDescuento = $subtotalGravable - ($descuentoTotalGlobal * $proporcionGravable);
+        // El descuento global se aplica proporcionalmente al impuesto de cada línea.
+        $factorDescuento = $subtotal > 0 ? ($subtotalConDescuento / $subtotal) : 1;
+        $impuestoTotalAjustado = $impuestoTotal * $factorDescuento;
 
-        $impuestoMonto = $subtotalGravableConDescuento * ($impuestoPorcentaje / 100);
-        $total = $subtotalConDescuento + $impuestoMonto;
+        $desgloseAjustado = [];
+        foreach ($desgloseImpuestos as $llave => $monto) {
+            $desgloseAjustado[$llave] = round($monto * $factorDescuento, 2);
+        }
+
+        $total = $subtotalConDescuento + $impuestoTotalAjustado;
 
         return [
             'subtotal' => round($subtotal, 2),
             'descuento_total' => round($descuentoTotalGlobal, 2),
-            'impuesto' => round($impuestoMonto, 2),
+            'impuesto' => round($impuestoTotalAjustado, 2),
+            'desglose_impuestos' => $desgloseAjustado,
             'total' => round($total, 2),
             'items_actualizados' => $items,
         ];
@@ -79,11 +96,8 @@ class FacturaService
     public function crear(array $data): Factura
     {
         return DB::transaction(function () use ($data) {
-            $empresa = Empresa::first();
-            $impuestoPorcentaje = $empresa ? floatval($empresa->impuesto_porcentaje) : 0;
-
             $numeroFactura = $this->generarNumero();
-            $totales = $this->calcularTotales($data['items'], $impuestoPorcentaje, floatval($data['descuento_porcentaje'] ?? 0));
+            $totales = $this->calcularTotales($data['items'], floatval($data['descuento_porcentaje'] ?? 0));
 
             $factura = Factura::create([
                 'numero_factura' => $numeroFactura,
@@ -115,10 +129,7 @@ class FacturaService
     public function actualizar(Factura $factura, array $data): Factura
     {
         return DB::transaction(function () use ($factura, $data) {
-            $empresa = Empresa::first();
-            $impuestoPorcentaje = $empresa ? floatval($empresa->impuesto_porcentaje) : 0;
-
-            $totales = $this->calcularTotales($data['items'], $impuestoPorcentaje, floatval($data['descuento_porcentaje'] ?? 0));
+            $totales = $this->calcularTotales($data['items'], floatval($data['descuento_porcentaje'] ?? 0));
 
             $factura->update([
                 'cliente_id' => $data['cliente_id'] ?? $factura->cliente_id,
@@ -218,16 +229,19 @@ class FacturaService
         $cantidad = floatval($item['cantidad'] ?? 0);
         $precioUnitario = floatval($item['precio_unitario'] ?? 0);
         $descuentoLineaPorcentaje = floatval($item['descuento_porcentaje'] ?? 0);
-        $aplicaImpuesto = boolval($item['aplica_impuesto'] ?? true);
+
+        $impuestoPorcentaje = floatval($item['impuesto_porcentaje'] ?? 0);
 
         $subtotalBrutoLinea = $cantidad * $precioUnitario;
         $descuentoMontoLinea = $subtotalBrutoLinea * ($descuentoLineaPorcentaje / 100);
         $subtotalLinea = $subtotalBrutoLinea - $descuentoMontoLinea;
 
+        $impuestoMonto = $subtotalLinea * ($impuestoPorcentaje / 100);
+
         return [
             'descuento_monto' => $descuentoMontoLinea,
             'subtotal_linea' => $subtotalLinea,
-            'aplica_impuesto' => $aplicaImpuesto,
+            'impuesto_monto' => $impuestoMonto,
         ];
     }
 
@@ -245,6 +259,10 @@ class FacturaService
                 'descuento_porcentaje' => floatval($itemData['descuento_porcentaje'] ?? 0),
                 'descuento_monto' => $itemData['descuento_monto'],
                 'subtotal_linea' => $itemData['subtotal_linea'],
+                'impuesto_id' => $itemData['impuesto_id'] ?? null,
+                'impuesto_nombre' => $itemData['impuesto_nombre'] ?? null,
+                'impuesto_porcentaje' => floatval($itemData['impuesto_porcentaje'] ?? 0),
+                'impuesto_monto' => floatval($itemData['impuesto_monto'] ?? 0),
             ]);
         }
     }

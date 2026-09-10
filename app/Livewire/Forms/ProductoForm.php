@@ -20,7 +20,7 @@ class ProductoForm extends Form
 
     public string $tipo = 'producto';
 
-    public bool $aplica_impuesto = true;
+    public ?int $impuesto_id = null;
 
     public string $imagen_path = '';
 
@@ -34,7 +34,7 @@ class ProductoForm extends Form
             'codigo' => ['nullable', 'string', 'max:255'],
             'precio' => ['required', 'numeric', 'min:0'],
             'tipo' => ['required', 'string', 'in:producto,servicio'],
-            'aplica_impuesto' => ['boolean'],
+            'impuesto_id' => ['nullable', 'exists:impuestos,id'],
             'imagen_path' => ['nullable', 'string'],
             'activo' => ['boolean'],
         ];
@@ -48,7 +48,7 @@ class ProductoForm extends Form
         $this->codigo = $producto->codigo ?? '';
         $this->precio = $producto->precio;
         $this->tipo = $producto->tipo;
-        $this->aplica_impuesto = $producto->aplica_impuesto;
+        $this->impuesto_id = $producto->impuesto_id;
         $this->imagen_path = $producto->imagen_path ?? '';
         $this->activo = $producto->activo;
     }

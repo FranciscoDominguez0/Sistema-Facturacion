@@ -17,10 +17,15 @@ class Producto extends Model
         'codigo',
         'precio',
         'tipo',
-        'aplica_impuesto',
+        'impuesto_id',
         'imagen_path',
         'activo',
     ];
+
+    public function impuesto()
+    {
+        return $this->belongsTo(Impuesto::class);
+    }
 
     protected function casts(): array
     {

@@ -2,22 +2,25 @@
 
 namespace App\Livewire\Roles;
 
-use Livewire\Component;
 use Livewire\Attributes\Layout;
-use Spatie\Permission\Models\Role;
+use Livewire\Component;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolIndex extends Component
 {
     public $rolActivoId = null;
+
     public $modalRolVisible = false;
+
     public $nuevoRolNombre = '';
+
     public $permisosAsignados = [];
 
     public function mount()
     {
         $this->authorize('empresa.gestionar');
-        
+
         $primerRol = Role::first();
         if ($primerRol) {
             $this->seleccionarRol($primerRol->id);
@@ -46,15 +49,15 @@ class RolIndex extends Component
         $this->authorize('empresa.gestionar');
 
         $this->validate([
-            'nuevoRolNombre' => 'required|string|max:255|unique:roles,name'
+            'nuevoRolNombre' => 'required|string|max:255|unique:roles,name',
         ]);
 
         $nuevoRol = Role::create(['name' => $this->nuevoRolNombre]);
         $this->modalRolVisible = false;
-        
+
         // Seleccionamos automáticamente el rol recién creado
         $this->seleccionarRol($nuevoRol->id);
-        
+
         $this->dispatch('toast', message: 'Rol creado exitosamente.', type: 'success');
     }
 
@@ -62,7 +65,9 @@ class RolIndex extends Component
     {
         $this->authorize('empresa.gestionar');
 
-        if (!$this->rolActivoId) return;
+        if (! $this->rolActivoId) {
+            return;
+        }
 
         $rol = Role::find($this->rolActivoId);
         if ($rol) {
@@ -76,10 +81,11 @@ class RolIndex extends Component
     {
         $roles = Role::withCount('users')->get();
         $rolActivo = Role::with('permissions')->find($this->rolActivoId);
-        $permisosAgrupados = Permission::all()->groupBy(function($permiso) {
+        $permisosAgrupados = Permission::all()->groupBy(function ($permiso) {
             // Separa por punto si usa notación dot, o espacio. Tomamos la primera palabra como módulo.
             $partes = preg_split('/[\s.]+/', $permiso->name);
-            return $partes[0] ?? 'General'; 
+
+            return $partes[0] ?? 'General';
         });
 
         return view('livewire.roles.rol-index', compact('roles', 'rolActivo', 'permisosAgrupados'));

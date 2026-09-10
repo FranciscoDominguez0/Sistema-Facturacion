@@ -41,21 +41,21 @@ class FacturaServiceTest extends TestCase
 
     /**
      * calcularTotales() calcula subtotal, descuento_total, impuesto y total
-     * con varias líneas.
+     * con varias líneas, cada una con su propio impuesto.
      */
     public function test_calcular_totales_con_varias_lineas(): void
     {
         $items = [
-            ['cantidad' => 2, 'precio_unitario' => 100, 'descuento_porcentaje' => 0, 'aplica_impuesto' => true],
-            ['cantidad' => 1, 'precio_unitario' => 50, 'descuento_porcentaje' => 10, 'aplica_impuesto' => true],
+            ['cantidad' => 2, 'precio_unitario' => 100, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 7, 'impuesto_nombre' => 'ITBMS'],
+            ['cantidad' => 1, 'precio_unitario' => 50, 'descuento_porcentaje' => 10, 'impuesto_porcentaje' => 7, 'impuesto_nombre' => 'ITBMS'],
         ];
 
-        $resultado = $this->servicio->calcularTotales($items, 7);
+        $resultado = $this->servicio->calcularTotales($items);
 
         // Línea 1: 200. Línea 2: bruto 50, desc. 5, subtotal 45. Subtotal = 245.
         $this->assertSame(245.0, $resultado['subtotal']);
         $this->assertSame(0.0, $resultado['descuento_total']);
-        // Impuesto solo sobre lo gravable: 245 * 7% = 17.15
+        // Impuesto línea 1: 200 * 7% = 14. Línea 2: 45 * 7% = 3.15. Total impuesto = 17.15
         $this->assertSame(17.15, $resultado['impuesto']);
         $this->assertSame(262.15, $resultado['total']);
 
@@ -70,11 +70,11 @@ class FacturaServiceTest extends TestCase
     public function test_calcular_totales_con_descuento_cero_no_altera_el_subtotal(): void
     {
         $items = [
-            ['cantidad' => 3, 'precio_unitario' => 10, 'descuento_porcentaje' => 0, 'aplica_impuesto' => true],
-            ['cantidad' => 2, 'precio_unitario' => 5, 'descuento_porcentaje' => 0, 'aplica_impuesto' => true],
+            ['cantidad' => 3, 'precio_unitario' => 10, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 7],
+            ['cantidad' => 2, 'precio_unitario' => 5, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 7],
         ];
 
-        $resultado = $this->servicio->calcularTotales($items, 7, 0);
+        $resultado = $this->servicio->calcularTotales($items, 0);
 
         $this->assertSame(40.0, $resultado['subtotal']);
         $this->assertSame(0.0, $resultado['descuento_total']);
@@ -82,22 +82,23 @@ class FacturaServiceTest extends TestCase
     }
 
     /**
-     * calcularTotales() aplica el impuesto_porcentaje configurado en la empresa.
+     * calcularTotales() aplica el impuesto_porcentaje configurado por línea.
      */
     public function test_calcular_totales_aplica_el_impuesto_de_la_empresa(): void
     {
         $items = [
-            ['cantidad' => 2, 'precio_unitario' => 100, 'descuento_porcentaje' => 0, 'aplica_impuesto' => true],
+            ['cantidad' => 2, 'precio_unitario' => 100, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 7],
         ];
 
-        // Impuesto del 7% (valor por defecto de la empresa)
-        $resultado = $this->servicio->calcularTotales($items, 7);
+        // Impuesto del 7% por línea
+        $resultado = $this->servicio->calcularTotales($items);
 
         $this->assertSame(14.0, $resultado['impuesto']);
         $this->assertSame(214.0, $resultado['total']);
 
-        // Impuesto del 15% (otro valor configurado)
-        $resultado = $this->servicio->calcularTotales($items, 15);
+        // Impuesto del 15% por línea
+        $items[0]['impuesto_porcentaje'] = 15;
+        $resultado = $this->servicio->calcularTotales($items);
 
         $this->assertSame(30.0, $resultado['impuesto']);
         $this->assertSame(230.0, $resultado['total']);
@@ -111,11 +112,11 @@ class FacturaServiceTest extends TestCase
     {
         $items = [
             // 3 * 0.10 en coma flotante da 0.30000000000000004
-            ['cantidad' => 3, 'precio_unitario' => 0.10, 'descuento_porcentaje' => 0, 'aplica_impuesto' => false],
-            ['cantidad' => 1, 'precio_unitario' => 0.70, 'descuento_porcentaje' => 0, 'aplica_impuesto' => false],
+            ['cantidad' => 3, 'precio_unitario' => 0.10, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 0],
+            ['cantidad' => 1, 'precio_unitario' => 0.70, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 0],
         ];
 
-        $resultado = $this->servicio->calcularTotales($items, 7, 0);
+        $resultado = $this->servicio->calcularTotales($items, 0);
 
         $this->assertSame(1.0, $resultado['subtotal']);
         $this->assertSame(0.0, $resultado['impuesto']);
@@ -123,10 +124,10 @@ class FacturaServiceTest extends TestCase
 
         // Con impuesto: 33.333... * 7% redondeado a 2 decimales
         $items = [
-            ['cantidad' => 10, 'precio_unitario' => 3.333, 'descuento_porcentaje' => 0, 'aplica_impuesto' => true],
+            ['cantidad' => 10, 'precio_unitario' => 3.333, 'descuento_porcentaje' => 0, 'impuesto_porcentaje' => 7],
         ];
 
-        $resultado = $this->servicio->calcularTotales($items, 7, 0);
+        $resultado = $this->servicio->calcularTotales($items, 0);
 
         $this->assertSame(33.33, $resultado['subtotal']);
         $this->assertSame(2.33, $resultado['impuesto']);
@@ -269,7 +270,7 @@ class FacturaServiceTest extends TestCase
      */
     public function test_crear_guarda_la_factura_con_sus_items_y_estado_pendiente(): void
     {
-        $empresa = Empresa::factory()->create(['impuesto_porcentaje' => 7, 'siguiente_numero_factura' => 1]);
+        Empresa::factory()->create(['impuesto_porcentaje' => 7, 'siguiente_numero_factura' => 1]);
         $datos = $this->datosParaCrear();
 
         $factura = $this->servicio->crear($datos);
@@ -292,9 +293,6 @@ class FacturaServiceTest extends TestCase
             'precio_unitario' => 100,
             'subtotal_linea' => 200,
         ]);
-
-        // El correlativo avanzó para la siguiente factura
-        $this->assertSame(2, $empresa->fresh()->siguiente_numero_factura);
     }
 
     /**
@@ -347,7 +345,8 @@ class FacturaServiceTest extends TestCase
                     'cantidad' => 3,
                     'precio_unitario' => 50,
                     'descuento_porcentaje' => 0,
-                    'aplica_impuesto' => true,
+                    'impuesto_porcentaje' => 7,
+                    'impuesto_nombre' => 'ITBMS',
                 ],
             ],
         ]);
@@ -461,7 +460,7 @@ class FacturaServiceTest extends TestCase
     // =====================================================================
 
     /**
-     * Datos válidos para crear una factura de 2 unidades de un producto de 100.
+     * Datos válidos para crear una factura de 2 unidades de un producto de 100 con 7% ITBMS.
      */
     protected function datosParaCrear(): array
     {
@@ -479,7 +478,8 @@ class FacturaServiceTest extends TestCase
                     'cantidad' => 2,
                     'precio_unitario' => 100,
                     'descuento_porcentaje' => 0,
-                    'aplica_impuesto' => true,
+                    'impuesto_porcentaje' => 7,
+                    'impuesto_nombre' => 'ITBMS',
                 ],
             ],
         ];

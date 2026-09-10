@@ -313,7 +313,7 @@ class ProductoTest extends TestCase
     }
 
     /**
-     * aplica_impuesto se guarda según el toggle del formulario.
+     * impuesto_id se guarda correctamente al crear un producto.
      */
     public function test_aplica_impuesto_se_guarda_segun_el_toggle(): void
     {
@@ -323,12 +323,12 @@ class ProductoTest extends TestCase
             ->test(ProductoForm::class)
             ->set('form.nombre', 'Producto Sin Impuesto')
             ->set('form.precio', '10.00')
-            ->set('form.aplica_impuesto', false)
+            ->set('form.impuesto_id', null)
             ->call('save');
 
         $this->assertDatabaseHas('productos', [
             'nombre' => 'Producto Sin Impuesto',
-            'aplica_impuesto' => false,
+            'impuesto_id' => null,
         ]);
     }
 

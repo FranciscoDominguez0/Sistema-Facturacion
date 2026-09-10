@@ -3,7 +3,6 @@
 namespace Tests\Feature\Usuarios;
 
 use App\Models\User;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -100,7 +99,6 @@ class UsuarioTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $usuario->id]);
         $this->assertNull(User::find($usuario->id));
     }
-
 
     // =====================================================================
     // Seguridad

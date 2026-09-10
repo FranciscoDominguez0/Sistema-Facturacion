@@ -20,7 +20,7 @@ class ProductoFactory extends Factory
             'codigo' => fake()->unique()->bothify('SKU-####'),
             'precio' => fake()->randomFloat(2, 1, 1000),
             'tipo' => 'producto',
-            'aplica_impuesto' => true,
+            'impuesto_id' => null,
             'imagen_path' => null,
             'activo' => true,
         ];

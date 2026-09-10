@@ -31,10 +31,7 @@ class EmpresaForm extends Component
         $this->logo_path_actual = $empresa->logo_path;
     }
 
-    public function getImpuestoChipPreviewProperty()
-    {
-        return $this->form->vistaPreviaImpuesto();
-    }
+
 
     public function guardar()
     {

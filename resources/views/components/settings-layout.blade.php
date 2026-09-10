@@ -16,6 +16,12 @@
                             Detalles de la Empresa
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('configuracion.impuestos') }}" wire:navigate
+                            class="block w-full px-3 py-2 text-sm transition-all text-left rounded-lg {{ $activa === 'impuestos' ? 'bg-slate-100 text-slate-900 font-semibold' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50' }}">
+                            Impuestos
+                        </a>
+                    </li>
                 </ul>
             </div>
 
