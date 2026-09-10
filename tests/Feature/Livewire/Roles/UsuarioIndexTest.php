@@ -164,7 +164,8 @@ class UsuarioIndexTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(UsuarioIndex::class)
-            ->assertSee('Siguiente')
+            ->assertSee('chevron_right')
+            ->assertSee('aria-label="Página siguiente"', false)
             ->assertSee('aria-current="page"', false);
     }
 
