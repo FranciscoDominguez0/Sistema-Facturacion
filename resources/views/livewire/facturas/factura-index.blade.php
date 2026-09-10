@@ -60,8 +60,8 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-slate-800 font-medium">{{ $factura->cliente->nombre }}</div>
-                            @if($factura->cliente->identificacion_fiscal)
-                                <div class="text-xs text-slate-500 mt-0.5">ID: {{ $factura->cliente->identificacion_fiscal }}</div>
+                            @if($factura->cliente->identificacion)
+                                <div class="text-xs text-slate-500 mt-0.5">ID: {{ $factura->cliente->identificacion }}</div>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-sm text-slate-600">

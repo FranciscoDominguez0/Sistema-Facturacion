@@ -111,7 +111,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse($facturas->take(10) as $factura)
+                    @forelse($facturas as $factura)
                     <tr class="hover:bg-slate-50 transition-colors group">
                         <td class="px-6 py-4 text-sovereign-blue font-bold text-sm">
                             <a href="{{ route('facturas.show', $factura->id) }}" wire:navigate class="hover:underline">{{ $factura->numero_factura }}</a>

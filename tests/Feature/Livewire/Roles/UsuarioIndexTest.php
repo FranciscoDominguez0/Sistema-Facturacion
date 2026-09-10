@@ -155,6 +155,41 @@ class UsuarioIndexTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $aEditar->id, 'name' => 'Nombre Actualizado']);
     }
 
+    public function test_muestra_la_paginacion_con_mas_de_cinco_usuarios()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('usuarios.ver');
+
+        User::factory()->count(6)->create();
+
+        Livewire::actingAs($user)
+            ->test(UsuarioIndex::class)
+            ->assertSee('Siguiente')
+            ->assertSee('aria-current="page"', false);
+    }
+
+    public function test_la_paginacion_de_settings_usuarios_no_duplica_el_prefijo()
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo('usuarios.ver');
+
+        User::factory()->count(6)->create();
+
+        $respuesta = $this->actingAs($user)->get('/settings/usuarios');
+
+        $respuesta->assertOk();
+
+        preg_match_all('/href="([^"]*page=2[^"]*)"[^>]*wire:navigate/', $respuesta->getContent(), $coincidencias);
+
+        $hrefs = $coincidencias[1] ?? [];
+
+        $this->assertNotEmpty($hrefs, 'Debe existir un enlace a la página 2.');
+        foreach ($hrefs as $href) {
+            $this->assertStringNotContainsString('/settings/settings/', $href);
+            $this->assertStringStartsWith('/settings/usuarios?page=2', $href);
+        }
+    }
+
     public function test_permisos_distintos_no_comparten_estado()
     {
         Permission::firstOrCreate(['name' => 'clientes.editar']);

@@ -100,23 +100,19 @@ class Dashboard extends Component
 
         $this->mesActual = Carbon::now()->translatedFormat('M Y');
 
-        // KPIs del periodo seleccionado
-        $this->ventasTotales = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
-            ->whereBetween('fecha_emision', [$inicio, $fin])
-            ->sum('total');
+        // KPIs del periodo seleccionado (una consulta agrupada en lugar de varias sueltas)
+        $resumen = $this->resumenFacturas($inicio, $fin);
+        $resumenAnterior = $this->resumenFacturas($inicioAnterior, $finAnterior);
 
-        $this->totalFacturas = Factura::whereBetween('fecha_emision', [$inicio, $fin])->count();
+        $this->ventasTotales = $resumen['ventas'];
+        $this->totalFacturas = $resumen['total'];
 
         $this->nuevosClientes = Cliente::whereBetween('created_at', [$inicio, $fin])->count();
 
         // Crecimiento comparado con el periodo anterior equivalente
-        $ventasAnterior = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
-            ->whereBetween('fecha_emision', [$inicioAnterior, $finAnterior])
-            ->sum('total');
-        $this->ventasCrecimiento = $ventasAnterior > 0 ? (($this->ventasTotales - $ventasAnterior) / $ventasAnterior) * 100 : 0;
+        $this->ventasCrecimiento = $resumenAnterior['ventas'] > 0 ? (($this->ventasTotales - $resumenAnterior['ventas']) / $resumenAnterior['ventas']) * 100 : 0;
 
-        $facturasAnterior = Factura::whereBetween('fecha_emision', [$inicioAnterior, $finAnterior])->count();
-        $this->facturasCrecimiento = $facturasAnterior > 0 ? (($this->totalFacturas - $facturasAnterior) / $facturasAnterior) * 100 : 0;
+        $this->facturasCrecimiento = $resumenAnterior['total'] > 0 ? (($this->totalFacturas - $resumenAnterior['total']) / $resumenAnterior['total']) * 100 : 0;
 
         $clientesAnterior = Cliente::whereBetween('created_at', [$inicioAnterior, $finAnterior])->count();
         $this->clientesCrecimiento = $clientesAnterior > 0 ? (($this->nuevosClientes - $clientesAnterior) / $clientesAnterior) * 100 : 0;
@@ -182,15 +178,41 @@ class Dashboard extends Component
 
         $ahora = Carbon::now();
 
+        $primerMes = $ahora->copy()->startOfMonth();
         if ($this->periodoGrafico === 'anio') {
             $totalMeses = $ahora->month;
-            for ($i = 0; $i < $totalMeses; $i++) {
-                $this->agregarMesAlGrafico($ahora->copy()->startOfYear()->addMonths($i), $meses, $ingresos, $volumen);
-            }
+            $primerMes = $ahora->copy()->startOfYear();
         } else {
             $cantidad = $this->periodoGrafico === '12M' ? 12 : 6;
-            for ($i = $cantidad - 1; $i >= 0; $i--) {
-                $this->agregarMesAlGrafico($ahora->copy()->startOfMonth()->subMonths($i), $meses, $ingresos, $volumen);
+            $totalMeses = $cantidad;
+            $primerMes = $ahora->copy()->startOfMonth()->subMonths($cantidad - 1);
+        }
+
+        // Una sola consulta agrupada por mes (antes: 2 consultas por mes).
+        $filaMes = "to_char(fecha_emision, 'YYYY-MM')";
+        $resultados = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
+            ->whereBetween('fecha_emision', [$primerMes->copy()->startOfMonth(), $ahora->copy()->endOfMonth()])
+            ->selectRaw("{$filaMes} as mes")
+            ->selectRaw('SUM(total) as ingresos')
+            ->selectRaw('COUNT(*) as volumen')
+            ->groupByRaw($filaMes)
+            ->orderByRaw($filaMes)
+            ->get()
+            ->keyBy('mes');
+
+        for ($i = 0; $i < $totalMeses; $i++) {
+            $mes = $primerMes->copy()->addMonths($i);
+            $fila = $resultados->get($mes->format('Y-m'));
+
+            $meses[] = ucfirst($mes->translatedFormat('M'));
+
+            $totalMes = $fila ? round((float) $fila->ingresos, 2) : 0;
+            $ingresos[] = $totalMes;
+            $volumen[] = $fila ? (int) $fila->volumen : 0;
+
+            if ($totalMes > $this->mesMasAltoValor) {
+                $this->mesMasAltoValor = $totalMes;
+                $this->mesMasAlto = ucfirst($mes->translatedFormat('F'));
             }
         }
 
@@ -202,49 +224,56 @@ class Dashboard extends Component
 
         $this->totalIngresosGrafico = array_sum($ingresos);
         $this->totalPedidosGrafico = array_sum($volumen);
-
-    }
-
-    private function agregarMesAlGrafico(Carbon $mes, array &$meses, array &$ingresos, array &$volumen)
-    {
-        $inicio = $mes->copy()->startOfMonth();
-        $fin = $mes->copy()->endOfMonth();
-
-        $meses[] = ucfirst($mes->translatedFormat('M'));
-
-        $totalMes = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
-            ->whereBetween('fecha_emision', [$inicio, $fin])
-            ->sum('total');
-
-        $ingresos[] = round($totalMes, 2);
-
-        $volumen[] = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
-            ->whereBetween('fecha_emision', [$inicio, $fin])
-            ->count();
-
-        if ($totalMes > $this->mesMasAltoValor) {
-            $this->mesMasAltoValor = $totalMes;
-            $this->mesMasAlto = ucfirst($mes->translatedFormat('F'));
-        }
     }
 
     private function calcularMetricasExtra()
     {
         [$inicio, $fin] = $this->rangoActual();
 
-        $totalNoAnuladas = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
-            ->whereBetween('fecha_emision', [$inicio, $fin])
-            ->count();
+        // Tasa de cobro con una sola consulta agrupada por estado.
+        $facturasPorEstado = Factura::whereBetween('fecha_emision', [$inicio, $fin])
+            ->selectRaw('estado, COUNT(*) as total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado')
+            ->map(fn ($total) => (int) $total);
 
-        $totalPagadas = Factura::where('estado', EstadoFactura::PAGADA->value)
-            ->whereBetween('fecha_emision', [$inicio, $fin])
-            ->count();
+        $totalNoAnuladas = $facturasPorEstado->except([EstadoFactura::ANULADA->value])->sum();
+        $totalPagadas = $facturasPorEstado[EstadoFactura::PAGADA->value] ?? 0;
 
         $this->tasaCobro = $totalNoAnuladas > 0 ? ($totalPagadas / $totalNoAnuladas) * 100 : 0;
 
         $this->proyeccionTrimestre = $this->ventasTotales * 3;
 
-        // Sparklines - últimos 14 días
+        // Sparklines - últimos 14 días (una consulta agrupada por día y serie,
+        // antes: 4 consultas por día).
+        $inicioSpark = Carbon::now()->subDays(13)->startOfDay();
+        $finSpark = Carbon::now()->endOfDay();
+
+        $ventasPorDia = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
+            ->whereBetween('fecha_emision', [$inicioSpark, $finSpark])
+            ->selectRaw('fecha_emision::date as dia, SUM(total) as total')
+            ->groupBy('dia')
+            ->pluck('total', 'dia')
+            ->map(fn ($total) => round((float) $total, 2));
+
+        $facturasPorDia = Factura::whereBetween('fecha_emision', [$inicioSpark, $finSpark])
+            ->selectRaw('fecha_emision::date as dia, COUNT(*) as total')
+            ->groupBy('dia')
+            ->pluck('total', 'dia')
+            ->map(fn ($total) => (int) $total);
+
+        $clientesPorDia = Cliente::whereBetween('created_at', [$inicioSpark, $finSpark])
+            ->selectRaw('created_at::date as dia, COUNT(*) as total')
+            ->groupBy('dia')
+            ->pluck('total', 'dia')
+            ->map(fn ($total) => (int) $total);
+
+        $gastosPorDia = Gasto::whereBetween('fecha', [$inicioSpark, $finSpark])
+            ->selectRaw('fecha::date as dia, SUM(monto) as total')
+            ->groupBy('dia')
+            ->pluck('total', 'dia')
+            ->map(fn ($total) => round((float) $total, 2));
+
         $this->sparklineVentas = [];
         $this->sparklineFacturas = [];
         $this->sparklineClientes = [];
@@ -253,21 +282,29 @@ class Dashboard extends Component
         for ($i = 13; $i >= 0; $i--) {
             $dia = Carbon::now()->subDays($i)->format('Y-m-d');
 
-            $ventasDia = Factura::where('estado', '!=', EstadoFactura::ANULADA->value)
-                ->whereDate('fecha_emision', $dia)
-                ->sum('total');
-
-            $facturasDia = Factura::whereDate('fecha_emision', $dia)->count();
-
-            $clientesDia = Cliente::whereDate('created_at', $dia)->count();
-
-            $gastosDia = Gasto::whereDate('fecha', $dia)->sum('monto');
-
-            $this->sparklineVentas[] = round($ventasDia, 2);
-            $this->sparklineFacturas[] = $facturasDia;
-            $this->sparklineClientes[] = $clientesDia;
-            $this->sparklineGastos[] = round($gastosDia, 2);
+            $this->sparklineVentas[] = $ventasPorDia[$dia] ?? 0;
+            $this->sparklineFacturas[] = $facturasPorDia[$dia] ?? 0;
+            $this->sparklineClientes[] = $clientesPorDia[$dia] ?? 0;
+            $this->sparklineGastos[] = $gastosPorDia[$dia] ?? 0;
         }
+    }
+
+    /**
+     * Ventas (sin anuladas) y total de facturas de un rango en una sola consulta.
+     *
+     * @return array{ventas: float, total: int}
+     */
+    private function resumenFacturas(Carbon $inicio, Carbon $fin): array
+    {
+        $resumen = Factura::whereBetween('fecha_emision', [$inicio, $fin])
+            ->selectRaw('SUM(CASE WHEN estado <> ? THEN total ELSE 0 END) as ventas', [EstadoFactura::ANULADA->value])
+            ->selectRaw('COUNT(*) as total_facturas')
+            ->first();
+
+        return [
+            'ventas' => round((float) ($resumen->ventas ?? 0), 2),
+            'total' => (int) ($resumen->total_facturas ?? 0),
+        ];
     }
 
     /**

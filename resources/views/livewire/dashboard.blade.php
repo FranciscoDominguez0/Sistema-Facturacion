@@ -374,7 +374,7 @@
                     <span class="material-symbols-outlined text-base">payments</span>
                   </div>
                   <div>
-                    <div class="text-xs font-bold text-slate-900">{{ $gasto->descripcion }}</div>
+                    <div class="text-xs font-bold text-slate-900">{{ $gasto->concepto }}</div>
                     <div class="text-[10px] text-slate-400 flex items-center gap-1.5">
                       <span class="inline-block px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 font-semibold">{{ $gasto->categoria }}</span>
                     </div>

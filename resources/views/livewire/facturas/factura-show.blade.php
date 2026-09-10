@@ -65,8 +65,8 @@
                     <div>
                         <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Facturado a:</h3>
                         <p class="text-lg font-bold text-slate-800">{{ $factura->cliente->nombre }}</p>
-                        @if($factura->cliente->identificacion_fiscal)
-                            <p class="text-sm font-medium text-slate-500 mt-1">NIT/ID: {{ $factura->cliente->identificacion_fiscal }}</p>
+                        @if($factura->cliente->identificacion)
+                            <p class="text-sm font-medium text-slate-500 mt-1">NIT/ID: {{ $factura->cliente->identificacion }}</p>
                         @endif
                     </div>
                     

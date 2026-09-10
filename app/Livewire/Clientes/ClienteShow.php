@@ -19,7 +19,7 @@ class ClienteShow extends Component
     public function render()
     {
         return view('livewire.clientes.cliente-show', [
-            'facturas' => $this->cliente->facturas()->latest()->get(),
+            'facturas' => $this->cliente->facturas()->latest()->limit(10)->get(),
         ]);
     }
 }
