@@ -7,7 +7,16 @@
 
     <title>{{ config('app.name', 'VigiFact') }}</title>
 
-    <!-- Fonts autoalojadas en /fonts (figtree y material symbols): las descarga el CSS -->
+    <!-- Iconos: fuente autoalojada en /fonts (declarada en app.css). El preload
+         la pide en paralelo y el script evita ver las ligaduras como texto. -->
+    <link rel="preload" href="/fonts/material-symbols/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
+
+    <script>
+        if (document.fonts) {
+            document.documentElement.classList.add('fonts-cargando');
+            document.fonts.ready.then(() => document.documentElement.classList.remove('fonts-cargando'));
+        }
+    </script>
 
     <style>
         .material-symbols-outlined {

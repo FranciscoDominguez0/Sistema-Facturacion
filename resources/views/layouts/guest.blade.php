@@ -7,10 +7,16 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts & Icons -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <!-- Iconos: fuente autoalojada en /fonts (declarada en app.css). El preload
+             la pide en paralelo y el script evita ver las ligaduras como texto. -->
+        <link rel="preload" href="/fonts/material-symbols/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
+
+        <script>
+            if (document.fonts) {
+                document.documentElement.classList.add('fonts-cargando');
+                document.fonts.ready.then(() => document.documentElement.classList.remove('fonts-cargando'));
+            }
+        </script>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

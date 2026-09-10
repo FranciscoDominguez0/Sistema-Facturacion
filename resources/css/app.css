@@ -59,11 +59,20 @@
     unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* Material Symbols: fuente variable para los iconos (pesos 100 a 700). */
+/* Material Symbols: fuente variable para los iconos (pesos 100 a 700).
+   font-display: block evita que las ligaduras se pinten como texto ("home", "add")
+   mientras la fuente carga: el navegador mantiene el espacio invisible hasta ~3s. */
 @font-face {
     font-family: 'Material Symbols Outlined';
     font-style: normal;
     font-weight: 100 700;
-    font-display: swap;
+    font-display: block;
     src: url('/fonts/material-symbols/material-symbols-outlined.woff2') format('woff2');
+}
+
+/* Refuerzo para conexiones lentas: si la fuente de iconos tarda más que el periodo
+   de bloque, se ocultan las ligaduras hasta que terminen de cargar (la clase la
+   agrega/quita el script inline del layout). */
+.fonts-cargando .material-symbols-outlined {
+    visibility: hidden;
 }
