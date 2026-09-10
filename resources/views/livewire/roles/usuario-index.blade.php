@@ -7,112 +7,69 @@
 
 <x-settings-layout activa="usuarios">
     @if($view === 'list')
-        <div class="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h2 class="text-xl text-slate-900 font-bold">Usuarios</h2>
-                
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    @if(count($seleccionados) > 0)
-                        <x-dropdown align="left" width="48">
-                            <x-slot name="trigger">
-                                <div class="bg-slate-800 text-white text-sm px-4 py-2 rounded-md font-medium cursor-pointer flex items-center gap-2">
-                                    Comportamiento
-                                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
-                                </div>
-                            </x-slot>
-                            <x-slot name="content">
-                                <button wire:click="confirmarEliminacionMasiva" type="button" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[16px]">delete</span>
-                                    Eliminar
-                                </button>
-                            </x-slot>
-                        </x-dropdown>
-                    @endif
-                    <div class="flex-1 md:w-64">
-                        <input wire:model.live.debounce.300ms="search" class="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-300" placeholder="Filtrar" type="text"/>
-                    </div>
-                    <x-dropdown align="left" width="48">
-                        <x-slot name="trigger">
-                            <div class="bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-600 flex items-center gap-2 cursor-pointer">
-                                Estado: {{ $filtroEstado ?: 'Todos' }}
-                                <span class="material-symbols-outlined text-[16px]">expand_more</span>
-                            </div>
-                        </x-slot>
-                        <x-slot name="content">
-                            <button wire:click="$set('filtroEstado', '')" type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium">
-                                Todos
-                            </button>
-                            <button wire:click="$set('filtroEstado', 'Activo')" type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                Activo
-                            </button>
-                            <button wire:click="$set('filtroEstado', 'Inactivo')" type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                Inactivo
-                            </button>
-                        </x-slot>
-                    </x-dropdown>
-                    <button wire:click="crearUsuario" type="button" class="bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-slate-800 transition-colors ml-2">
-                        Nuevo Usuario
-                    </button>
-                </div>
-            </div>
+        <x-listado
+            titulo="Usuarios"
+            metodo-crear="crearUsuario"
+            texto-crear="Nuevo Usuario"
+            :seleccionados="$seleccionados"
+            :ids-pagina="$idsPagina"
+            :paginador="$usuarios"
+        >
+            <x-slot name="filtros">
+                <x-dropdown align="left" width="48">
+                    <x-slot name="trigger">
+                        <div class="bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-600 flex items-center gap-2 cursor-pointer">
+                            Estado: {{ $filtroEstado ?: 'Todos' }}
+                            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                        </div>
+                    </x-slot>
+                    <x-slot name="content">
+                        <button wire:click="$set('filtroEstado', '')" type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium">
+                            Todos
+                        </button>
+                        <button wire:click="$set('filtroEstado', 'Activo')" type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Activo
+                        </button>
+                        <button wire:click="$set('filtroEstado', 'Inactivo')" type="button" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            Inactivo
+                        </button>
+                    </x-slot>
+                </x-dropdown>
+            </x-slot>
 
-            <!-- Tabla Ejecutiva de Usuarios -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-b border-slate-200 bg-white">
-                            <th class="py-3 px-4 w-12 text-center">
-                                <input type="checkbox" class="rounded border-slate-300 text-slate-900 shadow-sm cursor-pointer" wire:click="seleccionarTodos" @checked($idsPagina && count(array_diff($idsPagina, $seleccionados)) === 0)>
-                            </th>
-                            <th class="py-3 px-4 font-medium text-slate-500 w-1/2">
-                                <div class="flex items-center gap-1 cursor-pointer">
-                                    Nombre
-                                    <div class="flex flex-col">
-                                        <span class="material-symbols-outlined text-[10px] leading-none">expand_less</span>
-                                        <span class="material-symbols-outlined text-[10px] leading-none -mt-1">expand_more</span>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="py-3 px-4 font-medium text-slate-500">
-                                <div class="flex items-center gap-1 cursor-pointer">
-                                    Correo
-                                    <div class="flex flex-col">
-                                        <span class="material-symbols-outlined text-[10px] leading-none">expand_less</span>
-                                        <span class="material-symbols-outlined text-[10px] leading-none -mt-1">expand_more</span>
-                                    </div>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($usuarios as $usuario)
-                        <tr wire:key="usuario-{{ $usuario->id }}" wire:click="editarUsuario({{ $usuario->id }})" class="hover:bg-slate-50 transition-colors cursor-pointer group">
-                            <td class="py-4 px-4 text-center" @click.stop>
-                                <input type="checkbox" value="{{ $usuario->id }}" wire:model.live="seleccionados" class="rounded border-slate-300 text-slate-900 shadow-sm cursor-pointer">
-                            </td>
-                            <td class="py-4 px-4 text-blue-600 font-medium">
-                                {{ $usuario->name }}
-                            </td>
-                            <td class="py-4 px-4 text-slate-700">
-                                {{ $usuario->email }}
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="py-8 px-4 text-center text-slate-500">
-                                No se encontraron usuarios.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                
-                <!-- Paginación -->
-                <x-paginacion :paginador="$usuarios" />
-            </div>
-        </div>
+            <x-slot name="cabeceras">
+                <th class="py-3 px-4 font-medium text-slate-500 w-1/2">
+                    Nombre
+                </th>
+                <th class="py-3 px-4 font-medium text-slate-500">
+                    Correo
+                </th>
+            </x-slot>
+
+            <x-slot name="filas">
+                @forelse($usuarios as $usuario)
+                <tr wire:key="usuario-{{ $usuario->id }}" wire:click="editarUsuario({{ $usuario->id }})" class="hover:bg-slate-50 transition-colors cursor-pointer group">
+                    <td class="py-4 px-4 text-center" @click.stop>
+                        <input type="checkbox" value="{{ $usuario->id }}" wire:model.live="seleccionados" class="rounded border-slate-300 text-slate-900 shadow-sm cursor-pointer">
+                    </td>
+                    <td class="py-4 px-4 text-blue-600 font-medium">
+                        {{ $usuario->name }}
+                    </td>
+                    <td class="py-4 px-4 text-slate-700">
+                        {{ $usuario->email }}
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="3" class="py-8 px-4 text-center text-slate-500">
+                        No se encontraron usuarios.
+                    </td>
+                </tr>
+                @endforelse
+            </x-slot>
+        </x-listado>
     @else
         <!-- Formulario Inline de Creación/Edición -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

@@ -54,9 +54,11 @@ class FacturaService
             $impuestoTotal += $resultadoLinea['impuesto_monto'];
 
             // Desglose
-            if ($item['impuesto_porcentaje'] > 0) {
+            $impuestoPorcentajeLinea = floatval($item['impuesto_porcentaje'] ?? 0);
+
+            if ($impuestoPorcentajeLinea > 0) {
                 $nombre = $item['impuesto_nombre'] ?? 'Impuesto';
-                $porc = number_format($item['impuesto_porcentaje'], 2).'%';
+                $porc = number_format($impuestoPorcentajeLinea, 2).'%';
                 $llave = "$nombre ($porc)";
 
                 if (! isset($desgloseImpuestos[$llave])) {

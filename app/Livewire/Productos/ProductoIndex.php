@@ -36,6 +36,7 @@ class ProductoIndex extends Component
     public function render()
     {
         $productos = Producto::query()
+            ->with('impuesto')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('nombre', 'ilike', '%'.$this->escapeLike($this->search).'%')

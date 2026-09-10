@@ -8,6 +8,7 @@ use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\FacturaItem;
 use App\Models\Gasto;
+use App\Models\Impuesto;
 use App\Models\Producto;
 use App\Models\User;
 use App\Services\FacturaService;
@@ -45,12 +46,41 @@ class DatosDemoSeeder extends Seeder
 
         Empresa::actual();
 
+        $impuestos = $this->crearImpuestos();
         $vendedores = $this->crearVendedores();
-        $productos = Producto::factory()->count(self::TOTAL_PRODUCTOS)->create();
+
+        // Cada producto recibe un impuesto al azar y un par quedan exentos para probar.
+        $productos = Producto::factory()
+            ->count(self::TOTAL_PRODUCTOS)
+            ->create([
+                'impuesto_id' => fn () => $impuestos->random()->id,
+            ]);
+
+        $productos->take(2)->each(fn (Producto $producto) => $producto->update(['impuesto_id' => null]));
+        $productos->load('impuesto');
+
         $clientes = Cliente::factory()->count(self::TOTAL_CLIENTES)->create();
 
         $this->crearFacturas($clientes, $vendedores, $productos);
         $this->crearGastos($vendedores);
+    }
+
+    /**
+     * Crea los impuestos de prueba (7%, 10%, 15% y 20%). Idempotente por nombre.
+     *
+     * @return Collection<int, Impuesto>
+     */
+    private function crearImpuestos()
+    {
+        return collect([
+            ['nombre' => 'ITBMS', 'porcentaje' => 7],
+            ['nombre' => 'Impuesto 10', 'porcentaje' => 10],
+            ['nombre' => 'Impuesto 15', 'porcentaje' => 15],
+            ['nombre' => 'Impuesto 20', 'porcentaje' => 20],
+        ])->map(fn (array $datos) => Impuesto::updateOrCreate(
+            ['nombre' => $datos['nombre']],
+            ['porcentaje' => $datos['porcentaje'], 'activo' => true],
+        ));
     }
 
     /**
@@ -149,7 +179,9 @@ class DatosDemoSeeder extends Seeder
                 'cantidad' => random_int(1, 5),
                 'precio_unitario' => $producto->precio,
                 'descuento_porcentaje' => 0,
-                'aplica_impuesto' => $producto->aplica_impuesto,
+                'impuesto_id' => $producto->impuesto_id,
+                'impuesto_nombre' => $producto->impuesto?->nombre,
+                'impuesto_porcentaje' => $producto->impuesto?->porcentaje ?? 0,
             ];
         }
 

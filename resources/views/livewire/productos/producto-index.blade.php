@@ -85,7 +85,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-slate-800">${{ number_format($producto->precio, 2) }}</div>
-                            <div class="text-[10px] text-slate-400">{{ $producto->aplica_impuesto ? '+ Impuesto' : 'Exento' }}</div>
+                            <div class="text-[10px] text-slate-400">
+                                {{ $producto->impuesto ? $producto->impuesto->nombre.' ('.number_format($producto->impuesto->porcentaje, 2).'%)' : 'Exento' }}
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($producto->activo)

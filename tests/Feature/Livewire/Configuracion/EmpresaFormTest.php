@@ -51,17 +51,13 @@ class EmpresaFormTest extends TestCase
             'nombre' => 'Empresa Cargada',
             'moneda' => 'EUR - Euro',
             'simbolo_moneda' => '€',
-            'impuesto_nombre' => 'IVA',
-            'impuesto_porcentaje' => 21,
         ]);
 
         Livewire::actingAs($user)
             ->test(EmpresaForm::class)
             ->assertSet('form.nombre', 'Empresa Cargada')
             ->assertSet('form.moneda', 'EUR - Euro')
-            ->assertSet('form.simbolo_moneda', '€')
-            ->assertSet('form.impuesto_nombre', 'IVA')
-            ->assertSet('form.impuesto_porcentaje', 21);
+            ->assertSet('form.simbolo_moneda', '€');
     }
 
     public function test_guarda_datos_de_empresa_correctamente()
@@ -75,8 +71,6 @@ class EmpresaFormTest extends TestCase
             ->set('form.identificacion_fiscal', '123456789')
             ->set('form.moneda', 'EUR - Euro')
             ->set('form.simbolo_moneda', '€')
-            ->set('form.impuesto_nombre', 'IVA')
-            ->set('form.impuesto_porcentaje', 21)
             ->call('guardar')
             ->assertDispatched('toast');
 
@@ -84,7 +78,6 @@ class EmpresaFormTest extends TestCase
         $this->assertEquals('Empresa Test SA', $empresa->nombre);
         $this->assertEquals('123456789', $empresa->identificacion_fiscal);
         $this->assertEquals('EUR - Euro', $empresa->moneda);
-        $this->assertEquals(21, $empresa->impuesto_porcentaje);
     }
 
     public function test_guarda_el_logo_y_reemplaza_el_anterior()
@@ -124,13 +117,11 @@ class EmpresaFormTest extends TestCase
             ->set('form.nombre', '')
             ->set('form.moneda', '')
             ->set('form.simbolo_moneda', '')
-            ->set('form.impuesto_nombre', '')
             ->call('guardar')
             ->assertHasErrors([
                 'form.nombre' => 'required',
                 'form.moneda' => 'required',
                 'form.simbolo_moneda' => 'required',
-                'form.impuesto_nombre' => 'required',
             ]);
     }
 

@@ -52,6 +52,8 @@ class FacturaFactory extends Factory
     public function conItems(int $cantidad = 2): static
     {
         return $this->afterCreating(function (Factura $factura) use ($cantidad) {
+            $empresa = Empresa::first() ?? Empresa::factory()->create();
+
             $items = [];
 
             for ($i = 0; $i < $cantidad; $i++) {
@@ -60,12 +62,12 @@ class FacturaFactory extends Factory
                     'cantidad' => fake()->numberBetween(1, 5),
                     'precio_unitario' => fake()->randomFloat(2, 10, 500),
                     'descuento_porcentaje' => 0,
-                    'aplica_impuesto' => true,
+                    'impuesto_nombre' => $empresa->impuesto_nombre,
+                    'impuesto_porcentaje' => $empresa->impuesto_porcentaje,
                 ];
             }
 
-            $empresa = Empresa::first() ?? Empresa::factory()->create();
-            $totales = app(FacturaService::class)->calcularTotales($items, (float) $empresa->impuesto_porcentaje, 0);
+            $totales = app(FacturaService::class)->calcularTotales($items, 0);
 
             foreach ($totales['items_actualizados'] as $item) {
                 FacturaItem::create([
@@ -77,6 +79,9 @@ class FacturaFactory extends Factory
                     'descuento_porcentaje' => $item['descuento_porcentaje'] ?? 0,
                     'descuento_monto' => $item['descuento_monto'],
                     'subtotal_linea' => $item['subtotal_linea'],
+                    'impuesto_nombre' => $item['impuesto_nombre'],
+                    'impuesto_porcentaje' => $item['impuesto_porcentaje'],
+                    'impuesto_monto' => $item['impuesto_monto'],
                 ]);
             }
 

@@ -96,7 +96,7 @@
                         <select id="impuesto" wire:model="form.impuesto_id" class="w-full appearance-none bg-white border @error('form.impuesto_id') border-red-300 focus:border-red-500 focus:ring-red-500 @else border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue @enderror rounded-lg pl-4 pr-10 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 transition-colors cursor-pointer">
                             <option value="">Seleccione un impuesto...</option>
                             @foreach($impuestos as $impuesto)
-                                <option value="{{ $impuesto->id }}">{{ $impuesto->nombre }} ({{ number_format($impuesto->porcentaje, 2) }}%)</option>
+                                <option value="{{ $impuesto->id }}">{{ number_format($impuesto->porcentaje, 2) }}%</option>
                             @endforeach
                         </select>
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
