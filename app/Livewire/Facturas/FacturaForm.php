@@ -5,6 +5,7 @@ namespace App\Livewire\Facturas;
 use App\Livewire\Forms\FacturaForm as FacturaFormObject;
 use App\Models\Cliente;
 use App\Models\Empresa;
+use App\Models\Impuesto;
 use App\Models\Producto;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -152,6 +153,23 @@ class FacturaForm extends Component
                         $this->form->items[$index]['precio_unitario'] = 0;
                     }
                 }
+            } elseif (str_ends_with($property, '.impuesto_id')) {
+                preg_match('/form\.items\.(\d+)\.impuesto_id/', $property, $matches);
+                if (isset($matches[1])) {
+                    $index = $matches[1];
+                    // Cada línea tiene su propio impuesto: al cambiarlo se actualizan
+                    // el nombre y porcentaje (null = producto exento).
+                    $impuesto = $value ? Impuesto::find($value) : null;
+                    $this->form->items[$index]['impuesto_id'] = $impuesto?->id;
+                    $this->form->items[$index]['impuesto_nombre'] = $impuesto?->nombre;
+                    $this->form->items[$index]['impuesto_porcentaje'] = $impuesto?->porcentaje ?? 0;
+                }
+            } elseif (str_ends_with($property, '.descuento_porcentaje')) {
+                preg_match('/form\.items\.(\d+)\.descuento_porcentaje/', $property, $matches);
+                if (isset($matches[1])) {
+                    // El selector de descuento entrega el porcentaje como texto.
+                    $this->form->items[$matches[1]]['descuento_porcentaje'] = floatval($value ?: 0);
+                }
             }
             $this->form->recalcularTotales();
         }
@@ -237,10 +255,26 @@ class FacturaForm extends Component
 
     public function render()
     {
+        $impuestos = Impuesto::where('activo', true)->orderBy('porcentaje')->get();
+
         return view('livewire.facturas.factura-form', [
             'clientes' => Cliente::where('activo', true)->get(['id', 'nombre'])->toArray(),
             'vendedores' => Gate::allows('facturas.vendedor.seleccionar') ? User::role('Vendedor')->get(['id', 'name as nombre'])->toArray() : [],
             'productos' => Producto::where('activo', true)->get(['id', 'nombre', 'precio', 'impuesto_id'])->toArray(),
+            // Opciones del selector de impuesto por línea: "Exento" + los activos.
+            'opcionesImpuestos' => collect([['id' => '', 'nombre' => 'Exento']])
+                ->concat($impuestos->map(fn (Impuesto $impuesto) => [
+                    'id' => (string) $impuesto->id,
+                    'nombre' => $impuesto->nombre.' ('.number_format($impuesto->porcentaje, 2).'%)',
+                ]))
+                ->all(),
+            // Opciones del selector de descuento por línea.
+            'opcionesDescuentos' => collect([0, 5, 10, 15, 20, 25, 30, 40, 50])
+                ->map(fn ($porcentaje) => [
+                    'id' => (string) $porcentaje,
+                    'nombre' => $porcentaje.'%',
+                ])
+                ->all(),
         ]);
     }
 }

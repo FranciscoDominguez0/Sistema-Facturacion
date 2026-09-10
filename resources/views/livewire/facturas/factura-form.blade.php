@@ -106,7 +106,7 @@
                                 <th class="px-2 py-3">Producto / Descripción</th>
                                 <th class="px-2 py-3 w-24 text-center">Cant.</th>
                                 <th class="px-2 py-3 w-32 text-right">Precio U.</th>
-                                <th class="px-2 py-3 w-24 text-center">Desc %</th>
+                                <th class="px-2 py-3 w-40 text-center">Desc %</th>
                                 <th class="px-2 py-3 w-28 text-right">Subtotal</th>
                                 <th class="px-2 py-3 w-10"></th>
                             </tr>
@@ -118,7 +118,7 @@
                                     <div class="space-y-3">
                                         <!-- Selector de Producto (Autocomplete) -->
                                         <x-select-searchable 
-                                            wire:model="form.items.{{ $index }}.producto_id" 
+                                            wire:model.live="form.items.{{ $index }}.producto_id" 
                                             :options="$productos" 
                                             placeholder="Buscar producto..." 
                                             action-text="Nuevo Producto" 
@@ -137,7 +137,12 @@
                                     <input type="number" step="0.01" min="0" wire:model.live.debounce.500ms="form.items.{{ $index }}.precio_unitario" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
-                                    <input type="number" step="0.01" min="0" max="100" wire:model.live.debounce.500ms="form.items.{{ $index }}.descuento_porcentaje" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <!-- Descuento de la línea con el mismo componente que clientes/vendedores -->
+                                    <x-select-searchable 
+                                        wire:model.live="form.items.{{ $index }}.descuento_porcentaje" 
+                                        :options="$opcionesDescuentos" 
+                                        placeholder="0%" 
+                                    />
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3 text-right">
                                     <span class="inline-block mt-1.5 font-medium text-slate-800 text-sm">
@@ -147,6 +152,8 @@
                                     <div class="text-[10px] text-slate-500 mt-0.5">
                                         +${{ number_format($item['impuesto_monto'], 2) }}
                                     </div>
+                                    @else
+                                    <div class="text-[10px] text-emerald-600 font-medium mt-0.5">Exento</div>
                                     @endif
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3 text-center">
@@ -207,13 +214,6 @@
                             <span class="text-red-600 font-medium">-${{ number_format($form->descuento_total, 2) }}</span>
                         </div>
                     @endif
-
-                    @foreach($form->desglose_impuestos as $nombreImpuesto => $montoImpuesto)
-                        <div class="flex justify-between items-center text-sm text-slate-600">
-                            <span>{{ $nombreImpuesto }}</span>
-                            <span class="text-slate-900 font-medium">${{ number_format($montoImpuesto, 2) }}</span>
-                        </div>
-                    @endforeach
 
                     <div class="border-t border-slate-100 pt-3 mt-2 flex justify-between items-end">
                         <span class="text-base font-bold text-slate-900">Total</span>
