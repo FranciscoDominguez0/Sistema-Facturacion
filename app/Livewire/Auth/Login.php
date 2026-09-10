@@ -18,6 +18,9 @@ class Login extends Component
         // Regenera la sesión para prevenir session fixation
         session()->regenerate();
 
+        // Marca la sesión para mostrar el skeleton del dashboard al entrar.
+        session(['is_from_login' => true]);
+
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 

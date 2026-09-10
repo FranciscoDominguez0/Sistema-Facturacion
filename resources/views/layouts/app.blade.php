@@ -1,3 +1,10 @@
+@php
+// Skeleton del dashboard: solo al entrar tras el login (flag de sesión o referer)
+// y únicamente en la página del dashboard. El flag se consume al primer uso.
+$mostrarSkeleton = request()->routeIs('dashboard')
+    && (session()->pull('is_from_login', false)
+        || str_contains((string) request()->headers->get('referer', ''), '/login'));
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -33,6 +40,27 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Barra de progreso de navegación de Livewire con el color de la marca */
+        :root {
+            --livewire-progress-bar-color: #1A2B44;
+        }
+
+        /* Entrada sutil del contenido al cambiar de pantalla */
+        @keyframes subtleFadeIn {
+            0% { opacity: 0; transform: translateY(6px); }
+            100% { opacity: 1; transform: none; }
+        }
+        .animate-fade-in-up {
+            animation: subtleFadeIn 0.35s ease-out;
+        }
+
+        /* Salida suave del contenido al navegar (SPA): sin blurs ni blancos */
+        .page-transitioning {
+            opacity: 0.65 !important;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out !important;
+        }
     </style>
 
     <!-- Scripts -->
@@ -175,13 +203,87 @@
 
         <!-- Main Canvas Area -->
         <main class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
-            <div class="w-full">
-                {{ $slot }}
+            <div class="relative w-full">
+                @if ($mostrarSkeleton)
+                    <!-- Skeleton del dashboard: se superpone al contenido real y se
+                         desvanece tras una pausa simulada (ver script al final). -->
+                    <div id="skeleton-dashboard" class="absolute inset-0 z-20 transition-opacity duration-300">
+                        <x-skeleton-dashboard />
+                    </div>
+                @endif
+                <div id="actual-page-content" class="w-full transition-opacity duration-300 {{ $mostrarSkeleton ? 'opacity-0' : '' }}">
+                    {{ $slot }}
+                </div>
             </div>
         </main>
     </div>
 
     <x-toast />
     @livewireScripts
+
+    <script>
+        (function () {
+            var skeletonProcesado = false;
+
+            // Skeleton post-login: pausa simulada, desvanecimiento del skeleton y
+            // entrada suave del contenido real.
+            function handleLoginSkeleton() {
+                var skeleton = document.getElementById('skeleton-dashboard');
+                var contenido = document.getElementById('actual-page-content');
+                if (!skeleton || !contenido || skeletonProcesado) return;
+                skeletonProcesado = true;
+
+                setTimeout(function () {
+                    contenido.classList.remove('opacity-0');
+                    contenido.classList.add('opacity-100', 'animate-fade-in-up');
+                    skeleton.style.opacity = '0';
+
+                    setTimeout(function () {
+                        skeleton.remove();
+                        setTimeout(function () {
+                            contenido.classList.remove('animate-fade-in-up');
+                        }, 400);
+                    }, 300);
+                }, 800);
+            }
+
+            // Transición entre pantallas (navegación SPA con wire:navigate):
+            // salida suave al iniciar y entrada con fade-in-up al terminar.
+            document.addEventListener('livewire:navigate', function () {
+                var contenido = document.getElementById('actual-page-content');
+                if (contenido) contenido.classList.add('page-transitioning');
+            });
+
+            document.addEventListener('livewire:navigated', function () {
+                var contenido = document.getElementById('actual-page-content');
+                if (contenido) {
+                    contenido.classList.remove('page-transitioning');
+                    contenido.classList.add('animate-fade-in-up');
+                    setTimeout(function () {
+                        contenido.classList.remove('animate-fade-in-up');
+                    }, 400);
+                }
+                handleLoginSkeleton();
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var contenido = document.getElementById('actual-page-content');
+                if (contenido) contenido.classList.remove('page-transitioning');
+                handleLoginSkeleton();
+            });
+
+            // Al volver con el botón atrás (BFCache) no deben quedar estados residuales.
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) {
+                    var contenido = document.getElementById('actual-page-content');
+                    if (contenido) contenido.classList.remove('page-transitioning');
+                }
+            });
+
+            // Primer ingreso tras el login vía navegación SPA: este script se
+            // re-ejecuta después del swap, así que se intenta aquí también.
+            handleLoginSkeleton();
+        })();
+    </script>
 </body>
 </html>
