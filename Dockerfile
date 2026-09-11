@@ -1,14 +1,17 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.4-apache
 
-# Instalar dependencias de ejecución (Runtime) y compilación (Build)
-RUN apk add --no-cache \
-    bash git curl zip unzip \
-    nodejs npm chromium nss freetype harfbuzz ca-certificates ttf-freefont \
-    libpng libjpeg-turbo libpq icu-libs oniguruma libzip \
-    && apk add --no-cache --virtual .build-deps \
-        libpng-dev libjpeg-turbo-dev freetype-dev libxml2-dev libpq-dev icu-dev oniguruma-dev libzip-dev $PHPIZE_DEPS \
+# Habilitar módulos de Apache necesarios para Laravel
+RUN a2enmod rewrite headers
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl zip unzip \
+    chromium \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    libpq-dev libicu-dev libzip-dev \
+    libxml2-dev libonig-dev \
+    nodejs npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_pgsql \
@@ -22,29 +25,33 @@ RUN apk add --no-cache \
         xml \
         zip \
         opcache \
-    && apk del .build-deps \
-    && rm -rf /tmp/pear
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Configurar Puppeteer para usar el Chromium del sistema (Alpine)
+# Configurar Puppeteer para usar Chromium del sistema
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Instalar Puppeteer globalmente para que Browsershot lo tenga siempre disponible
+# Instalar Puppeteer globalmente
 RUN npm install -g puppeteer
-ENV NODE_PATH="/usr/lib/node_modules:/usr/local/lib/node_modules"
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar configuración personalizada de PHP y OPcache
+# Configuración de PHP y OPcache
 COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
-# Copiar script de entrada
+# Virtual host de Laravel
+COPY docker/apache/laravel.conf /etc/apache2/sites-available/000-default.conf
+
+# Script de entrada
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /var/www/html
 
+EXPOSE 80
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["apache2-foreground"]
