@@ -3,6 +3,7 @@
     'placeholder' => 'Seleccione...',
     'actionText' => null,
     'actionClick' => null,
+    'compact' => false,
 ])
 
 <div x-data="{
@@ -28,7 +29,10 @@
     get selectedName() {
         if (this.value === null || this.value === undefined || this.value === '') return '';
         const opt = this.options.find(o => o.id == this.value);
-        return opt ? opt.nombre : '';
+        if (opt) return opt.nombre;
+        // Valor no listado (ej. descuento configurado en el producto): se muestra igual.
+        const numero = parseFloat(this.value);
+        return isNaN(numero) ? '' : String(parseFloat(numero.toFixed(2))) + '%';
     },
     selectOption(id) {
         this.value = id;
@@ -55,7 +59,8 @@
             @focus="open = true"
             @input="search = $event.target.value"
             @keydown.escape="open = false; search = ''"
-            class="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg pl-4 pr-10 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none transition-colors shadow-sm"
+            :class="{{ $compact ? "'py-1.5 pl-3 pr-8 rounded-md'" : "'py-3 pl-4 pr-10 rounded-lg'" }}"
+            class="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none transition-colors shadow-sm"
         />
         <button type="button" @click="manejarIcono" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-700 transition-colors">
             <span class="material-symbols-outlined text-[20px]" x-text="open || value ? 'close' : 'expand_more'"></span>

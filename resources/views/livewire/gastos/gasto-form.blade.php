@@ -39,7 +39,7 @@
                 <div>
                     <label for="monto" class="block text-sm font-semibold text-slate-700 mb-1">Monto <span class="text-red-500">*</span></label>
                     <div class="relative">
-                        <input type="number" step="0.01" min="0.01" id="monto" wire:model="form.monto" class="w-full bg-white border @error('form.monto') border-red-300 focus:border-red-500 focus:ring-red-500 @else border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue @enderror rounded-lg pl-4 pr-8 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 transition-colors" placeholder="0.00">
+                        <x-precio-input id="monto" wire:model="form.monto" class="pr-8 @error('form.monto') border-red-300 focus:border-red-500 focus:ring-red-500 @enderror" placeholder="0,00" />
                         <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">$</span>
                     </div>
                     @error('form.monto') <span class="text-red-500 text-xs mt-1 block font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span>{{ $message }}</span> @enderror

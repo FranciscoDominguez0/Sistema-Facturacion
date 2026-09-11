@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-red-100 hover:text-red-700 transition-colors shadow-sm" type="button">
+                <button wire:click="confirmarEliminacion" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-red-100 hover:text-red-700 transition-colors shadow-sm" type="button">
                     <span class="material-symbols-outlined text-[18px]">delete</span>
                     <span class="text-sm font-medium">Eliminar</span>
                 </button>
@@ -190,4 +190,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <x-modal-danger show="confirmingDeletion" title="Eliminar Gasto">
+        <p class="text-sm text-slate-600 mb-6">
+            ¿Estás seguro de que deseas eliminar este gasto por <strong>{{ $gasto->monto_formateado }}</strong>? Esta acción no se puede deshacer y los registros financieros serán afectados.
+        </p>
+        
+        <div class="flex justify-end gap-3">
+            <button type="button" x-on:click="show = false" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                Cancelar
+            </button>
+            <button type="button" x-on:click="show = false" wire:click="eliminar" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="eliminar" class="material-symbols-outlined text-[18px]">delete</span>
+                <span wire:loading wire:target="eliminar" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                Eliminar
+            </button>
+        </div>
+    </x-modal-danger>
 </div>

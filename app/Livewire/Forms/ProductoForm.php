@@ -18,6 +18,8 @@ class ProductoForm extends Form
 
     public string $precio = '';
 
+    public string $descuento_porcentaje = '0';
+
     public string $tipo = 'producto';
 
     public ?int $impuesto_id = null;
@@ -33,6 +35,7 @@ class ProductoForm extends Form
             'descripcion' => ['nullable', 'string'],
             'codigo' => ['nullable', 'string', 'max:255'],
             'precio' => ['required', 'numeric', 'min:0'],
+            'descuento_porcentaje' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'tipo' => ['required', 'string', 'in:producto,servicio'],
             'impuesto_id' => ['nullable', 'exists:impuestos,id'],
             'imagen_path' => ['nullable', 'string'],
@@ -47,6 +50,7 @@ class ProductoForm extends Form
         $this->descripcion = $producto->descripcion ?? '';
         $this->codigo = $producto->codigo ?? '';
         $this->precio = $producto->precio;
+        $this->descuento_porcentaje = (string) ($producto->descuento_porcentaje ?? 0);
         $this->tipo = $producto->tipo;
         $this->impuesto_id = $producto->impuesto_id;
         $this->imagen_path = $producto->imagen_path ?? '';

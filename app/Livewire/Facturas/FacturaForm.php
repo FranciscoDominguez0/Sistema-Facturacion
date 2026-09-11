@@ -145,6 +145,8 @@ class FacturaForm extends Component
                         $producto = Producto::with('impuesto')->find($value);
                         if ($producto) {
                             $this->form->items[$index]['precio_unitario'] = $producto->precio;
+                            // Descuento configurado en el producto (0 si no lleva).
+                            $this->form->items[$index]['descuento_porcentaje'] = $producto->descuento_porcentaje ?? 0;
                             $this->form->items[$index]['impuesto_id'] = $producto->impuesto_id;
                             $this->form->items[$index]['impuesto_nombre'] = $producto->impuesto ? $producto->impuesto->nombre : null;
                             $this->form->items[$index]['impuesto_porcentaje'] = $producto->impuesto ? $producto->impuesto->porcentaje : 0;

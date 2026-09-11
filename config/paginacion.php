@@ -6,4 +6,7 @@ return [
 
     // Listado de usuarios (settings/usuarios): páginas más cortas.
     'por_pagina_usuarios' => 5,
+
+    // Listado de impuestos (settings/impuestos): páginas más cortas.
+    'por_pagina_impuestos' => 5,
 ];

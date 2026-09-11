@@ -19,6 +19,7 @@ class ProductoFactory extends Factory
             'descripcion' => fake()->sentence(),
             'codigo' => fake()->unique()->bothify('SKU-####'),
             'precio' => fake()->randomFloat(2, 1, 1000),
+            'descuento_porcentaje' => 0,
             'tipo' => 'producto',
             'impuesto_id' => null,
             'imagen_path' => null,

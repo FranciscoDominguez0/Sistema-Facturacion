@@ -105,7 +105,7 @@ class ImpuestoIndex extends Component
     {
         $impuestos = Impuesto::where('nombre', 'ilike', '%'.$this->search.'%')
             ->orderBy('id', 'desc')
-            ->paginate(10);
+            ->paginate(config('paginacion.por_pagina_impuestos'));
 
         return view('livewire.configuracion.impuesto-index', [
             'impuestos' => $impuestos,

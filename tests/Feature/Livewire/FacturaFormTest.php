@@ -6,6 +6,7 @@ use App\Livewire\Facturas\FacturaForm;
 use App\Models\Cliente;
 use App\Models\Empresa;
 use App\Models\Factura;
+use App\Models\Impuesto;
 use App\Models\Producto;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -213,6 +214,51 @@ class FacturaFormTest extends TestCase
             ->set('form.items.0.producto_id', $producto->id)
             ->set('form.items.0.descripcion', 'Laptop Pro 16GB RAM')
             ->assertSet('form.items.0.descripcion', 'Laptop Pro 16GB RAM');
+    }
+
+    /**
+     * Al seleccionar un producto se copian su impuesto y, si el usuario cambia
+     * el impuesto de la línea, el cálculo y lo guardado usan el nuevo valor.
+     */
+    public function test_cambiar_el_impuesto_de_la_linea_recalcula_y_guarda_el_nuevo_porcentaje(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        [$usuario] = $this->usuarioConVendedor(['facturas.crear']);
+
+        $impuesto7 = Impuesto::create(['nombre' => 'ITBMS', 'porcentaje' => 7, 'activo' => true]);
+        $impuesto10 = Impuesto::create(['nombre' => 'Impuesto Especial', 'porcentaje' => 10, 'activo' => true]);
+        $producto = Producto::factory()->create([
+            'nombre' => 'Laptop Pro',
+            'precio' => 150.50,
+            'impuesto_id' => $impuesto7->id,
+        ]);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class)
+            // Seleccionar el producto completa su impuesto (7%)
+            ->set('form.items.0.producto_id', $producto->id)
+            ->assertSet('form.items.0.impuesto_id', $impuesto7->id)
+            ->assertSet('form.items.0.impuesto_nombre', 'ITBMS')
+            ->assertSet('form.items.0.impuesto_porcentaje', 7)
+            // Cambiar el impuesto de la línea a 10% recalcula todo
+            ->set('form.items.0.impuesto_id', $impuesto10->id)
+            ->assertSet('form.items.0.impuesto_nombre', 'Impuesto Especial')
+            ->assertSet('form.items.0.impuesto_porcentaje', 10)
+            ->assertSet('form.items.0.impuesto_monto', 15.05)
+            ->assertSet('form.impuesto', 15.05)
+            ->set('form.cliente_id', $cliente->id)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        // Lo guardado usa el impuesto cambiado, no el del producto
+        $this->assertDatabaseHas('facturas', ['impuesto' => 15.05]);
+        $this->assertDatabaseHas('factura_items', [
+            'impuesto_id' => $impuesto10->id,
+            'impuesto_nombre' => 'Impuesto Especial',
+            'impuesto_porcentaje' => 10,
+            'impuesto_monto' => 15.05,
+        ]);
     }
 
     /**

@@ -106,7 +106,8 @@
                                 <th class="px-2 py-3">Producto / Descripción</th>
                                 <th class="px-2 py-3 w-24 text-center">Cant.</th>
                                 <th class="px-2 py-3 w-32 text-right">Precio U.</th>
-                                <th class="px-2 py-3 w-40 text-center">Desc %</th>
+                                <th class="px-2 py-3 w-48 text-center">Desc %</th>
+                                <th class="px-2 py-3 w-44 text-center">Impuesto</th>
                                 <th class="px-2 py-3 w-28 text-right">Subtotal</th>
                                 <th class="px-2 py-3 w-10"></th>
                             </tr>
@@ -134,14 +135,34 @@
                                     <input type="number" step="0.01" min="0.01" wire:model.live.debounce.500ms="form.items.{{ $index }}.cantidad" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
-                                    <input type="number" step="0.01" min="0" wire:model.live.debounce.500ms="form.items.{{ $index }}.precio_unitario" class="w-full text-right bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-3 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <x-precio-input wire:model.live.debounce.500ms="form.items.{{ $index }}.precio_unitario" class="!px-3 !py-1.5 !rounded-md" />
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
+                                    @php
+                                        // Si el descuento de la línea no está en las opciones (viene del
+                                        // producto), se agrega para que el selector lo muestre.
+                                        $descuentoLinea = floatval($item['descuento_porcentaje'] ?? 0);
+                                        $opcionesDescuentoLinea = collect($opcionesDescuentos)->first(fn ($opcion) => $opcion['id'] == $descuentoLinea)
+                                            ? $opcionesDescuentos
+                                            : collect([[
+                                                'id' => (string) $descuentoLinea,
+                                                'nombre' => rtrim(rtrim(number_format($descuentoLinea, 2), '0'), '.').'%',
+                                            ]])->concat($opcionesDescuentos)->values()->all();
+                                    @endphp
                                     <!-- Descuento de la línea con el mismo componente que clientes/vendedores -->
                                     <x-select-searchable 
+                                        compact
                                         wire:model.live="form.items.{{ $index }}.descuento_porcentaje" 
-                                        :options="$opcionesDescuentos" 
+                                        :options="$opcionesDescuentoLinea" 
                                         placeholder="0%" 
+                                    />
+                                </td>
+                                <td class="px-2 py-3 align-top pt-3">
+                                    <x-select-searchable 
+                                        compact
+                                        wire:model.live="form.items.{{ $index }}.impuesto_id" 
+                                        :options="$opcionesImpuestos" 
+                                        placeholder="Exento" 
                                     />
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3 text-right">
@@ -165,7 +186,7 @@
                             @endforeach
                             @if(count($form->items) === 0)
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-slate-500 text-sm">
+                                <td colspan="7" class="px-6 py-8 text-center text-slate-500 text-sm">
                                     No hay líneas en esta factura.
                                 </td>
                             </tr>
@@ -324,7 +345,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Precio Unitario <span class="text-red-500">*</span></label>
-                            <input type="number" step="0.01" min="0" wire:model="nuevo_producto_precio" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                            <x-precio-input wire:model="nuevo_producto_precio" />
                             <x-input-error :messages="$errors->get('nuevo_producto_precio')" class="mt-1 text-xs" />
                         </div>
 

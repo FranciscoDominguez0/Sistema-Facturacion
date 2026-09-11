@@ -102,20 +102,19 @@
         </div>
     @endif
 
-    <x-modal name="eliminar-masivo" wire:model="modalEliminarMasivoVisible" maxWidth="md">
-        <div class="p-6">
-            <h2 class="text-lg font-bold text-slate-900">Eliminar impuestos</h2>
-            <p class="mt-1 text-sm text-slate-600">
-                ¿Estás seguro de que deseas eliminar los impuestos seleccionados? Esta acción no se puede deshacer y podría afectar las facturas existentes si estaban asociados a ellas.
-            </p>
-            <div class="mt-6 flex justify-end gap-3">
-                <button wire:click="$set('modalEliminarMasivoVisible', false)" type="button" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
-                    Cancelar
-                </button>
-                <button wire:click="eliminarMasivo" type="button" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
-                    Sí, eliminar
-                </button>
-            </div>
+    <x-modal-danger show="modalEliminarMasivoVisible" title="Eliminar impuestos">
+        <p class="text-sm text-slate-600 mb-6">
+            ¿Estás seguro de que deseas eliminar los impuestos seleccionados? Esta acción no se puede deshacer y podría afectar las facturas existentes si estaban asociados a ellas.
+        </p>
+        <div class="flex justify-end gap-3">
+            <button wire:click="$set('modalEliminarMasivoVisible', false)" type="button" class="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+                Cancelar
+            </button>
+            <button x-on:click="show = false" wire:click="eliminarMasivo" type="button" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="eliminarMasivo" class="material-symbols-outlined text-[18px]">delete</span>
+                <span wire:loading wire:target="eliminarMasivo" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                Sí, eliminar
+            </button>
         </div>
-    </x-modal>
+    </x-modal-danger>
 </x-settings-layout>

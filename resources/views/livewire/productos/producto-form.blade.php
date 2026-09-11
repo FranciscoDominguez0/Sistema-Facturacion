@@ -73,9 +73,16 @@
                     <label for="precio" class="block text-sm font-semibold text-slate-700 mb-1">Precio <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">$</span>
-                        <input type="number" step="0.01" id="precio" wire:model="form.precio" class="w-full bg-white border @error('form.precio') border-red-300 focus:border-red-500 focus:ring-red-500 @else border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue @enderror rounded-lg pl-8 pr-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 transition-colors" placeholder="0.00">
+                        <x-precio-input id="precio" wire:model="form.precio" class="pl-8 @error('form.precio') border-red-300 focus:border-red-500 focus:ring-red-500 @enderror" placeholder="0,00" />
                     </div>
                     @error('form.precio') <span class="text-red-500 text-xs mt-1 block font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span>{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Descuento -->
+                <div>
+                    <label for="descuento_porcentaje" class="block text-sm font-semibold text-slate-700 mb-1">Descuento (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="descuento_porcentaje" wire:model="form.descuento_porcentaje" class="w-full bg-white border @error('form.descuento_porcentaje') border-red-300 focus:border-red-500 focus:ring-red-500 @else border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue @enderror rounded-lg px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 transition-colors" placeholder="0">
+                    @error('form.descuento_porcentaje') <span class="text-red-500 text-xs mt-1 block font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">error</span>{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Descripción -->

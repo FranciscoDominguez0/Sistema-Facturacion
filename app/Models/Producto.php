@@ -16,6 +16,7 @@ class Producto extends Model
         'descripcion',
         'codigo',
         'precio',
+        'descuento_porcentaje',
         'tipo',
         'impuesto_id',
         'imagen_path',
@@ -31,6 +32,7 @@ class Producto extends Model
     {
         return [
             'precio' => 'decimal:2',
+            'descuento_porcentaje' => 'decimal:2',
             'activo' => 'boolean',
         ];
     }

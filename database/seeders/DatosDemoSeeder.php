@@ -53,10 +53,16 @@ class DatosDemoSeeder extends Seeder
         $productos = Producto::factory()
             ->count(self::TOTAL_PRODUCTOS)
             ->create([
-                'impuesto_id' => fn() => $impuestos->random()->id,
+                'impuesto_id' => fn () => $impuestos->random()->id,
             ]);
 
-        $productos->take(2)->each(fn(Producto $producto) => $producto->update(['impuesto_id' => null]));
+        $productos->take(2)->each(fn (Producto $producto) => $producto->update(['impuesto_id' => null]));
+
+        // Algunos productos con descuento configurado para probar el autollenado.
+        $productos->each(fn (Producto $producto) => $producto->update([
+            'descuento_porcentaje' => fake()->randomElement([0, 0, 5, 10, 15]),
+        ]));
+
         $productos->load('impuesto');
 
         $clientes = Cliente::factory()->count(self::TOTAL_CLIENTES)->create();
@@ -77,10 +83,10 @@ class DatosDemoSeeder extends Seeder
             ['nombre' => 'Impuesto 10', 'porcentaje' => 10],
             ['nombre' => 'Impuesto 15', 'porcentaje' => 15],
             ['nombre' => 'Impuesto 20', 'porcentaje' => 20],
-        ])->map(fn(array $datos) => Impuesto::updateOrCreate(
-                ['nombre' => $datos['nombre']],
-                ['porcentaje' => $datos['porcentaje'], 'activo' => true],
-            ));
+        ])->map(fn (array $datos) => Impuesto::updateOrCreate(
+            ['nombre' => $datos['nombre']],
+            ['porcentaje' => $datos['porcentaje'], 'activo' => true],
+        ));
     }
 
     /**
@@ -180,7 +186,6 @@ class DatosDemoSeeder extends Seeder
                 'precio_unitario' => $producto->precio,
                 'descuento_porcentaje' => 0,
                 'aplica_impuesto' => $producto->aplica_impuesto,
-
 
             ];
         }
