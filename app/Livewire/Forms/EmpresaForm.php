@@ -20,6 +20,8 @@ class EmpresaForm extends Form
 
     public ?string $telefono = null;
 
+    public ?string $ubicacion = null;
+
     public ?string $ruc = null;
 
     public ?string $dv = null;
@@ -38,6 +40,7 @@ class EmpresaForm extends Form
         $this->identificacion_fiscal = $empresa->identificacion_fiscal;
         $this->email = $empresa->email;
         $this->telefono = $empresa->telefono;
+        $this->ubicacion = $empresa->ubicacion;
         $this->ruc = $empresa->ruc;
         $this->dv = $empresa->dv;
         $this->moneda = $empresa->moneda;
@@ -53,6 +56,7 @@ class EmpresaForm extends Form
             'identificacion_fiscal' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:30'],
+            'ubicacion' => ['nullable', 'string', 'max:255'],
             'ruc' => ['nullable', 'string', 'max:20'],
             'dv' => ['nullable', 'string', 'max:5'],
             'moneda' => ['required', 'string', 'max:50'],
@@ -72,6 +76,7 @@ class EmpresaForm extends Form
             'identificacion_fiscal' => $this->identificacion_fiscal,
             'email' => $this->email,
             'telefono' => $this->telefono,
+            'ubicacion' => $this->ubicacion,
             'ruc' => $this->ruc,
             'dv' => $this->dv,
             'moneda' => $this->moneda,
@@ -91,6 +96,7 @@ class EmpresaForm extends Form
         $this->identificacion_fiscal = $this->identificacion_fiscal ? trim($this->identificacion_fiscal) : null;
         $this->email = $this->email ? trim($this->email) : null;
         $this->telefono = $this->telefono ? trim($this->telefono) : null;
+        $this->ubicacion = $this->ubicacion ? trim($this->ubicacion) : null;
         $this->ruc = $this->ruc ? trim($this->ruc) : null;
         $this->dv = $this->dv ? trim($this->dv) : null;
         $this->pie_pagina_pdf = $this->pie_pagina_pdf ? trim($this->pie_pagina_pdf) : null;

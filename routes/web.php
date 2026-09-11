@@ -78,6 +78,10 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->middleware('can:facturas.ver')
         ->name('facturas.pdf');
 
+    Route::get('facturas/{factura}/preview', [PdfFacturaController::class, 'preview'])
+        ->middleware('can:facturas.ver')
+        ->name('facturas.preview');
+
     Route::get('gastos', GastoIndex::class)
         ->name('gastos')
         ->middleware('can:gastos.ver');

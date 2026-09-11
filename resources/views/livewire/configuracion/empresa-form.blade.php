@@ -28,6 +28,9 @@
             <button @click="tab = 'valores'" :class="tab === 'valores' ? 'border-sovereign-blue text-sovereign-blue font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'" class="flex-shrink-0 px-5 py-3.5 text-sm border-b-2 transition-all -mb-px">
                 Valores por Defecto
             </button>
+            <button @click="tab = 'ubicacion'" :class="tab === 'ubicacion' ? 'border-sovereign-blue text-sovereign-blue font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'" class="flex-shrink-0 px-5 py-3.5 text-sm border-b-2 transition-all -mb-px">
+                Ubicación
+            </button>
         </div>
 
         <!-- Tab: Detalles -->
@@ -178,6 +181,17 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- Tab: Ubicación -->
+        <div x-show="tab === 'ubicacion'" x-cloak class="divide-y divide-slate-100">
+            <div class="flex items-center gap-6 px-6 py-4">
+                <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Dirección / Ubicación</label>
+                <div class="flex-1">
+                    <input wire:model="form.ubicacion" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all" placeholder="Ej. Calle Principal, Ciudad">
+                    @error('form.ubicacion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
         </div>
 
     </div>

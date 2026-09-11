@@ -4,7 +4,7 @@ namespace App\Mail;
 
 use App\Models\Empresa;
 use App\Models\Factura;
-use Barryvdh\DomPDF\Facade\Pdf;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -42,13 +42,11 @@ class FacturaMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('pdf.factura', [
-            'factura' => $this->factura,
-            'empresa' => Empresa::actual(),
-        ])->output();
+        $pdfService = app(\App\Services\FacturaPdfService::class);
+        $pdfBinary = $pdfService->generarPdfBinario($this->factura);
 
         return [
-            Attachment::fromData(fn () => $pdf, 'factura-'.$this->factura->numero_factura.'.pdf')
+            Attachment::fromData(fn () => $pdfBinary, 'factura-'.$this->factura->numero_factura.'.pdf')
                 ->withMime('application/pdf'),
         ];
     }

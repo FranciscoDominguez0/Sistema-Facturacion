@@ -1,6 +1,6 @@
 FROM php:8.3-fpm-alpine
 
-# Instalar dependencias del sistema requeridas para Laravel, PostgreSQL, DomPDF y Node.js/Vite
+# Instalar dependencias del sistema requeridas para Laravel, PostgreSQL, Node.js y Puppeteer (Chromium)
 RUN apk add --no-cache \
     bash \
     git \
@@ -16,7 +16,17 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libzip-dev \
     nodejs \
-    npm
+    npm \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Configurar Puppeteer para usar el Chromium del sistema (Alpine)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Configurar e instalar extensiones de PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \

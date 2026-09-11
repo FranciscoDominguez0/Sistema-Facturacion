@@ -19,6 +19,7 @@ class Empresa extends Model
         'identificacion_fiscal',
         'email',
         'telefono',
+        'ubicacion',
         'ruc',
         'dv',
         'logo_path',
