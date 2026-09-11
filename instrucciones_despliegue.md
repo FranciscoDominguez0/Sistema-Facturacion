@@ -117,40 +117,18 @@ docker compose exec app php artisan optimize
 
 ---
 
-## 6. Configurar Nginx (en tu servidor) y HTTPS
+## 6. Configurar Nginx Proxy Manager / Dominio
 
-Como hemos configurado Docker para exponer únicamente el motor PHP-FPM en el puerto **9000**, tu servidor web Nginx nativo se encargará de servir los archivos estáticos y enviar las peticiones PHP al contenedor.
+Como usas **Nginx Proxy Manager (NPM)** con interfaz gráfica, la configuración es muy sencilla porque NPM actúa como intermediario HTTP, no como FastCGI. Por esta razón, hemos restaurado el contenedor Nginx interno en el puerto **8088**.
 
-Ejemplo básico de configuración para Nginx en tu servidor (`/etc/nginx/sites-available/facturacion`):
+En tu Nginx Proxy Manager, configura tu dominio así:
 
-```nginx
-server {
-    listen 80;
-    server_name tu-dominio.com;
-    root /var/www/facturacion/public; # Ruta donde clonaste el proyecto
-    
-    index index.php index.html;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        # Pasa la petición al contenedor Docker que escucha en el puerto 9000
-        fastcgi_pass 127.0.0.1:9000; 
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-}
-```
+- **Scheme:** `http`
+- **Forward Hostname / IP:** La IP de tu servidor (ej: `192.168.110.109`)
+- **Forward Port:** `8088`
 
 > [!IMPORTANT]
-> Asegúrate de instalar un certificado SSL gratuito usando **Certbot (Let's Encrypt)** o activando el proxy de **Cloudflare** para que tu aplicación tenga el candado de seguridad (HTTPS). Puppeteer funciona mucho mejor bajo entornos seguros.
+> Recuerda ir a la pestaña **SSL** en tu Nginx Proxy Manager, seleccionar "Request a new SSL Certificate" y activar "Force SSL". Puppeteer y muchas funciones web modernas requieren HTTPS para funcionar correctamente.
 
 ---
 
