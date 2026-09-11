@@ -69,7 +69,7 @@
                                     <span class="material-symbols-outlined text-[16px]">expand_more</span>
                                 </button>
 
-                                <div x-show="open" x-transition class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-20 text-left" style="display: none;">
+                                <div x-show="open" x-transition class="absolute bottom-full right-0 mb-1 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 text-left" style="display: none;">
                                     @can('gastos.editar')
                                         <a href="{{ route('gastos.edit', $gasto) }}" wire:navigate
                                             class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">

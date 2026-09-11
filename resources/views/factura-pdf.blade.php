@@ -3,7 +3,27 @@
 <head>
     <meta charset="utf-8">
     <title>Factura {{ $factura->numero_factura }}</title>
-    @vite(['resources/css/app.css'])
+    @php
+        $cssContent = '';
+        $manifestPath = public_path('build/manifest.json');
+        if (file_exists($manifestPath)) {
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            if (isset($manifest['resources/css/app.css']['file'])) {
+                $cssFile = public_path('build/' . $manifest['resources/css/app.css']['file']);
+                if (file_exists($cssFile)) {
+                    $cssContent = file_get_contents($cssFile);
+                }
+            }
+        }
+    @endphp
+
+    @if($cssContent)
+        <style>
+            {!! $cssContent !!}
+        </style>
+    @else
+        @vite(['resources/css/app.css'])
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -149,6 +169,10 @@
         /* ESTILOS DE IMPRESIÓN / PDF */
         @media print {
             @page { margin: 0; size: A4; }
+            * {
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
             html, body {
                 width: 794px !important;
                 height: 1123px !important;
@@ -156,14 +180,6 @@
                 padding: 0 !important;
                 overflow: hidden !important;
                 background-color: white !important;
-            }
-            .bottom-left-shape {
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
-            }
-            .top-banner {
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
             }
         }
     </style>
@@ -198,7 +214,7 @@
                     </p>
                     
                     @if($empresa->ruc || $empresa->identificacion_fiscal)
-                        <p class="mt-0.5">RUC: <span class="font-medium">{{ $empresa->ruc ?: $empresa->identificacion_fiscal }}{{ $empresa->dv ? '-' . $empresa->dv : '' }}</span></p>
+                        <p class="mt-0.5">RUC: <span class="font-medium">{{ $empresa->ruc ?: $empresa->identificacion_fiscal }}{{ $empresa->dv ? ' DV ' . $empresa->dv : '' }}</span></p>
                     @endif
                 </div>
             </div>
