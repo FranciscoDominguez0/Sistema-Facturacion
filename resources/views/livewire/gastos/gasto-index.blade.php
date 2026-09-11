@@ -30,34 +30,69 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Concepto</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Categoría</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Monto</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Estado</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Nº Gasto</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Fecha</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Registrado por</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Comprobante</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right whitespace-nowrap">Acciones</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Monto</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Concepto</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right whitespace-nowrap">Comportamiento</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse($gastos as $gasto)
                     <tr class="hover:bg-slate-50 transition-colors" wire:key="{{ $gasto->id }}">
-                        <td class="px-6 py-4 text-sm font-medium text-slate-800">{{ $gasto->concepto }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->categoria }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800">{{ $gasto->monto_formateado }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->fecha->format('d/m/Y') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->registradoPor->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->comprobante ?? '—' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                            <a href="{{ route('gastos.show', $gasto) }}" wire:navigate
-                               class="text-slate-400 hover:text-sovereign-blue p-1 rounded transition-colors inline-flex" title="Ver">
-                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                                $badgeEstado = match($gasto->estado) {
+                                    'Pagado' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                                    'Anulado' => 'bg-red-100 text-red-800 border-red-200',
+                                    default => 'bg-sky-100 text-sky-800 border-sky-200',
+                                };
+                            @endphp
+                            <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded-full border {{ $badgeEstado }}">
+                                {{ $gasto->estado }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{{ route('gastos.edit', $gasto) }}" wire:navigate class="font-medium text-blue-600 hover:underline">
+                                GASTO #{{ str_pad((string) $gasto->id, 6, '0', STR_PAD_LEFT) }}
                             </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $gasto->fecha->format('d/m/Y') }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800">{{ $gasto->monto_formateado }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600 max-w-xs truncate">{{ $gasto->concepto }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <div x-data="{ open: false }" class="relative inline-block">
+                                <button @click="open = !open" @click.outside="open = false" type="button"
+                                    class="bg-slate-800 text-white text-sm px-4 py-2 rounded-md font-medium cursor-pointer flex items-center gap-2 hover:bg-slate-700 transition-colors shadow-sm">
+                                    Comportamiento
+                                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                                </button>
+
+                                <div x-show="open" x-transition class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-20 text-left" style="display: none;">
+                                    @can('gastos.editar')
+                                        <a href="{{ route('gastos.edit', $gasto) }}" wire:navigate
+                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400">edit</span>
+                                            Editar
+                                        </a>
+                                    @endcan
+
+                                    @can('gastos.eliminar')
+                                        <div class="border-t border-slate-100 my-1"></div>
+                                        <button type="button" wire:click="confirmarEliminacion({{ $gasto->id }})" @click="open = false"
+                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                            Eliminar
+                                        </button>
+                                    @endcan
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
+                        <td colspan="6" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center justify-center text-slate-500">
                                 <span class="material-symbols-outlined text-4xl mb-3 text-slate-300">receipt</span>
                                 <p class="text-base font-medium text-slate-800 mb-1">No hay gastos registrados</p>
@@ -76,4 +111,23 @@
         <!-- Paginación -->
         <x-paginacion :paginador="$gastos" />
     </div>
+
+    <!-- Modal Eliminar Gasto -->
+    <x-modal-danger show="modalEliminarVisible" title="Eliminar Gasto" maxWidth="sm">
+        @if($gastoAEliminar)
+            <p class="text-sm text-slate-600">
+                ¿Estás seguro de que deseas eliminar el gasto <strong>GASTO #{{ str_pad((string) $gastoAEliminar->id, 6, '0', STR_PAD_LEFT) }}</strong>? Esta acción es irreversible.
+            </p>
+        @endif
+
+        <div class="mt-6 flex justify-end gap-4 pt-4 border-t border-slate-50">
+            <button type="button" @click="show = false" class="px-5 py-2.5 bg-white border border-slate-200 text-sm font-semibold rounded-lg text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                Cancelar
+            </button>
+            <button type="button" wire:click="eliminar" class="px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors shadow-sm" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="eliminar">Eliminar</span>
+                <span wire:loading wire:target="eliminar">Eliminando...</span>
+            </button>
+        </div>
+    </x-modal-danger>
 </div>

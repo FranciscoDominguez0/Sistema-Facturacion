@@ -5,36 +5,33 @@
         ]" />
     @endsection
 
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Listado de Facturas</h2>
-            <p class="text-slate-500 text-sm mt-1">Gestión del historial de ventas facturadas.</p>
-        </div>
-        @can('facturas.crear')
-            <a href="{{ route('facturas.crear') }}" class="inline-flex items-center justify-center px-4 py-2 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm" wire:navigate>
-                <span class="material-symbols-outlined text-[20px] mr-2">add</span>
-                Nueva Venta
-            </a>
-        @endcan
-    </div>
+    <div class="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Listado de Facturas</h2>
 
-    <!-- Filtros y Búsqueda -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="relative w-full sm:w-96">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="material-symbols-outlined text-slate-400 text-lg">search</span>
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+            <div class="relative w-full sm:w-72">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">search</span>
+                </div>
+                <input type="text" wire:model.live.debounce.300ms="search" class="pl-10 block w-full rounded-lg border-slate-300 shadow-sm focus:border-sovereign-blue focus:ring-sovereign-blue sm:text-sm text-slate-900 placeholder-slate-400" placeholder="Buscar por cliente o nº factura...">
             </div>
-            <input type="text" wire:model.live.debounce.300ms="search" class="pl-10 block w-full rounded-lg border-slate-300 shadow-sm focus:border-sovereign-blue focus:ring-sovereign-blue sm:text-sm text-slate-900 placeholder-slate-400" placeholder="Buscar por cliente o nº factura...">
-        </div>
 
-        <div class="w-full sm:w-auto flex items-center gap-2">
-            <span class="text-sm text-slate-500 font-medium">Estado:</span>
-            <select wire:model.live="filtroEstado" class="block w-full sm:w-48 rounded-lg border-slate-300 shadow-sm focus:border-sovereign-blue focus:ring-sovereign-blue sm:text-sm text-slate-900">
-                <option value="Todos">Todos</option>
-                @foreach(\App\Enums\EstadoFactura::cases() as $estado)
-                    <option value="{{ $estado->value }}">{{ $estado->value }}</option>
-                @endforeach
-            </select>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-slate-500 font-medium">Estado:</span>
+                <select wire:model.live="filtroEstado" class="block w-full sm:w-40 rounded-lg border-slate-300 shadow-sm focus:border-sovereign-blue focus:ring-sovereign-blue sm:text-sm text-slate-900">
+                    <option value="Todos">Todos</option>
+                    @foreach(\App\Enums\EstadoFactura::cases() as $estado)
+                        <option value="{{ $estado->value }}">{{ $estado->value }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            @can('facturas.crear')
+                <a href="{{ route('facturas.crear') }}" class="inline-flex items-center justify-center px-4 py-2 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm" wire:navigate>
+                    <span class="material-symbols-outlined text-[20px] mr-2">add</span>
+                    Nueva Venta
+                </a>
+            @endcan
         </div>
     </div>
 
@@ -56,16 +53,13 @@
                     @forelse($facturas as $factura)
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-6 py-4">
-                            <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate class="font-semibold text-sovereign-blue hover:underline">
+                            <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate class="font-medium text-blue-600 hover:underline">
                                 {{ $factura->numero_factura }}
                             </a>
                         </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('clientes.show', $factura->cliente_id) }}" wire:navigate class="block group">
-                                <div class="text-sm text-slate-800 font-medium group-hover:text-sovereign-blue transition-colors">{{ $factura->cliente->nombre }}</div>
-                                @if($factura->cliente->identificacion)
-                                    <div class="text-xs text-slate-500 mt-0.5">ID: {{ $factura->cliente->identificacion }}</div>
-                                @endif
+                                <div class="text-sm text-blue-600 font-medium group-hover:underline">{{ $factura->cliente->nombre }}</div>
                             </a>
                         </td>
                         <td class="px-6 py-4 text-sm text-slate-600">

@@ -2,11 +2,9 @@
 
 namespace App\Livewire\Facturas;
 
-use App\Mail\FacturaMail;
 use App\Models\Factura;
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,12 +18,15 @@ class FacturaIndex extends Component
 
     public $filtroEstado = 'Todos';
 
+    // Factura elegida para eliminar (se muestra en el modal de confirmación)
     public ?Factura $facturaAEliminar = null;
 
     public bool $modalEliminarVisible = false;
 
+    // Factura cuyo PDF se carga en el iframe oculto de impresión
     public ?Factura $facturaPdfVista = null;
 
+    // Cambia en cada impresión para forzar la recarga del PDF en el iframe
     public int $impresionToken = 0;
 
     public function updatingSearch()
@@ -42,13 +43,11 @@ class FacturaIndex extends Component
     {
         $factura = Factura::with('cliente')->findOrFail($facturaId);
 
-        if (! $factura->cliente->email) {
+        if (! app(FacturaService::class)->enviarPorCorreo($factura)) {
             $this->dispatch('toast', message: 'El cliente no tiene correo electrónico registrado.', type: 'error');
 
             return;
         }
-
-        Mail::to($factura->cliente->email)->send(new FacturaMail($factura));
 
         $this->dispatch('toast', message: 'Factura '.$factura->numero_factura.' enviada a '.$factura->cliente->email.'.', type: 'success');
     }
@@ -60,7 +59,8 @@ class FacturaIndex extends Component
     }
 
     /**
-     * Prepara el PDF oculto y lo imprime directamente al cargar.
+     * Prepara el PDF oculto y abre el diálogo de impresión al cargar
+     * (el iframe oculto de la vista imprime en su evento @load).
      */
     public function abrirImpresion($facturaId)
     {

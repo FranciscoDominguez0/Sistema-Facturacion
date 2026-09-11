@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Enums\EstadoFactura;
+use App\Mail\FacturaMail;
 use App\Models\Empresa;
 use App\Models\Factura;
 use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class FacturaService
 {
@@ -151,6 +153,23 @@ class FacturaService
 
             return $factura;
         });
+    }
+
+    /**
+     * Envía la factura en PDF al correo del cliente.
+     * Devuelve false si el cliente no tiene correo registrado.
+     */
+    public function enviarPorCorreo(Factura $factura): bool
+    {
+        $factura->loadMissing('cliente');
+
+        if (! $factura->cliente->email) {
+            return false;
+        }
+
+        Mail::to($factura->cliente->email)->send(new FacturaMail($factura));
+
+        return true;
     }
 
     /**

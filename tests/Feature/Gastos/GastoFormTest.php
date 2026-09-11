@@ -3,6 +3,7 @@
 namespace Tests\Feature\Gastos;
 
 use App\Livewire\Gastos\GastoForm;
+use App\Models\Gasto;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -19,6 +20,69 @@ class GastoFormTest extends TestCase
 
         Permission::findOrCreate('gastos.ver');
         Permission::findOrCreate('gastos.crear');
+        Permission::findOrCreate('gastos.editar');
+    }
+
+    public function test_el_formulario_de_edicion_se_abre_con_los_datos_llenos(): void
+    {
+        $gasto = Gasto::factory()->create([
+            'concepto' => 'Luz eléctrica',
+            'categoria' => config('gastos.categorias')[0],
+            'monto' => 150.75,
+            'fecha' => '2026-08-20',
+            'comprobante' => 'FAC-001',
+        ]);
+        $usuario = User::factory()->create();
+        $usuario->givePermissionTo('gastos.editar');
+
+        Livewire::actingAs($usuario)
+            ->test(GastoForm::class, ['gasto' => $gasto])
+            ->assertSet('gasto.id', $gasto->id)
+            ->assertSet('form.concepto', 'Luz eléctrica')
+            ->assertSet('form.categoria', config('gastos.categorias')[0])
+            ->assertSet('form.monto', '150.75')
+            ->assertSet('form.fecha', '2026-08-20')
+            ->assertSet('form.comprobante', 'FAC-001');
+    }
+
+    public function test_guardar_en_edicion_actualiza_el_gasto_sin_crear_otro(): void
+    {
+        $gasto = Gasto::factory()->create([
+            'concepto' => 'Antes',
+            'categoria' => config('gastos.categorias')[0],
+            'monto' => 50,
+            'fecha' => '2026-08-01',
+        ]);
+        $usuario = User::factory()->create();
+        $usuario->givePermissionTo('gastos.editar');
+
+        Livewire::actingAs($usuario)
+            ->test(GastoForm::class, ['gasto' => $gasto])
+            ->set('form.concepto', 'Después')
+            ->set('form.monto', 99.99)
+            ->set('form.fecha', '2026-08-25')
+            ->call('guardar')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('gastos'))
+            ->assertSessionHas('success', 'Gasto actualizado con éxito.');
+
+        $this->assertDatabaseCount('gastos', 1);
+        $this->assertDatabaseHas('gastos', [
+            'id' => $gasto->id,
+            'concepto' => 'Después',
+            'monto' => 99.99,
+            'fecha' => '2026-08-25',
+        ]);
+    }
+
+    public function test_usuario_sin_permiso_de_editar_no_puede_acceder_al_formulario_de_edicion(): void
+    {
+        $gasto = Gasto::factory()->create();
+        $usuario = User::factory()->create();
+
+        $this->actingAs($usuario)
+            ->get(route('gastos.edit', $gasto))
+            ->assertForbidden();
     }
 
     public function test_usuario_con_permiso_puede_ver_el_formulario(): void

@@ -19,7 +19,15 @@ class Gasto extends Model
         'fecha',
         'registrado_por',
         'comprobante',
+        'estado',
     ];
+
+    // Estados posibles de un gasto (el registro inicia como "Registrado")
+    public const ESTADO_REGISTRADO = 'Registrado';
+
+    public const ESTADO_PAGADO = 'Pagado';
+
+    public const ESTADO_ANULADO = 'Anulado';
 
     protected $casts = [
         'monto' => 'decimal:2',

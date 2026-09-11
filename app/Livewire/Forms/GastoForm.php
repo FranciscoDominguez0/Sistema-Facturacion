@@ -46,6 +46,18 @@ class GastoForm extends Form
         ];
     }
 
+    /**
+     * Llena el formulario con los datos de un gasto existente para editarlo.
+     */
+    public function cargarGasto(Gasto $gasto): void
+    {
+        $this->concepto = $gasto->concepto;
+        $this->categoria = $gasto->categoria;
+        $this->monto = $gasto->monto;
+        $this->fecha = $gasto->fecha->format('Y-m-d');
+        $this->comprobante = $gasto->comprobante ?? '';
+    }
+
     public function guardar(): void
     {
         $this->validate();
@@ -58,6 +70,24 @@ class GastoForm extends Form
                 'fecha' => $this->fecha,
                 'comprobante' => $this->comprobante ?: null,
                 'registrado_por' => Auth::id(),
+            ]);
+        });
+    }
+
+    /**
+     * Actualiza el gasto con los datos del formulario.
+     */
+    public function actualizar(Gasto $gasto): void
+    {
+        $this->validate();
+
+        DB::transaction(function () use ($gasto) {
+            $gasto->update([
+                'concepto' => $this->concepto,
+                'categoria' => $this->categoria,
+                'monto' => $this->monto,
+                'fecha' => $this->fecha,
+                'comprobante' => $this->comprobante ?: null,
             ]);
         });
     }

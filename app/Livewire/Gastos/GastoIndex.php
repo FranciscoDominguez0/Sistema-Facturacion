@@ -3,6 +3,7 @@
 namespace App\Livewire\Gastos;
 
 use App\Models\Gasto;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,11 +15,38 @@ class GastoIndex extends Component
 
     public string $search = '';
 
+    // Gasto elegido para eliminar (se muestra en el modal de confirmación)
+    public ?Gasto $gastoAEliminar = null;
+
+    public bool $modalEliminarVisible = false;
+
     public function updated($property)
     {
         if ($property === 'search') {
             $this->resetPage();
         }
+    }
+
+    public function confirmarEliminacion($gastoId)
+    {
+        $this->gastoAEliminar = Gasto::findOrFail($gastoId);
+        $this->modalEliminarVisible = true;
+    }
+
+    public function eliminar()
+    {
+        if (! Gate::allows('gastos.eliminar')) {
+            abort(403, 'No tiene permiso para eliminar gastos.');
+        }
+
+        if ($this->gastoAEliminar) {
+            $this->gastoAEliminar->delete();
+        }
+
+        $this->modalEliminarVisible = false;
+        $this->gastoAEliminar = null;
+
+        $this->dispatch('toast', message: 'Gasto eliminado correctamente.', type: 'success');
     }
 
     public function render()

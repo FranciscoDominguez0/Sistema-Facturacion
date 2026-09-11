@@ -148,9 +148,13 @@ class FacturaForm extends Form
         ];
     }
 
-    public function guardar()
+    /**
+     * Prepara los datos antes de guardar o actualizar:
+     * el descuento por línea se quitó del formulario (siempre 0) y el descuento
+     * global solo se aplica si el usuario tiene permiso.
+     */
+    private function prepararDatos(): void
     {
-        // Descuento por línea quitado del formulario: siempre se fuerza a 0
         foreach ($this->items as &$item) {
             $item['descuento_porcentaje'] = 0;
         }
@@ -161,10 +165,13 @@ class FacturaForm extends Form
         }
 
         $this->validate();
+    }
 
-        $facturaService = app(FacturaService::class);
+    public function guardar()
+    {
+        $this->prepararDatos();
 
-        return $facturaService->crear($this->all());
+        return app(FacturaService::class)->crear($this->all());
     }
 
     /**
@@ -172,20 +179,8 @@ class FacturaForm extends Form
      */
     public function actualizar(Factura $factura): Factura
     {
-        // Descuento por línea quitado del formulario: siempre se fuerza a 0
-        foreach ($this->items as &$item) {
-            $item['descuento_porcentaje'] = 0;
-        }
-        unset($item);
+        $this->prepararDatos();
 
-        if (! Gate::allows('facturas.descuento')) {
-            $this->descuento_porcentaje = 0;
-        }
-
-        $this->validate();
-
-        $facturaService = app(FacturaService::class);
-
-        return $facturaService->actualizar($factura, $this->all());
+        return app(FacturaService::class)->actualizar($factura, $this->all());
     }
 }

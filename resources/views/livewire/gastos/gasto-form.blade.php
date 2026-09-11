@@ -2,14 +2,14 @@
     @section('breadcrumbs')
         <x-breadcrumbs :links="[
             ['title' => 'Gastos', 'url' => route('gastos')],
-            ['title' => 'Nuevo Gasto']
+            ['title' => $gasto ? 'Editar Gasto' : 'Nuevo Gasto']
         ]" />
     @endsection
 
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-slate-800">Nuevo Gasto</h2>
+        <h2 class="text-2xl font-bold text-slate-800">{{ $gasto ? 'Editar Gasto' : 'Nuevo Gasto' }}</h2>
         <p class="text-slate-500 text-sm mt-1">
-            Registra un egreso del negocio.
+            {{ $gasto ? 'Modifica los datos del gasto y guarda los cambios.' : 'Registra un egreso del negocio.' }}
         </p>
     </div>
 
@@ -67,7 +67,7 @@
             <button type="submit" class="px-5 py-2 bg-sovereign-blue text-white rounded-lg text-sm font-medium hover:bg-opacity-90 transition-colors shadow-sm flex items-center gap-2" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="guardar" class="material-symbols-outlined text-[18px]">save</span>
                 <span wire:loading wire:target="guardar" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
-                Guardar Gasto
+                {{ $gasto ? 'Actualizar Gasto' : 'Guardar Gasto' }}
             </button>
         </div>
     </form>

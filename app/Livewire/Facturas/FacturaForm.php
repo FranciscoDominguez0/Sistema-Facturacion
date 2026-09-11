@@ -79,14 +79,7 @@ class FacturaForm extends Component
     {
         $this->factura = $factura;
 
-        $empresa = Empresa::first();
-        if ($empresa) {
-            $numero = $empresa->siguiente_numero_factura;
-            $prefijo = $empresa->prefijo_factura;
-            $this->numero_factura_preview = $prefijo.str_pad((string) $numero, 6, '0', STR_PAD_LEFT);
-        } else {
-            $this->numero_factura_preview = 'FAC-000001';
-        }
+        $this->numero_factura_preview = $this->siguienteNumeroPreview();
 
         if ($factura) {
             $this->form->cargarFactura($factura);
@@ -111,6 +104,20 @@ class FacturaForm extends Component
                 $this->cliente_id = null;
             }
         }
+    }
+
+    /**
+     * Calcula el número correlativo que mostrará la vista previa en creación.
+     */
+    private function siguienteNumeroPreview(): string
+    {
+        $empresa = Empresa::first();
+
+        if (! $empresa) {
+            return 'FAC-000001';
+        }
+
+        return $empresa->prefijo_factura.str_pad((string) $empresa->siguiente_numero_factura, 6, '0', STR_PAD_LEFT);
     }
 
     public function guardarClienteExpress()
@@ -300,18 +307,16 @@ class FacturaForm extends Component
     public function save()
     {
         try {
-            if ($this->factura) {
-                $factura = $this->form->actualizar($this->factura);
-                session()->flash('success', 'Factura actualizada exitosamente.');
-            } else {
-                $factura = $this->form->guardar();
-                session()->flash('success', 'Factura creada exitosamente.');
-            }
+            $factura = $this->factura
+                ? $this->form->actualizar($this->factura)
+                : $this->form->guardar();
+
+            session()->flash('success', $this->factura ? 'Factura actualizada exitosamente.' : 'Factura creada exitosamente.');
 
             // navigate: solo se actualiza el contenido, el sidebar no se recarga
             return $this->redirectRoute('facturas.edit', $factura->id, navigate: true);
         } catch (ValidationException $e) {
-            Log::error('Validation errors al crear factura', $e->errors());
+            Log::error('Errores de validación al guardar la factura', $e->errors());
             $this->dispatch('toast', message: 'Hay campos obligatorios vacíos o con errores. Por favor, revisa el formulario.', type: 'error');
             throw $e;
         }

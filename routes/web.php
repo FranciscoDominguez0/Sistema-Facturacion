@@ -1,7 +1,12 @@
 <?php
 
+use App\Http\Controllers\PdfFacturaController;
+use App\Http\Middleware\PreventBackHistory;
+use App\Livewire\Clientes\ClienteForm;
 use App\Livewire\Clientes\ClienteIndex;
+use App\Livewire\Clientes\ClienteShow;
 use App\Livewire\Configuracion\EmpresaForm;
+use App\Livewire\Configuracion\FacturacionIndex;
 use App\Livewire\Configuracion\ImpuestoIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\Facturas\FacturaForm;
@@ -9,23 +14,14 @@ use App\Livewire\Facturas\FacturaIndex;
 use App\Livewire\Facturas\FacturaPdf;
 use App\Livewire\Gastos\GastoForm;
 use App\Livewire\Gastos\GastoIndex;
-use App\Livewire\Gastos\GastoShow;
+use App\Livewire\Productos\ProductoForm;
 use App\Livewire\Productos\ProductoIndex;
 use App\Livewire\Profile;
-use App\Models\Empresa;
-use App\Models\Factura;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Livewire\Roles\RolIndex;
+use App\Livewire\Roles\UsuarioIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
-
-use App\Http\Middleware\PreventBackHistory;
-use App\Livewire\Clientes\ClienteForm;
-use App\Livewire\Clientes\ClienteShow;
-use App\Livewire\Configuracion\FacturacionIndex;
-use App\Livewire\Productos\ProductoForm;
-use App\Livewire\Roles\RolIndex;
-use App\Livewire\Roles\UsuarioIndex;
 
 Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('dashboard', Dashboard::class)
@@ -78,20 +74,9 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->middleware('can:facturas.ver')
         ->name('facturas.pdf.vista');
 
-    Route::get('facturas/{factura}/pdf', function (Factura $factura) {
-        if (! auth()->user()->can('facturas.ver')) {
-            abort(403);
-        }
-        $empresa = Empresa::actual();
-        $factura->load(['cliente', 'vendedor', 'items']);
-        $pdf = Pdf::loadView('pdf.factura', compact('factura', 'empresa'));
-
-        if (request()->has('print')) {
-            return $pdf->stream('factura-'.$factura->numero_factura.'.pdf');
-        }
-
-        return $pdf->download('factura-'.$factura->numero_factura.'.pdf');
-    })->name('facturas.pdf');
+    Route::get('facturas/{factura}/pdf', [PdfFacturaController::class, 'mostrar'])
+        ->middleware('can:facturas.ver')
+        ->name('facturas.pdf');
 
     Route::get('gastos', GastoIndex::class)
         ->name('gastos')
@@ -101,9 +86,9 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->name('gastos.crear')
         ->middleware('can:gastos.crear');
 
-    Route::get('gastos/{gasto}', GastoShow::class)
-        ->name('gastos.show')
-        ->middleware('can:gastos.ver');
+    Route::get('gastos/{gasto}/edit', GastoForm::class)
+        ->name('gastos.edit')
+        ->middleware('can:gastos.editar');
 
     Route::get('empresa', EmpresaForm::class)
         ->name('empresa');
