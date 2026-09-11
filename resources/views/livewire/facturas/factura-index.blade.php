@@ -81,53 +81,73 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <div x-data="{ open: false }" class="relative inline-block">
-                                <button @click="open = !open" @click.outside="open = false" type="button"
+                            <div x-data="{
+                                open: false,
+                                posTop: 0,
+                                posRight: 0,
+                                abrir($el) {
+                                    const rect = $el.getBoundingClientRect();
+                                    const alturaMenu = 260;
+                                    const espacioAbajo = window.innerHeight - rect.bottom;
+                                    this.posTop = espacioAbajo < alturaMenu
+                                        ? rect.top - alturaMenu - 4
+                                        : rect.bottom + 4;
+                                    this.posRight = window.innerWidth - rect.right;
+                                    this.open = true;
+                                }
+                            }" class="inline-block">
+                                <button @click="open ? open = false : abrir($el)" type="button"
                                     class="bg-slate-800 text-white text-sm px-4 py-2 rounded-md font-medium cursor-pointer flex items-center gap-2 hover:bg-slate-700 transition-colors shadow-sm">
                                     Comportamiento
                                     <span class="material-symbols-outlined text-[16px]">expand_more</span>
                                 </button>
 
-                                <div x-show="open" x-transition class="absolute bottom-full right-0 mb-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 text-left" style="display: none;">
-                                    <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate
-                                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                        <span class="material-symbols-outlined text-[18px] text-slate-400">edit</span>
-                                        Editar
-                                    </a>
+                                <template x-teleport="body">
+                                    <div x-show="open" x-transition
+                                        @click.outside="open = false"
+                                        :style="`position:fixed; top:${posTop}px; right:${posRight}px; z-index:9999;`"
+                                        class="w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 text-left"
+                                        style="display:none;">
+                                        <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate
+                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400">edit</span>
+                                            Editar
+                                        </a>
 
-                                    <button type="button" wire:click="enviarPorCorreo({{ $factura->id }})" @click="open = false"
-                                        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                        <span class="material-symbols-outlined text-[18px] text-slate-400">mail</span>
-                                        Enviar factura por correo
-                                    </button>
-
-                                    <a href="{{ route('facturas.pdf.vista', $factura->id) }}" wire:navigate
-                                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                        <span class="material-symbols-outlined text-[18px] text-slate-400">visibility</span>
-                                        Ver PDF
-                                    </a>
-
-                                    <button type="button" wire:click="abrirImpresion({{ $factura->id }})" @click="open = false"
-                                        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                        <span class="material-symbols-outlined text-[18px] text-slate-400">print</span>
-                                        Imprimir PDF
-                                    </button>
-
-                                    <a href="{{ route('facturas.pdf', $factura->id) }}"
-                                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                        <span class="material-symbols-outlined text-[18px] text-slate-400">download</span>
-                                        Descargar
-                                    </a>
-
-                                    @can('facturas.eliminar')
-                                        <div class="border-t border-slate-100 my-1"></div>
-                                        <button type="button" wire:click="confirmarEliminacion({{ $factura->id }})" @click="open = false"
-                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                                            <span class="material-symbols-outlined text-[18px]">delete</span>
-                                            Eliminar
+                                        <button type="button" wire:click="enviarPorCorreo({{ $factura->id }})" @click="open = false"
+                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400">mail</span>
+                                            Enviar factura por correo
                                         </button>
-                                    @endcan
-                                </div>
+
+                                        <a href="{{ route('facturas.pdf.vista', $factura->id) }}" wire:navigate
+                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400">visibility</span>
+                                            Ver PDF
+                                        </a>
+
+                                        <button type="button" wire:click="abrirImpresion({{ $factura->id }})" @click="open = false"
+                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400">print</span>
+                                            Imprimir PDF
+                                        </button>
+
+                                        <a href="{{ route('facturas.pdf', $factura->id) }}"
+                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[18px] text-slate-400">download</span>
+                                            Descargar
+                                        </a>
+
+                                        @can('facturas.eliminar')
+                                            <div class="border-t border-slate-100 my-1"></div>
+                                            <button type="button" wire:click="confirmarEliminacion({{ $factura->id }})" @click="open = false"
+                                                class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                Eliminar
+                                            </button>
+                                        @endcan
+                                    </div>
+                                </template>
                             </div>
                         </td>
                     </tr>
