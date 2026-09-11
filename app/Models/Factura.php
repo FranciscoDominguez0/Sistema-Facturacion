@@ -26,8 +26,8 @@ class Factura extends Model
     ];
 
     protected $casts = [
-        'fecha_emision' => 'date',
-        'fecha_vencimiento' => 'date',
+        'fecha_emision' => 'datetime',
+        'fecha_vencimiento' => 'datetime',
         'subtotal' => 'decimal:2',
         'descuento_porcentaje' => 'decimal:2',
         'descuento_total' => 'decimal:2',
