@@ -15,25 +15,15 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-12345678}
     volumes:
       - ./:/var/www/html
+      - vigifact_storage:/var/www/html/storage
     depends_on:
       db:
         condition: service_healthy
     networks:
       - vigifact_network
-
-  web:
-    image: nginx:alpine
-    container_name: vigifact_web
-    restart: unless-stopped
     ports:
-      - "${APP_PORT:-8088}:80"
-    volumes:
-      - ./:/var/www/html
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - app
-    networks:
-      - vigifact_network
+      - "127.0.0.1:9000:9000"
+
 
   db:
     image: postgres:15-alpine
@@ -64,3 +54,4 @@ networks:
 
 volumes:
   vigifact_db_data:
+  vigifact_storage:

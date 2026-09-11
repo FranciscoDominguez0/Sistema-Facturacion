@@ -11,6 +11,7 @@ const opcionesSparkline = {
     chart: {
         type: 'area',
         height: 64,
+        width: '100%',
         sparkline: { enabled: true },
         animations: { enabled: false },
         // Evita que ApexCharts se redibuje solo con el ResizeObserver del padre:
@@ -33,6 +34,7 @@ const opcionesSparkline = {
 const opcionesPrincipal = {
     chart: {
         height: 250,
+        width: '100%',
         type: 'line',
         fontFamily: 'Inter, sans-serif',
         toolbar: { show: false },

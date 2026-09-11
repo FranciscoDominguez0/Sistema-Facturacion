@@ -28,6 +28,10 @@ RUN apk add --no-cache \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
+# Instalar Puppeteer globalmente para que Browsershot lo tenga siempre disponible
+RUN npm install -g puppeteer
+ENV NODE_PATH="/usr/lib/node_modules:/usr/local/lib/node_modules"
+
 # Configurar e instalar extensiones de PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
