@@ -132,11 +132,12 @@
                                             Imprimir PDF
                                         </button>
 
-                                        <a href="{{ route('facturas.pdf', $factura->id) }}"
-                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                            <span class="material-symbols-outlined text-[18px] text-slate-400">download</span>
-                                            Descargar
-                                        </a>
+                                        <div @click="open = false">
+                                            <x-boton-descarga href="{{ route('facturas.pdf', $factura->id) }}" menu>
+                                                <span class="material-symbols-outlined text-[18px] text-slate-400">download</span>
+                                                Descargar
+                                            </x-boton-descarga>
+                                        </div>
 
                                         @can('facturas.eliminar')
                                             <div class="border-t border-slate-100 my-1"></div>

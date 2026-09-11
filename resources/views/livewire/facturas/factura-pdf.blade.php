@@ -44,11 +44,10 @@
                 Imprimir
             </button>
 
-            <a href="{{ route('facturas.pdf', $factura->id) }}"
-                class="h-10 px-4 bg-sovereign-blue text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors inline-flex items-center gap-2 shadow-sm whitespace-nowrap">
+            <x-boton-descarga href="{{ route('facturas.pdf', $factura->id) }}" primary>
                 <span class="material-symbols-outlined text-[18px]">download</span>
                 Descargar
-            </a>
+            </x-boton-descarga>
         </div>
     </div>
 

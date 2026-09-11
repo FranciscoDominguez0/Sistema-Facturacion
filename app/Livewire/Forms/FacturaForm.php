@@ -61,17 +61,17 @@ class FacturaForm extends Form
 
         foreach ($factura->items as $item) {
             $this->items[] = [
-                'producto_id' => $item->producto_id,
-                'descripcion' => $item->descripcion,
-                'cantidad' => $item->cantidad,
-                'precio_unitario' => $item->precio_unitario,
-                'descuento_porcentaje' => $item->descuento_porcentaje,
-                'descuento_monto' => $item->descuento_monto,
-                'subtotal_linea' => $item->subtotal_linea,
-                'impuesto_id' => $item->impuesto_id,
-                'impuesto_nombre' => $item->impuesto_nombre,
-                'impuesto_porcentaje' => $item->impuesto_porcentaje,
-                'impuesto_monto' => $item->impuesto_monto,
+                'producto_id'          => $item->producto_id,
+                'descripcion'          => $item->descripcion,
+                'cantidad'             => (float) $item->cantidad,
+                'precio_unitario'      => (float) $item->precio_unitario,
+                'descuento_porcentaje' => (float) $item->descuento_porcentaje,
+                'descuento_monto'      => (float) $item->descuento_monto,
+                'subtotal_linea'       => (float) $item->subtotal_linea,
+                'impuesto_id'          => $item->impuesto_id,
+                'impuesto_nombre'      => $item->impuesto_nombre,
+                'impuesto_porcentaje'  => (float) $item->impuesto_porcentaje,
+                'impuesto_monto'       => (float) $item->impuesto_monto,
             ];
         }
 
@@ -129,7 +129,7 @@ class FacturaForm extends Form
             'descuento_porcentaje' => 'nullable|numeric|min:0|max:100',
             'items' => 'required|array|min:1',
             'items.*.descripcion' => 'nullable|string',
-            'items.*.cantidad' => 'required|integer|min:1',
+            'items.*.cantidad'       => 'required|numeric|min:0.001',
             'items.*.precio_unitario' => 'required|numeric|min:0',
         ];
 
@@ -142,8 +142,7 @@ class FacturaForm extends Form
             'cliente_id.required' => 'Debe seleccionar un cliente.',
             'vendedor_id.required' => 'Debe seleccionar un vendedor.',
             'items.min' => 'La factura debe tener al menos una línea.',
-            'items.*.cantidad.min' => 'La cantidad debe ser un entero mayor a 0.',
-            'items.*.cantidad.integer' => 'La cantidad debe ser un número entero.',
+            'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
             'items.*.descuento_porcentaje.max' => 'El descuento no puede superar el 100%.',
         ];
     }
