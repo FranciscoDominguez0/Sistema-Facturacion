@@ -24,9 +24,9 @@
         </div>
     </div>
 
-    <!-- Data Table Container -->
-    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto">
+    <!-- Tabla -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div class="overflow-x-auto lg:overflow-visible">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
@@ -69,7 +69,10 @@
                                     <span class="material-symbols-outlined text-[16px]">expand_more</span>
                                 </button>
 
-                                <div x-show="open" x-transition class="absolute bottom-full right-0 mb-1 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 text-left" style="display: none;">
+                                @php
+                                    $abrirHaciaArriba = $loop->count >= 4 && $loop->iteration >= $loop->count - 1;
+                                @endphp
+                                <div x-show="open" x-transition class="absolute right-0 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 text-left {{ $abrirHaciaArriba ? 'bottom-full mb-1' : 'mt-1' }}" style="display: none;">
                                     @can('gastos.editar')
                                         <a href="{{ route('gastos.edit', $gasto) }}" wire:navigate
                                             class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
