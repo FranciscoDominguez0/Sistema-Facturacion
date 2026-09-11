@@ -35,7 +35,7 @@ ENV NODE_PATH="/usr/lib/node_modules:/usr/local/lib/node_modules"
 # Configurar e instalar extensiones de PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install \
+    && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_pgsql \
         pgsql \
