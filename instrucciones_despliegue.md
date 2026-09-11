@@ -65,9 +65,21 @@ docker compose up -d --build
 
 ---
 
-## 4. Inicializar Laravel
+## 4. Instalar Dependencias y Compilar (Primer Uso)
 
-Con los contenedores corriendo, necesitamos ejecutar los comandos internos de Laravel para preparar la base de datos y la seguridad. Ejecuta los siguientes comandos uno por uno:
+Como acabas de clonar el código desde Git, necesitas descargar las librerías de PHP (Composer) y compilar tus estilos y Javascript (Vite/Tailwind). Ejecuta estos dos comandos:
+
+```bash
+docker compose exec app composer install --no-dev --optimize-autoloader
+docker compose exec app npm install
+docker compose exec app npm run build
+```
+
+---
+
+## 5. Inicializar Laravel
+
+Con las librerías instaladas, procedemos a preparar la base de datos y la seguridad:
 
 **Generar la clave de encriptación:**
 ```bash
