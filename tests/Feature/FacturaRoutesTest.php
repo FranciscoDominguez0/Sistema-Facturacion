@@ -42,7 +42,8 @@ class FacturaRoutesTest extends TestCase
 
         $this->get(route('facturas'))->assertRedirect(route('login'));
         $this->get(route('facturas.crear'))->assertRedirect(route('login'));
-        $this->get(route('facturas.show', $factura))->assertRedirect(route('login'));
+        $this->get(route('facturas.edit', $factura))->assertRedirect(route('login'));
+        $this->get(route('facturas.pdf.vista', $factura))->assertRedirect(route('login'));
         $this->get(route('facturas.pdf', $factura))->assertRedirect(route('login'));
     }
 
@@ -57,16 +58,17 @@ class FacturaRoutesTest extends TestCase
 
         $usuario = User::factory()->create();
         $usuario->assignRole('Cajero');
-        $usuario->givePermissionTo('facturas.ver', 'facturas.crear');
+        $usuario->givePermissionTo('facturas.ver', 'facturas.crear', 'facturas.editar');
 
         $this->actingAs($usuario)->get(route('facturas.crear'))->assertOk();
-        $this->actingAs($usuario)->get(route('facturas.show', $factura))->assertOk();
+        $this->actingAs($usuario)->get(route('facturas.edit', $factura))->assertOk();
+        $this->actingAs($usuario)->get(route('facturas.pdf.vista', $factura))->assertOk();
         $this->actingAs($usuario)->get(route('facturas.pdf', $factura))->assertOk();
     }
 
     /**
      * Un usuario autenticado sin los permisos recibe 403 en las rutas que los
-     * exigen (crear, ver y PDF), aunque esté autenticado.
+     * exigen (crear, editar, ver y PDF), aunque esté autenticado.
      */
     public function test_un_usuario_autenticado_sin_permisos_recibe_403(): void
     {
@@ -74,7 +76,8 @@ class FacturaRoutesTest extends TestCase
         $usuario = User::factory()->create();
 
         $this->actingAs($usuario)->get(route('facturas.crear'))->assertForbidden();
-        $this->actingAs($usuario)->get(route('facturas.show', $factura))->assertForbidden();
+        $this->actingAs($usuario)->get(route('facturas.edit', $factura))->assertForbidden();
+        $this->actingAs($usuario)->get(route('facturas.pdf.vista', $factura))->assertForbidden();
         $this->actingAs($usuario)->get(route('facturas.pdf', $factura))->assertForbidden();
     }
 

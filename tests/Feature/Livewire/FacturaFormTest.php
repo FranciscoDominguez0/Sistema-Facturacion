@@ -9,6 +9,7 @@ use App\Models\Factura;
 use App\Models\Impuesto;
 use App\Models\Producto;
 use App\Models\User;
+use App\Services\FacturaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -31,6 +32,7 @@ class FacturaFormTest extends TestCase
         // Permisos del módulo de facturas
         Permission::findOrCreate('facturas.ver');
         Permission::findOrCreate('facturas.crear');
+        Permission::findOrCreate('facturas.editar');
         Permission::findOrCreate('facturas.estado.cambiar');
         Permission::findOrCreate('facturas.vendedor.seleccionar');
         Permission::findOrCreate('facturas.descuento');
@@ -390,7 +392,7 @@ class FacturaFormTest extends TestCase
 
         $factura = Factura::firstOrFail();
 
-        $componente->assertRedirect(route('facturas.show', $factura->id));
+        $componente->assertRedirect(route('facturas.edit', $factura->id));
 
         $this->assertDatabaseHas('facturas', [
             'id' => $factura->id,
@@ -458,6 +460,117 @@ class FacturaFormTest extends TestCase
         Livewire::actingAs($usuario)
             ->test(FacturaForm::class)
             ->assertSet('form.fecha_emision', date('Y-m-d'));
+    }
+
+    // =====================================================================
+    // Edición de factura
+    // =====================================================================
+
+    /**
+     * El formulario de edición se abre con los datos de la factura llenos.
+     */
+    public function test_el_formulario_de_edicion_se_abre_con_los_datos_llenos(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        $producto = Producto::factory()->create(['precio' => 100]);
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.crear', 'facturas.editar']);
+
+        $factura = (new FacturaService)->crear([
+            'cliente_id' => $cliente->id,
+            'vendedor_id' => $vendedor->id,
+            'fecha_emision' => '2026-08-19',
+            'fecha_vencimiento' => '2026-09-19',
+            'descuento_porcentaje' => 10,
+            'notas' => 'Nota de prueba',
+            'items' => [
+                [
+                    'producto_id' => $producto->id,
+                    'descripcion' => 'Producto A',
+                    'cantidad' => 2,
+                    'precio_unitario' => 100,
+                    'descuento_porcentaje' => 0,
+                    'impuesto_porcentaje' => 7,
+                    'impuesto_nombre' => 'ITBMS',
+                ],
+            ],
+        ]);
+
+        Livewire::actingAs($usuario)
+            ->test(FacturaForm::class, ['factura' => $factura])
+            ->assertSet('factura.id', $factura->id)
+            ->assertSet('cliente_id', $cliente->id)
+            ->assertSet('form.cliente_id', $cliente->id)
+            ->assertSet('form.vendedor_id', $vendedor->id)
+            ->assertSet('form.fecha_emision', '2026-08-19')
+            ->assertSet('form.fecha_vencimiento', '2026-09-19')
+            ->assertSet('form.descuento_porcentaje', 10)
+            ->assertSet('form.notas', 'Nota de prueba')
+            ->assertSet('form.items.0.descripcion', 'Producto A')
+            ->assertSet('form.items.0.cantidad', '2.00')
+            ->assertSet('form.items.0.precio_unitario', '100.00')
+            ->assertSet('form.items.0.impuesto_porcentaje', '7.00')
+            ->assertSet('numero_factura_preview', $factura->numero_factura);
+    }
+
+    /**
+     * Guardar en modo edición actualiza la factura y sus líneas, sin crear
+     * una factura nueva ni tocar el número correlativo.
+     */
+    public function test_guardar_en_edicion_actualiza_la_factura_y_las_lineas(): void
+    {
+        Empresa::factory()->create(['impuesto_porcentaje' => 7]);
+        $cliente = Cliente::factory()->create();
+        $producto = Producto::factory()->create(['precio' => 100]);
+        [$usuario, $vendedor] = $this->usuarioConVendedor(['facturas.crear', 'facturas.editar']);
+
+        $factura = (new FacturaService)->crear([
+            'cliente_id' => $cliente->id,
+            'vendedor_id' => $vendedor->id,
+            'fecha_emision' => '2026-08-19',
+            'fecha_vencimiento' => null,
+            'descuento_porcentaje' => 0,
+            'notas' => null,
+            'items' => [
+                [
+                    'producto_id' => $producto->id,
+                    'descripcion' => 'Producto A',
+                    'cantidad' => 2,
+                    'precio_unitario' => 100,
+                    'descuento_porcentaje' => 0,
+                    'impuesto_porcentaje' => 7,
+                    'impuesto_nombre' => 'ITBMS',
+                ],
+            ],
+        ]);
+
+        $componente = Livewire::actingAs($usuario)
+            ->test(FacturaForm::class, ['factura' => $factura])
+            ->set('form.items.0.cantidad', 3)
+            ->set('form.items.0.precio_unitario', 50)
+            ->set('form.notas', 'Factura actualizada')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $componente->assertRedirect(route('facturas.edit', $factura->id));
+
+        $this->assertDatabaseCount('facturas', 1);
+        $this->assertDatabaseHas('facturas', [
+            'id' => $factura->id,
+            'numero_factura' => $factura->numero_factura,
+            'notas' => 'Factura actualizada',
+            'subtotal' => 150,
+            'impuesto' => 10.5,
+            'total' => 160.5,
+        ]);
+
+        // Las líneas viejas se reemplazan por las nuevas
+        $this->assertDatabaseCount('factura_items', 1);
+        $this->assertDatabaseHas('factura_items', [
+            'factura_id' => $factura->id,
+            'cantidad' => 3,
+            'precio_unitario' => 50,
+        ]);
     }
 
     // =====================================================================

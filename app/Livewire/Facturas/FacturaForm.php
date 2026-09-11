@@ -5,12 +5,14 @@ namespace App\Livewire\Facturas;
 use App\Livewire\Forms\FacturaForm as FacturaFormObject;
 use App\Models\Cliente;
 use App\Models\Empresa;
+use App\Models\Factura;
 use App\Models\Impuesto;
 use App\Models\Producto;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -23,6 +25,9 @@ class FacturaForm extends Component
 
     #[Url]
     public $cliente_id;
+
+    // Factura que se está editando (null = creación nueva)
+    public ?Factura $factura = null;
 
     // Para la creación rápida de cliente
     public $nuevo_cliente_nombre = '';
@@ -70,9 +75,9 @@ class FacturaForm extends Component
 
     public $numero_factura_preview = '';
 
-    public function mount()
+    public function mount(?Factura $factura = null)
     {
-        $this->form->init();
+        $this->factura = $factura;
 
         $empresa = Empresa::first();
         if ($empresa) {
@@ -83,13 +88,22 @@ class FacturaForm extends Component
             $this->numero_factura_preview = 'FAC-000001';
         }
 
+        if ($factura) {
+            $this->form->cargarFactura($factura);
+            $this->numero_factura_preview = $factura->numero_factura;
+            // El select de cliente está ligado a esta propiedad del componente
+            $this->cliente_id = $factura->cliente_id;
+        } else {
+            $this->form->init();
+        }
+
         // Autoseleccionar vendedor si no puede elegirlo libremente
         if (! Gate::allows('facturas.vendedor.seleccionar')) {
             $this->form->vendedor_id = Auth::id();
         }
 
-        // Si viene un cliente_id por la URL
-        if ($this->cliente_id) {
+        // Si viene un cliente_id por la URL (solo aplica en creación)
+        if ($this->cliente_id && ! $factura) {
             $cliente = Cliente::find($this->cliente_id);
             if ($cliente) {
                 $this->form->cliente_id = $cliente->id;
@@ -144,6 +158,7 @@ class FacturaForm extends Component
         // Sincronizar el cliente seleccionado en el form object
         if ($property === 'cliente_id') {
             $this->form->cliente_id = $value;
+
             return;
         }
 
@@ -239,7 +254,7 @@ class FacturaForm extends Component
             'nuevo_impuesto_porcentaje' => 'required|numeric|min:0|max:100',
         ]);
 
-        $impuesto = \App\Models\Impuesto::create([
+        $impuesto = Impuesto::create([
             'nombre' => $this->nuevo_impuesto_nombre,
             'porcentaje' => $this->nuevo_impuesto_porcentaje,
             'activo' => true,
@@ -285,13 +300,18 @@ class FacturaForm extends Component
     public function save()
     {
         try {
-            $factura = $this->form->guardar();
-            session()->flash('success', 'Factura creada exitosamente.');
+            if ($this->factura) {
+                $factura = $this->form->actualizar($this->factura);
+                session()->flash('success', 'Factura actualizada exitosamente.');
+            } else {
+                $factura = $this->form->guardar();
+                session()->flash('success', 'Factura creada exitosamente.');
+            }
 
             // navigate: solo se actualiza el contenido, el sidebar no se recarga
-            return $this->redirectRoute('facturas.show', $factura->id, navigate: true);
+            return $this->redirectRoute('facturas.edit', $factura->id, navigate: true);
         } catch (ValidationException $e) {
-            \Illuminate\Support\Facades\Log::error('Validation errors al crear factura', $e->errors());
+            Log::error('Validation errors al crear factura', $e->errors());
             $this->dispatch('toast', message: 'Hay campos obligatorios vacíos o con errores. Por favor, revisa el formulario.', type: 'error');
             throw $e;
         }

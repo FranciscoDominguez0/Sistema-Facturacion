@@ -26,7 +26,7 @@
             </div>
             <input type="text" wire:model.live.debounce.300ms="search" class="pl-10 block w-full rounded-lg border-slate-300 shadow-sm focus:border-sovereign-blue focus:ring-sovereign-blue sm:text-sm text-slate-900 placeholder-slate-400" placeholder="Buscar por cliente o nº factura...">
         </div>
-        
+
         <div class="w-full sm:w-auto flex items-center gap-2">
             <span class="text-sm text-slate-500 font-medium">Estado:</span>
             <select wire:model.live="filtroEstado" class="block w-full sm:w-48 rounded-lg border-slate-300 shadow-sm focus:border-sovereign-blue focus:ring-sovereign-blue sm:text-sm text-slate-900">
@@ -49,20 +49,24 @@
                         <th class="px-6 py-4">Emisión</th>
                         <th class="px-6 py-4 text-right">Total</th>
                         <th class="px-6 py-4">Estado</th>
-                        <th class="px-6 py-4 text-right">Acciones</th>
+                        <th class="px-6 py-4 text-right">Comportamiento</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($facturas as $factura)
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-6 py-4">
-                            <span class="font-medium text-slate-800">{{ $factura->numero_factura }}</span>
+                            <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate class="font-semibold text-sovereign-blue hover:underline">
+                                {{ $factura->numero_factura }}
+                            </a>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm text-slate-800 font-medium">{{ $factura->cliente->nombre }}</div>
-                            @if($factura->cliente->identificacion)
-                                <div class="text-xs text-slate-500 mt-0.5">ID: {{ $factura->cliente->identificacion }}</div>
-                            @endif
+                            <a href="{{ route('clientes.show', $factura->cliente_id) }}" wire:navigate class="block group">
+                                <div class="text-sm text-slate-800 font-medium group-hover:text-sovereign-blue transition-colors">{{ $factura->cliente->nombre }}</div>
+                                @if($factura->cliente->identificacion)
+                                    <div class="text-xs text-slate-500 mt-0.5">ID: {{ $factura->cliente->identificacion }}</div>
+                                @endif
+                            </a>
                         </td>
                         <td class="px-6 py-4 text-sm text-slate-600">
                             {{ $factura->fecha_emision->format('d/m/Y') }}
@@ -83,9 +87,54 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <a href="{{ route('facturas.show', $factura->id) }}" class="text-sovereign-blue hover:text-slate-900 font-medium text-sm transition-colors" wire:navigate>
-                                Ver Detalle
-                            </a>
+                            <div x-data="{ open: false }" class="relative inline-block">
+                                <button @click="open = !open" @click.outside="open = false" type="button"
+                                    class="bg-slate-800 text-white text-sm px-4 py-2 rounded-md font-medium cursor-pointer flex items-center gap-2 hover:bg-slate-700 transition-colors shadow-sm">
+                                    Comportamiento
+                                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                                </button>
+
+                                <div x-show="open" x-transition class="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-20 text-left" style="display: none;">
+                                    <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate
+                                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                        <span class="material-symbols-outlined text-[18px] text-slate-400">edit</span>
+                                        Editar
+                                    </a>
+
+                                    <button type="button" wire:click="enviarPorCorreo({{ $factura->id }})" @click="open = false"
+                                        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                        <span class="material-symbols-outlined text-[18px] text-slate-400">mail</span>
+                                        Enviar factura por correo
+                                    </button>
+
+                                    <a href="{{ route('facturas.pdf.vista', $factura->id) }}" wire:navigate
+                                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                        <span class="material-symbols-outlined text-[18px] text-slate-400">visibility</span>
+                                        Ver PDF
+                                    </a>
+
+                                    <button type="button" wire:click="abrirImpresion({{ $factura->id }})" @click="open = false"
+                                        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                        <span class="material-symbols-outlined text-[18px] text-slate-400">print</span>
+                                        Imprimir PDF
+                                    </button>
+
+                                    <a href="{{ route('facturas.pdf', $factura->id) }}"
+                                        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                        <span class="material-symbols-outlined text-[18px] text-slate-400">download</span>
+                                        Descargar
+                                    </a>
+
+                                    @can('facturas.eliminar')
+                                        <div class="border-t border-slate-100 my-1"></div>
+                                        <button type="button" wire:click="confirmarEliminacion({{ $factura->id }})" @click="open = false"
+                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                            Eliminar
+                                        </button>
+                                    @endcan
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -111,4 +160,29 @@
         <!-- Paginación -->
         <x-paginacion :paginador="$facturas" />
     </div>
+
+    <!-- Iframe oculto de impresión: carga el PDF y abre el diálogo de impresión directo -->
+    <iframe x-ref="pdfImpresion"
+        src="{{ $facturaPdfVista ? route('facturas.pdf', $facturaPdfVista->id).'?print=true&v='.$impresionToken : 'about:blank' }}"
+        @load="if ({{ $facturaPdfVista ? 'true' : 'false' }}) { setTimeout(() => $refs.pdfImpresion.contentWindow.print(), 400); }"
+        class="sr-only" aria-hidden="true" title="Impresión PDF"></iframe>
+
+    <!-- Modal Eliminar Factura -->
+    <x-modal-danger show="modalEliminarVisible" title="Eliminar Factura" maxWidth="sm">
+        @if($facturaAEliminar)
+            <p class="text-sm text-slate-600">
+                ¿Estás seguro de que deseas eliminar la factura <strong>{{ $facturaAEliminar->numero_factura }}</strong>? Esta acción es irreversible y también eliminará sus líneas de detalle.
+            </p>
+        @endif
+
+        <div class="mt-6 flex justify-end gap-4 pt-4 border-t border-slate-50">
+            <button type="button" @click="show = false" class="px-5 py-2.5 bg-white border border-slate-200 text-sm font-semibold rounded-lg text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                Cancelar
+            </button>
+            <button type="button" wire:click="eliminar" class="px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors shadow-sm" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="eliminar">Eliminar</span>
+                <span wire:loading wire:target="eliminar">Eliminando...</span>
+            </button>
+        </div>
+    </x-modal-danger>
 </div>

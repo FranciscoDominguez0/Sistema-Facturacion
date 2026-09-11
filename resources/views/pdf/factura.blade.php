@@ -211,8 +211,8 @@
                 <div class="section-title">Facturar a</div>
                 <div class="customer-info">
                     <strong>{{ $factura->cliente->nombre }}</strong><br>
-                    @if($factura->cliente->identificacion_fiscal)
-                        RUC/ID: {{ $factura->cliente->identificacion_fiscal }}<br>
+                    @if($factura->cliente->identificacion)
+                        RUC/ID: {{ $factura->cliente->identificacion }}<br>
                     @endif
                     @if($factura->cliente->email)
                         {{ $factura->cliente->email }}<br>

@@ -114,7 +114,7 @@
                     @forelse($facturas as $factura)
                     <tr class="hover:bg-slate-50 transition-colors group">
                         <td class="px-6 py-4 text-sovereign-blue font-bold text-sm">
-                            <a href="{{ route('facturas.show', $factura->id) }}" wire:navigate class="hover:underline">{{ $factura->numero_factura }}</a>
+                            <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate class="hover:underline">{{ $factura->numero_factura }}</a>
                         </td>
                         <td class="px-6 py-4 text-slate-500 text-sm">
                             {{ $factura->fecha_emision->format('d M Y') }}

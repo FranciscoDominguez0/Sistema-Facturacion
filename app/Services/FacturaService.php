@@ -154,6 +154,17 @@ class FacturaService
     }
 
     /**
+     * Elimina una factura y todas sus líneas de detalle.
+     */
+    public function eliminar(Factura $factura): void
+    {
+        DB::transaction(function () use ($factura) {
+            $factura->items()->delete();
+            $factura->delete();
+        });
+    }
+
+    /**
      * Marca una factura como anulada.
      */
     public function anular(Factura $factura): Factura

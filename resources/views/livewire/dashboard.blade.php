@@ -252,7 +252,7 @@
                 </td>
                 <td class="py-3.5 px-6 text-right font-bold text-slate-900">${{ number_format($factura->total, 2) }}</td>
                 <td class="py-3.5 px-6 text-center">
-                  <a href="{{ route('facturas.show', $factura) }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">Ver / Gestionar</a>
+                  <a href="{{ route('facturas.edit', $factura) }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">Ver / Gestionar</a>
                 </td>
               </tr>
               @empty

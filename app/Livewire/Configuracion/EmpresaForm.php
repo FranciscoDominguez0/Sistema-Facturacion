@@ -31,8 +31,6 @@ class EmpresaForm extends Component
         $this->logo_path_actual = $empresa->logo_path;
     }
 
-
-
     public function guardar()
     {
         $this->authorize('empresa.gestionar');

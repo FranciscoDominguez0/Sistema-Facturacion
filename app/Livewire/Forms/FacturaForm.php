@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Factura;
 use App\Services\FacturaService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
@@ -43,6 +44,38 @@ class FacturaForm extends Form
         if (empty($this->items)) {
             $this->agregarLinea();
         }
+    }
+
+    /**
+     * Llena el formulario con los datos de una factura existente para editarla.
+     */
+    public function cargarFactura(Factura $factura): void
+    {
+        $this->cliente_id = $factura->cliente_id;
+        $this->vendedor_id = $factura->vendedor_id;
+        $this->fecha_emision = $factura->fecha_emision->format('Y-m-d');
+        $this->fecha_vencimiento = $factura->fecha_vencimiento?->format('Y-m-d');
+        $this->descuento_porcentaje = $factura->descuento_porcentaje;
+        $this->notas = $factura->notas;
+        $this->items = [];
+
+        foreach ($factura->items as $item) {
+            $this->items[] = [
+                'producto_id' => $item->producto_id,
+                'descripcion' => $item->descripcion,
+                'cantidad' => $item->cantidad,
+                'precio_unitario' => $item->precio_unitario,
+                'descuento_porcentaje' => $item->descuento_porcentaje,
+                'descuento_monto' => $item->descuento_monto,
+                'subtotal_linea' => $item->subtotal_linea,
+                'impuesto_id' => $item->impuesto_id,
+                'impuesto_nombre' => $item->impuesto_nombre,
+                'impuesto_porcentaje' => $item->impuesto_porcentaje,
+                'impuesto_monto' => $item->impuesto_monto,
+            ];
+        }
+
+        $this->recalcularTotales();
     }
 
     public function agregarLinea()
@@ -132,5 +165,27 @@ class FacturaForm extends Form
         $facturaService = app(FacturaService::class);
 
         return $facturaService->crear($this->all());
+    }
+
+    /**
+     * Actualiza la factura y reemplaza sus líneas con los datos del formulario.
+     */
+    public function actualizar(Factura $factura): Factura
+    {
+        // Descuento por línea quitado del formulario: siempre se fuerza a 0
+        foreach ($this->items as &$item) {
+            $item['descuento_porcentaje'] = 0;
+        }
+        unset($item);
+
+        if (! Gate::allows('facturas.descuento')) {
+            $this->descuento_porcentaje = 0;
+        }
+
+        $this->validate();
+
+        $facturaService = app(FacturaService::class);
+
+        return $facturaService->actualizar($factura, $this->all());
     }
 }

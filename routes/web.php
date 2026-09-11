@@ -6,7 +6,7 @@ use App\Livewire\Configuracion\ImpuestoIndex;
 use App\Livewire\Dashboard;
 use App\Livewire\Facturas\FacturaForm;
 use App\Livewire\Facturas\FacturaIndex;
-use App\Livewire\Facturas\FacturaShow;
+use App\Livewire\Facturas\FacturaPdf;
 use App\Livewire\Gastos\GastoForm;
 use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Gastos\GastoShow;
@@ -70,9 +70,13 @@ Route::middleware(['auth', PreventBackHistory::class])->group(function () {
         ->middleware('can:facturas.crear')
         ->name('facturas.crear');
 
-    Route::get('facturas/{factura}', FacturaShow::class)
+    Route::get('facturas/{factura}/edit', FacturaForm::class)
+        ->middleware('can:facturas.editar')
+        ->name('facturas.edit');
+
+    Route::get('facturas/{factura}/pdf-vista', FacturaPdf::class)
         ->middleware('can:facturas.ver')
-        ->name('facturas.show');
+        ->name('facturas.pdf.vista');
 
     Route::get('facturas/{factura}/pdf', function (Factura $factura) {
         if (! auth()->user()->can('facturas.ver')) {

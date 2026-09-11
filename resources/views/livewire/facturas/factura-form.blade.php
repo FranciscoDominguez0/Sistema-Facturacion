@@ -2,13 +2,13 @@
     @section('breadcrumbs')
         <x-breadcrumbs :links="[
             ['title' => 'Facturas', 'url' => route('facturas')],
-            ['title' => 'Nueva Venta']
+            ['title' => $factura ? 'Editar '.$factura->numero_factura : 'Nueva Venta']
         ]" />
     @endsection
 
     <div>
-        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Nueva Venta</h2>
-        <p class="text-slate-500 text-sm mt-1">Registra una nueva factura de venta en el sistema.</p>
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">{{ $factura ? 'Editar Venta' : 'Nueva Venta' }}</h2>
+        <p class="text-slate-500 text-sm mt-1">{{ $factura ? 'Modifica los datos de la factura y guarda los cambios.' : 'Registra una nueva factura de venta en el sistema.' }}</p>
     </div>
 
     <!-- Layout Principal en 1 columna -->
@@ -234,7 +234,7 @@
                     <button wire:click="save" class="w-full flex justify-center items-center py-2.5 px-4 bg-sovereign-blue hover:bg-slate-800 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="save" class="material-symbols-outlined text-[18px] mr-2">save</span>
                         <span wire:loading wire:target="save" class="material-symbols-outlined text-[18px] mr-2 animate-spin">progress_activity</span>
-                        Guardar Venta
+                        {{ $factura ? 'Actualizar Venta' : 'Guardar Venta' }}
                     </button>
                     <a href="{{ route('facturas') }}" class="w-full flex justify-center items-center py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg shadow-sm transition-colors">
                         Cancelar
