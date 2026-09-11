@@ -1,24 +1,52 @@
 FROM php:8.3-fpm-alpine
 
-# Instalar dependencias del sistema y Node.js para Vite/Livewire
+# Instalar dependencias del sistema requeridas para Laravel, PostgreSQL, DomPDF y Node.js/Vite
 RUN apk add --no-cache \
+    bash \
     git \
     curl \
-    libpng-dev \
-    libxml2-dev \
     zip \
     unzip \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libxml2-dev \
     libpq-dev \
     icu-dev \
     oniguruma-dev \
+    libzip-dev \
     nodejs \
     npm
 
-# Instalar extensiones de PHP necesarias para Laravel y PostgreSQL
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd intl xml
+# Configurar e instalar extensiones de PHP
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install \
+        pdo \
+        pdo_pgsql \
+        pgsql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        intl \
+        xml \
+        zip \
+        opcache
 
-# Obtener Composer actualizado
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copiar configuración personalizada de PHP y OPcache
+COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Copiar script de entrada
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /var/www/html
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]

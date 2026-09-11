@@ -103,7 +103,7 @@
     </script>
 </head>
 
-<body class="font-sans antialiased bg-slate-50 text-slate-900 h-screen flex overflow-hidden">
+<body class="font-sans antialiased bg-sovereign-blue text-slate-900 h-screen flex overflow-hidden">
 
     @persist('sidebar')
     <!-- SideNavBar: el estado Alpine vive en este contenedor persistido para que
@@ -186,7 +186,7 @@
     @endpersist
 
     <!-- Main Content Area Wrapper -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 lg:rounded-tl-[2rem]">
 
         <!-- TopNavBar -->
         <header

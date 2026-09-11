@@ -6,8 +6,18 @@ services:
     container_name: vigifact_app
     restart: unless-stopped
     working_dir: /var/www/html
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-Sistema-Facturacion}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-12345678}
     volumes:
       - ./:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - vigifact_network
 
@@ -16,8 +26,7 @@ services:
     container_name: vigifact_web
     restart: unless-stopped
     ports:
-      # Se expone en el puerto 8088 para evitar conflictos con los puertos en uso (80, 8080, 8082, 8087, 8000, etc.)
-      - "8088:80"
+      - "${APP_PORT:-8088}:80"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -35,10 +44,17 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-12345678}
     ports:
-      # El puerto 5432 no estaba en la lista de puertos en conflicto
-      - "5432:5432"
+      # SEGURIDAD: Vinculado EXCLUSIVAMENTE a 127.0.0.1 (localhost del host).
+      # No abre puertos a la red pública; solo accesible mediante túnel SSH:
+      # Ejemplo: ssh -L 5432:127.0.0.1:5432 usuario@tu-servidor
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - vigifact_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - vigifact_network
 

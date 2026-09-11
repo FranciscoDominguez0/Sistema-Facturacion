@@ -1,301 +1,587 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8">
     <title>Factura {{ $factura->numero_factura }}</title>
+    @php
+        $colorPrimario = $empresa->color_primario ?: '#1A2B44';
+
+        $logoBase64 = null;
+        if ($empresa->logo_path) {
+            $path = storage_path('app/public/' . $empresa->logo_path);
+            if (file_exists($path)) {
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = file_get_contents($path);
+                $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+        }
+
+        $estadoSlug = strtolower($factura->estado->value);
+        $colorEstadoBg = match ($estadoSlug) {
+            'borrador' => '#f1f5f9',
+            'emitida' => '#e0f2fe',
+            'pagada' => '#dcfce7',
+            'anulada' => '#fee2e2',
+            'vencida' => '#fef3c7',
+            default => '#f1f5f9',
+        };
+        $colorEstadoText = match ($estadoSlug) {
+            'borrador' => '#475569',
+            'emitida' => '#0284c7',
+            'pagada' => '#16a34a',
+            'anulada' => '#dc2626',
+            'vencida' => '#d97706',
+            default => '#475569',
+        };
+    @endphp
     <style>
+        @page {
+            margin: 35px 40px 40px 40px;
+        }
+
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 13px;
-            color: #333;
+            font-size: 11px;
+            color: #334155;
+            line-height: 1.5;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
-        .header {
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        .header td {
-            vertical-align: top;
-        }
-        .logo {
-            max-width: 120px;
-            margin-bottom: 15px;
-            object-fit: contain;
-        }
-        .company-info {
-            color: #555;
-            line-height: 1.6;
-        }
-        .invoice-title-container {
-            text-align: right;
-        }
-        .invoice-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: {{ $empresa->color_primario ?? '#002349' }};
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .invoice-meta {
-            font-size: 13px;
-            color: #555;
-            line-height: 1.6;
-        }
-        .billing-section {
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        .billing-section td {
-            vertical-align: top;
-            width: 50%;
-        }
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: {{ $empresa->color_primario ?? '#002349' }};
-            border-bottom: 2px solid {{ $empresa->color_primario ?? '#002349' }};
-            padding-bottom: 5px;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .customer-info {
-            line-height: 1.6;
-            color: #444;
-        }
-        .items-table {
+
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
         }
-        .items-table th {
-            background-color: #f4f6f8;
-            color: {{ $empresa->color_primario ?? '#002349' }};
-            font-weight: bold;
-            text-align: left;
-            padding: 12px 10px;
-            border-bottom: 2px solid {{ $empresa->color_primario ?? '#002349' }};
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        .items-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #eee;
-            color: #333;
+
+        td {
             vertical-align: top;
         }
-        .items-table .text-right {
+
+        /* Utilidades de texto */
+        .text-right {
             text-align: right;
         }
-        .items-table .text-center {
+
+        .text-center {
             text-align: center;
         }
-        .items-table tr:nth-child(even) td {
-            background-color: #fcfcfc;
+
+        .text-left {
+            text-align: left;
         }
-        .totals-container {
-            width: 100%;
-        }
-        .totals-table {
-            width: 45%;
-            float: right;
-            border-collapse: collapse;
-        }
-        .totals-table td {
-            padding: 8px 12px;
-            color: #333;
-        }
-        .totals-table .label {
+
+        .font-bold {
             font-weight: bold;
-            color: #555;
         }
-        .totals-table .amount {
-            text-align: right;
+
+        .text-uppercase {
+            text-transform: uppercase;
         }
-        .totals-table .total-row td {
+
+        /* HEADER */
+        .header-logo {
+            max-height: 70px;
+            max-width: 220px;
+            margin-bottom: 10px;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color:
+                {{ $colorPrimario }}
+            ;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .company-details {
+            font-size: 10px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        /* Invoice Badge */
+        .invoice-badge-table {
+            width: auto;
+            float: right;
+            background-color:
+                {{ $colorPrimario }}
+            ;
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+
+        .invoice-badge-title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .invoice-badge-num {
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+
+        /* Fechas y Estado */
+        .meta-info-table {
+            width: auto;
+            float: right;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 10px;
+        }
+
+        .meta-info-table td {
+            padding: 0 10px;
+            text-align: center;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .meta-info-table td:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .meta-label {
+            color: #94a3b8;
+            font-weight: bold;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+
+        .meta-val {
+            color: #0f172a;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        /* Total a Pagar */
+        .total-due-wrapper {
+            float: right;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            padding: 10px 20px;
+            text-align: center;
+            clear: both;
+        }
+
+        .total-due-label {
+            font-size: 9px;
+            font-weight: bold;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .total-due-amount {
             font-size: 18px;
             font-weight: bold;
-            color: {{ $empresa->color_primario ?? '#002349' }};
-            border-top: 2px solid {{ $empresa->color_primario ?? '#002349' }};
-            padding-top: 15px;
-            margin-top: 5px;
+            color: #0f172a;
         }
-        .footer {
-            position: fixed;
-            bottom: -20px;
-            left: 0;
+
+        /* CLIENTE */
+        .client-section {
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+
+        .client-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .client-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .client-details-table {
             width: 100%;
-            text-align: center;
-            font-size: 11px;
-            color: #888;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
+            font-size: 10px;
+            color: #475569;
         }
-        .badge {
-            font-size: 12px;
+
+        .client-details-table td {
+            padding-bottom: 3px;
+        }
+
+        .client-prefix {
+            font-weight: bold;
+            color:
+                {{ $colorPrimario }}
+            ;
+            width: 25px;
+            /* Evita que EML pise el correo */
+        }
+
+        /* TABLA DE ITEMS */
+        .items-table {
+            margin-bottom: 25px;
+        }
+
+        .items-table thead tr {
+            background-color:
+                {{ $colorPrimario }}
+            ;
+            color: #ffffff;
+        }
+
+        .items-table th {
+            padding: 10px 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .items-table td {
+            padding: 12px 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .row-even {
+            background-color: #f8fafc;
+        }
+
+        .item-desc {
+            font-weight: bold;
+            color: #0f172a;
+            font-size: 11px;
+        }
+
+        .item-discount {
+            font-size: 9px;
+            color: #d97706;
+            margin-top: 3px;
+        }
+
+        /* TOTALES INFERIORES */
+        .totals-table {
+            width: 100%;
+        }
+
+        .totals-table td {
+            padding: 5px 8px;
+        }
+
+        .totals-label {
+            text-align: right;
+            color: #64748b;
             font-weight: bold;
         }
-        .notes {
-            margin-top: 40px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-left: 4px solid {{ $empresa->color_primario ?? '#002349' }};
-            font-size: 12px;
-            color: #555;
-            width: 50%;
-            float: left;
+
+        .totals-value {
+            text-align: right;
+            color: #0f172a;
+            font-weight: bold;
+            width: 120px;
+        }
+
+        .grand-total-bg {
+            background-color:
+                {{ $colorPrimario }}
+            ;
+            border-radius: 6px;
+        }
+
+        .grand-total-bg td {
+            color: #ffffff !important;
+            font-size: 14px;
+            padding: 10px 12px;
+        }
+
+        /* NOTAS */
+        .notes-box {
+            background-color: #f8fafc;
+            border-left: 3px solid
+                {{ $colorPrimario }}
+            ;
+            padding: 12px 15px;
+            border-radius: 0 4px 4px 0;
+            margin-right: 30px;
+        }
+
+        .notes-title {
+            font-size: 10px;
+            font-weight: bold;
+            color:
+                {{ $colorPrimario }}
+            ;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .notes-text {
+            font-size: 10px;
+            color: #475569;
+        }
+
+        /* FOOTER */
+        .footer {
+            position: fixed;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+
+        .footer-thanks {
+            font-size: 11px;
+            font-weight: bold;
+            color:
+                {{ $colorPrimario }}
+            ;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .footer-line {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+            font-size: 9px;
+            color: #64748b;
+        }
+
+        .footer-contact {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .footer-contact span {
+            margin: 0 10px;
         }
     </style>
 </head>
+
 <body>
 
-    <table class="header">
+    <!-- 1. HEADER (Logo y Datos de Empresa a la Izquierda / Factura a la Derecha) -->
+    <table>
         <tr>
             <td style="width: 50%;">
-                @php
-                    $logoBase64 = null;
-                    if($empresa->logo_path) {
-                        $path = storage_path('app/public/' . $empresa->logo_path);
-                        if(file_exists($path)) {
-                            $type = pathinfo($path, PATHINFO_EXTENSION);
-                            $data = file_get_contents($path);
-                            $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                        }
-                    }
-                @endphp
-                
+                <!-- Logo -->
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" class="logo" alt="{{ $empresa->nombre }}">
-                @else
-                    <h2 style="color: {{ $empresa->color_primario ?? '#002349' }}; margin-top:0; font-size:24px;">{{ $empresa->nombre }}</h2>
+                    <img src="{{ $logoBase64 }}" class="header-logo" alt="Logo">
                 @endif
-                
-                <div class="company-info">
-                    <strong>{{ $empresa->nombre }}</strong><br>
-                    @if($empresa->identificacion_fiscal)
-                        RUC/ID: {{ $empresa->identificacion_fiscal }}<br>
+
+                <!-- Nombre de Empresa -->
+                <div class="company-name">{{ $empresa->nombre }}</div>
+
+                <!-- Datos de Empresa -->
+                <div class="company-details">
+                    @if($empresa->ruc)
+                        <strong>RUC:</strong> {{ $empresa->ruc }}{{ $empresa->dv ? '-' . $empresa->dv : '' }}<br>
+                    @elseif($empresa->identificacion_fiscal)
+                        <strong>ID Fiscal:</strong> {{ $empresa->identificacion_fiscal }}<br>
                     @endif
-                    Moneda: {{ $empresa->moneda }} ({{ $empresa->simbolo_moneda }})
+                    @if($empresa->direccion)
+                        {{ $empresa->direccion }}<br>
+                    @endif
+                    @if($empresa->telefono)
+                        <strong>Tel:</strong> {{ $empresa->telefono }}<br>
+                    @endif
+                    @if($empresa->email)
+                        <strong>Email:</strong> {{ $empresa->email }}
+                    @endif
                 </div>
             </td>
-            <td style="width: 50%;" class="invoice-title-container">
-                <div class="invoice-title">Factura</div>
-                <div class="invoice-meta">
-                    @php
-                        $estadoSlug = strtolower($factura->estado->value);
-                        $colorEstado = match($estadoSlug) {
-                            'borrador'  => '#6b7280',
-                            'emitida'   => '#059669', // Verde
-                            'pagada'    => '#16a34a',
-                            'anulada'   => '#dc2626', // Rojo
-                            'vencida'   => '#d97706', // Naranja
-                            default     => '#4b5563',
-                        };
-                    @endphp
-                    <strong>Nº de Factura:</strong> {{ $factura->numero_factura }}<br>
-                    <strong>Fecha de Emisión:</strong> {{ $factura->fecha_emision->format('d M, Y') }}<br>
-                    @if($factura->fecha_vencimiento)
-                        <strong>Vencimiento:</strong> {{ $factura->fecha_vencimiento->format('d M, Y') }}<br>
-                    @endif
-                    <strong>Estado:</strong> <span class="badge" style="color: {{ $colorEstado }};">{{ strtoupper($factura->estado->value) }}</span>
+
+            <td style="width: 50%; text-align: right;">
+                <!-- Bloque FACTURA -->
+                <table class="invoice-badge-table">
+                    <tr>
+                        <td>
+                            <div class="invoice-badge-title">FACTURA</div>
+                            <div class="invoice-badge-num">No. {{ $factura->numero_factura }}</div>
+                        </td>
+                    </tr>
+                </table>
+                <div style="clear: both;"></div>
+
+                <!-- Bloque Fechas y Estado -->
+                <table class="meta-info-table">
+                    <tr>
+                        <td>
+                            <div class="meta-label">Fecha Emisión</div>
+                            <div class="meta-val">{{ $factura->fecha_emision->format('d/m/Y') }}</div>
+                        </td>
+                        @if($factura->fecha_vencimiento)
+                            <td>
+                                <div class="meta-label">Vencimiento</div>
+                                <div class="meta-val">{{ $factura->fecha_vencimiento->format('d/m/Y') }}</div>
+                            </td>
+                        @endif
+                        <td style="border-right: none;">
+                            <div class="meta-label">Estado</div>
+                            <div class="meta-val" style="color: {{ $colorEstadoText }};">
+                                {{ strtoupper($factura->estado->value) }}</div>
+                        </td>
+                    </tr>
+                </table>
+                <div style="clear: both;"></div>
+
+                <!-- Bloque Total a Pagar -->
+                <div class="total-due-wrapper">
+                    <div class="total-due-label">Total a Pagar</div>
+                    <div class="total-due-amount">{{ $empresa->simbolo_moneda }} {{ number_format($factura->total, 2) }}
+                    </div>
                 </div>
             </td>
         </tr>
     </table>
 
-    <table class="billing-section">
-        <tr>
-            <td style="padding-right: 30px;">
-                <div class="section-title">Facturar a</div>
-                <div class="customer-info">
-                    <strong>{{ $factura->cliente->nombre }}</strong><br>
-                    @if($factura->cliente->identificacion)
-                        RUC/ID: {{ $factura->cliente->identificacion }}<br>
-                    @endif
-                    @if($factura->cliente->email)
-                        {{ $factura->cliente->email }}<br>
-                    @endif
-                    @if($factura->cliente->telefono)
-                        Tel: {{ $factura->cliente->telefono }}
-                    @endif
-                </div>
-            </td>
-            <td>
-                <div class="section-title">Información Adicional</div>
-                <div class="customer-info">
-                    <strong>Vendedor:</strong> {{ $factura->vendedor->name }}<br>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <!-- 2. SECCIÓN DEL CLIENTE -->
+    <div class="client-section">
+        <div class="client-label">Facturar a:</div>
+        <div class="client-name">{{ $factura->cliente->nombre }}</div>
 
+        <!-- Tabla anidada para alinear los prefijos (evita superposiciones) -->
+        <table style="width: 60%;">
+            @if($factura->cliente->identificacion)
+                <tr>
+                    <td class="client-prefix">ID</td>
+                    <td style="font-size: 11px; color: #475569;">{{ $factura->cliente->identificacion }}</td>
+                </tr>
+            @endif
+            @if($factura->cliente->direccion)
+                <tr>
+                    <td class="client-prefix">DIR</td>
+                    <td style="font-size: 11px; color: #475569;">{{ $factura->cliente->direccion }}</td>
+                </tr>
+            @endif
+            @if($factura->cliente->telefono)
+                <tr>
+                    <td class="client-prefix">TEL</td>
+                    <td style="font-size: 11px; color: #475569;">{{ $factura->cliente->telefono }}</td>
+                </tr>
+            @endif
+            @if($factura->cliente->email)
+                <tr>
+                    <td class="client-prefix">EML</td>
+                    <td style="font-size: 11px; color: #475569;">{{ $factura->cliente->email }}</td>
+                </tr>
+            @endif
+        </table>
+    </div>
+
+    <!-- 3. TABLA DE ÍTEMS -->
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 10%; text-align: center;">CANT</th>
-                <th style="width: 45%;">DESCRIPCIÓN</th>
-                <th style="width: 20%; text-align: right;">PRECIO UNIT.</th>
-                <th style="width: 25%; text-align: right;">SUBTOTAL</th>
+                <th class="text-center" style="width: 7%;">SL.</th>
+                <th class="text-left" style="width: 48%;">DESCRIPCIÓN</th>
+                <th class="text-right" style="width: 17%;">PRECIO</th>
+                <th class="text-center" style="width: 11%;">CANT.</th>
+                <th class="text-right" style="width: 17%;">TOTAL</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($factura->items as $item)
-            <tr>
-                <td class="text-center">{{ rtrim(rtrim(number_format($item->cantidad, 2), '0'), '.') }}</td>
-                <td>
-                    <strong>{{ $item->descripcion }}</strong>
-                    @if($item->descuento_porcentaje > 0)
-                        <div style="font-size: 11px; color: #777; margin-top: 3px;">
-                            Desc. aplicado: {{ $item->descuento_porcentaje }}%
-                        </div>
-                    @endif
-                </td>
-                <td class="text-right">{{ $empresa->simbolo_moneda }}{{ number_format($item->precio_unitario, 2) }}</td>
-                <td class="text-right">{{ $empresa->simbolo_moneda }}{{ number_format($item->subtotal_linea, 2) }}</td>
-            </tr>
+            @foreach($factura->items as $index => $item)
+                <tr class="{{ $index % 2 === 1 ? 'row-even' : '' }}">
+                    <td class="text-center" style="color: #94a3b8; font-weight: bold;">{{ $index + 1 }}.</td>
+                    <td>
+                        <div class="item-desc">{{ $item->descripcion }}</div>
+                        @if($item->descuento_porcentaje > 0)
+                            <div class="item-discount">Desc. aplicado:
+                                {{ rtrim(rtrim(number_format($item->descuento_porcentaje, 2), '0'), '.') }}%</div>
+                        @endif
+                    </td>
+                    <td class="text-right">{{ $empresa->simbolo_moneda }} {{ number_format($item->precio_unitario, 2) }}
+                    </td>
+                    <td class="text-center" style="font-weight: bold;">
+                        {{ rtrim(rtrim(number_format($item->cantidad, 2), '0'), '.') }}</td>
+                    <td class="text-right font-bold" style="color: #0f172a;">{{ $empresa->simbolo_moneda }}
+                        {{ number_format($item->subtotal_linea, 2) }}</td>
+                </tr>
             @endforeach
         </tbody>
     </table>
 
-    <div class="totals-container">
-        @if($factura->notas)
-        <div class="notes">
-            <strong>Notas Adicionales:</strong><br>
-            {!! nl2br(e($factura->notas)) !!}
-        </div>
-        @endif
-        
-        <table class="totals-table">
-            <tr>
-                <td class="label">Subtotal</td>
-                <td class="amount">{{ $empresa->simbolo_moneda }}{{ number_format($factura->subtotal, 2) }}</td>
-            </tr>
-            @if($factura->descuento_total > 0)
-            <tr>
-                <td class="label">Descuento ({{ $factura->descuento_porcentaje }}%)</td>
-                <td class="amount" style="color: #059669;">-{{ $empresa->simbolo_moneda }}{{ number_format($factura->descuento_total, 2) }}</td>
-            </tr>
-            @endif
-            <tr>
-                <td class="label">{{ $empresa->impuesto_nombre ?: 'Impuesto' }} ({{ $empresa->impuesto_porcentaje }}%)</td>
-                <td class="amount">{{ $empresa->simbolo_moneda }}{{ number_format($factura->impuesto, 2) }}</td>
-            </tr>
-            <tr class="total-row">
-                <td class="label">TOTAL</td>
-                <td class="amount">{{ $empresa->simbolo_moneda }}{{ number_format($factura->total, 2) }}</td>
-            </tr>
-        </table>
-        <div style="clear: both;"></div>
-    </div>
+    <!-- 4. TOTALES Y NOTAS -->
+    <table>
+        <tr>
+            <!-- Columna Izquierda: Notas -->
+            <td style="width: 55%;">
+                @if($factura->notas)
+                    <div class="notes-box">
+                        <div class="notes-title">Notas / Observaciones</div>
+                        <div class="notes-text">{!! nl2br(e($factura->notas)) !!}</div>
+                    </div>
+                @endif
+            </td>
 
+            <!-- Columna Derecha: Totales -->
+            <td style="width: 45%;">
+                <table class="totals-table">
+                    <tr>
+                        <td class="totals-label">Sub Total</td>
+                        <td class="totals-value">{{ $empresa->simbolo_moneda }}
+                            {{ number_format($factura->subtotal, 2) }}</td>
+                    </tr>
+                    @if($factura->descuento_total > 0)
+                        <tr>
+                            <td class="totals-label">Descuento
+                                ({{ rtrim(rtrim(number_format($factura->descuento_porcentaje, 2), '0'), '.') }}%)</td>
+                            <td class="totals-value" style="color: #dc2626;">-{{ $empresa->simbolo_moneda }}
+                                {{ number_format($factura->descuento_total, 2) }}</td>
+                        </tr>
+                    @endif
+                    <tr>
+                        <td class="totals-label">{{ $empresa->impuesto_nombre ?: 'Impuesto' }}
+                            ({{ rtrim(rtrim(number_format($empresa->impuesto_porcentaje, 2), '0'), '.') }}%)</td>
+                        <td class="totals-value">{{ $empresa->simbolo_moneda }}
+                            {{ number_format($factura->impuesto, 2) }}</td>
+                    </tr>
+
+                    <!-- Fila de espacio antes del Grand Total -->
+                    <tr>
+                        <td colspan="2" style="height: 5px; padding: 0;"></td>
+                    </tr>
+
+                    <!-- Grand Total Block -->
+                    <tr class="grand-total-bg">
+                        <td class="font-bold text-left"
+                            style="color: #ffffff; padding-left: 15px; border-top-left-radius: 6px; border-bottom-left-radius: 6px;">
+                            Grand Total :</td>
+                        <td class="totals-value"
+                            style="color: #ffffff; padding-right: 15px; border-top-right-radius: 6px; border-bottom-right-radius: 6px;">
+                            {{ $empresa->simbolo_moneda }} {{ number_format($factura->total, 2) }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- 5. FOOTER -->
     <div class="footer">
-        @if($empresa->pie_pagina_pdf)
-            {{ $empresa->pie_pagina_pdf }}<br>
-        @endif
-        <strong>{{ $empresa->nombre }}</strong>
+        <div class="footer-thanks">Gracias por su preferencia</div>
+        <div class="footer-line">
+            <div class="footer-contact">
+                @if($empresa->telefono) <span>TEL: {{ $empresa->telefono }}</span> @endif
+                @if($empresa->email) <span>EMAIL: {{ $empresa->email }}</span> @endif
+                @if($empresa->ruc || $empresa->identificacion_fiscal) <span>ID:
+                {{ $empresa->ruc ?: $empresa->identificacion_fiscal }}</span> @endif
+            </div>
+            @if($empresa->pie_pagina_pdf)
+                <div style="margin-top: 4px;">{{ $empresa->pie_pagina_pdf }}</div>
+            @endif
+        </div>
     </div>
 
 </body>
+
 </html>
