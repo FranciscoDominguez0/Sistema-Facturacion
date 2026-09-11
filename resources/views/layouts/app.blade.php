@@ -1,12 +1,13 @@
 @php
-// Skeleton del dashboard: solo al entrar tras el login (flag de sesión o referer)
-// y únicamente en la página del dashboard. El flag se consume al primer uso.
-$mostrarSkeleton = request()->routeIs('dashboard')
-    && (session()->pull('is_from_login', false)
-        || str_contains((string) request()->headers->get('referer', ''), '/login'));
+    // Skeleton del dashboard: solo al entrar tras el login (flag de sesión o referer)
+    // y únicamente en la página del dashboard. El flag se consume al primer uso.
+    $mostrarSkeleton = request()->routeIs('dashboard')
+        && (session()->pull('is_from_login', false)
+            || str_contains((string) request()->headers->get('referer', ''), '/login'));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +17,8 @@ $mostrarSkeleton = request()->routeIs('dashboard')
 
     <!-- Iconos: fuente autoalojada en /fonts (declarada en app.css). El preload
          la pide en paralelo y el script evita ver las ligaduras como texto. -->
-    <link rel="preload" href="/fonts/material-symbols/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/material-symbols/material-symbols-outlined.woff2" as="font" type="font/woff2"
+        crossorigin>
 
     <script>
         if (document.fonts) {
@@ -30,16 +32,30 @@ $mostrarSkeleton = request()->routeIs('dashboard')
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
+
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
 
         /* Estilo general para scrollbars de la app */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
 
         /* Barra de progreso de navegación de Livewire con el color de la marca */
         :root {
@@ -48,9 +64,17 @@ $mostrarSkeleton = request()->routeIs('dashboard')
 
         /* Entrada sutil del contenido al cambiar de pantalla */
         @keyframes subtleFadeIn {
-            0% { opacity: 0; transform: translateY(6px); }
-            100% { opacity: 1; transform: none; }
+            0% {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: none;
+            }
         }
+
         .animate-fade-in-up {
             animation: subtleFadeIn 0.35s ease-out;
         }
@@ -78,86 +102,98 @@ $mostrarSkeleton = request()->routeIs('dashboard')
         });
     </script>
 </head>
+
 <body class="font-sans antialiased bg-slate-50 text-slate-900 h-screen flex overflow-hidden">
 
     @persist('sidebar')
     <!-- SideNavBar: el estado Alpine vive en este contenedor persistido para que
          no se pierda al navegar (SPA) ni dependa de elementos que se recrean -->
-    <div
-        x-data="{ abierto: false, currentPath: window.location.pathname }"
+    <div x-data="{ abierto: false, currentPath: window.location.pathname }"
         x-on:livewire:navigated.document="currentPath = window.location.pathname; abierto = false"
-        x-on:abrir-sidebar.window="abierto = true"
-        class="flex-shrink-0"
-    >
+        x-on:abrir-sidebar.window="abierto = true" class="flex-shrink-0">
         <!-- Mobile sidebar backdrop: hermano del aside para que no tape sus enlaces -->
-        <div x-show="abierto" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/50 lg:hidden" style="display: none;" @click="abierto = false"></div>
+        <div x-show="abierto" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/50 lg:hidden"
+            style="display: none;" @click="abierto = false"></div>
 
-        <aside
-            :class="abierto ? 'translate-x-0' : '-translate-x-full'"
-            class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300"
-        >
-        <!-- Header (Logo) -->
-        <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-3">
-            <div class="h-10 w-10 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-sm">
-                <span class="material-symbols-outlined text-2xl">receipt_long</span>
-            </div>
-            <h1 class="text-2xl font-semibold text-white tracking-tight">
-                Vigi<span class="font-light">Fact</span>
-            </h1>
-        </div>
-
-        <!-- Navigation Menu -->
-        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-hide">
-            <x-sidebar-link href="{{ route('dashboard') }}" icono="home" :secciones="['/dashboard']">Inicio</x-sidebar-link>
-
-            @canany(['clientes.ver', 'clientes.crear', 'clientes.editar', 'clientes.eliminar'])
-                <x-sidebar-link href="{{ route('clientes') }}" icono="group" :secciones="['/clientes']">Clientes</x-sidebar-link>
-            @endcanany
-
-            @canany(['productos.ver', 'productos.crear', 'productos.editar', 'productos.eliminar'])
-                <x-sidebar-link href="{{ route('productos.index') }}" icono="inventory_2" :secciones="['/productos']">Productos</x-sidebar-link>
-            @endcanany
-
-            @canany(['facturas.ver', 'facturas.crear', 'facturas.editar', 'facturas.eliminar'])
-                <x-sidebar-link href="{{ route('facturas') }}" icono="receipt_long" :secciones="['/facturas']">Facturas</x-sidebar-link>
-            @endcanany
-
-            @canany(['gastos.ver', 'gastos.crear', 'gastos.editar', 'gastos.eliminar'])
-                <x-sidebar-link href="{{ route('gastos') }}" icono="receipt" :secciones="['/gastos']">Gastos</x-sidebar-link>
-            @endcanany
-
-            @canany(['empresa.gestionar', 'usuarios.ver'])
-                <div class="pt-4 pb-2 px-2">
-                    <div class="h-px w-full bg-white/10 rounded-full"></div>
+        <aside :class="abierto ? 'translate-x-0' : '-translate-x-full'"
+            class="bg-sovereign-blue text-white h-screen w-64 flex flex-col py-2 flex-shrink-0 shadow-xl z-30 fixed lg:relative lg:translate-x-0 transition-transform duration-300">
+            <!-- Header (Logo) -->
+            <div class="px-6 pb-6 pt-4 flex items-center justify-center gap-3">
+                <div class="h-10 w-10 bg-slate-900 rounded-full flex items-center justify-center text-white shadow-sm">
+                    <span class="material-symbols-outlined text-2xl">receipt_long</span>
                 </div>
+                <h1 class="text-2xl font-semibold text-white tracking-tight">
+                    Vigi<span class="font-light">Fact</span>
+                </h1>
+            </div>
 
-                <x-sidebar-link href="{{ route('settings.empresa') }}" icono="settings" :secciones="['/settings', '/usuarios', '/roles']">Configuración</x-sidebar-link>
-            @endcanany
-        </nav>
+            <!-- Navigation Menu -->
+            <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-hide">
+                <x-sidebar-link href="{{ route('dashboard') }}" icono="home"
+                    :secciones="['/dashboard']">Inicio</x-sidebar-link>
 
-        <!-- Footer Actions -->
-        <div class="px-4 py-4 border-t border-white/10 mt-auto">
-            <form method="POST" action="{{ route('logout') }}" class="w-full">
-                @csrf
-                <button type="submit" class="w-full group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all hover:bg-white/5">
-                    <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-white/5 text-white/70 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                @canany(['clientes.ver', 'clientes.crear', 'clientes.editar', 'clientes.eliminar'])
+                    <x-sidebar-link href="{{ route('clientes') }}" icono="group"
+                        :secciones="['/clientes']">Clientes</x-sidebar-link>
+                @endcanany
+
+                @canany(['productos.ver', 'productos.crear', 'productos.editar', 'productos.eliminar'])
+                    <x-sidebar-link href="{{ route('productos.index') }}" icono="inventory_2"
+                        :secciones="['/productos']">Productos</x-sidebar-link>
+                @endcanany
+
+                @canany(['facturas.ver', 'facturas.crear', 'facturas.editar', 'facturas.eliminar'])
+                    <x-sidebar-link href="{{ route('facturas') }}" icono="receipt_long"
+                        :secciones="['/facturas']">Facturas</x-sidebar-link>
+                @endcanany
+
+                @canany(['gastos.ver', 'gastos.crear', 'gastos.editar', 'gastos.eliminar'])
+                    <x-sidebar-link href="{{ route('gastos') }}" icono="receipt"
+                        :secciones="['/gastos']">Gastos</x-sidebar-link>
+                @endcanany
+
+                @canany(['empresa.gestionar', 'usuarios.ver'])
+                    <div class="pt-4 pb-2 px-2">
+                        <div class="h-px w-full bg-white/10 rounded-full"></div>
                     </div>
-                    <span class="text-sm tracking-wide text-white/70 font-medium group-hover:text-red-400 transition-colors">Cerrar sesión</span>
-                </button>
-            </form>
-        </div>
-    </aside>
+
+                    <x-sidebar-link href="{{ route('settings.empresa') }}" icono="settings" :secciones="['/settings', '/usuarios', '/roles']">Configuración</x-sidebar-link>
+                @endcanany
+            </nav>
+
+            <!-- Footer Actions -->
+            <div class="px-4 py-4 border-t border-white/10 mt-auto">
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    @csrf
+                    <button type="submit"
+                        class="w-full group relative flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-full transition-all hover:bg-white/5">
+                        <div
+                            class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-white/5 text-white/70 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">logout</span>
+                        </div>
+                        <span class="text-sm tracking-wide text-white/70 font-medium group-hover:text-red-400 transition-colors">Cerrar sesión</span>
+                    </button>
+                </form>
+            </div>
+
+            @if ($mostrarSkeleton)
+                <!-- Skeleton del sidebar: tapa el menú real tras el login y se
+                     desvanece con el del dashboard (ver script al final). -->
+                <x-skeleton-sidebar />
+            @endif
+        </aside>
     </div>
     @endpersist
 
     <!-- Main Content Area Wrapper -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        
+
         <!-- TopNavBar -->
-        <header class="bg-white w-full h-16 border-b border-slate-200 flex justify-between items-center px-4 md:px-8 flex-shrink-0 z-10">
+        <header
+            class="bg-white w-full h-16 border-b border-slate-200 flex justify-between items-center px-4 md:px-8 flex-shrink-0 z-10">
             <!-- Left: Menu Icon for collapse -->
-            <button @click="$dispatch('abrir-sidebar')" class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full lg:hidden focus:outline-none">
+            <button @click="$dispatch('abrir-sidebar')"
+                class="p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full lg:hidden focus:outline-none">
                 <span class="material-symbols-outlined">menu</span>
             </button>
             <div class="flex-1 flex items-center ml-4 lg:ml-0 overflow-x-auto scrollbar-hide">
@@ -172,16 +208,23 @@ $mostrarSkeleton = request()->routeIs('dashboard')
                     <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
                         <span class="material-symbols-outlined text-[20px]">notifications</span>
                     </button>
-                    <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors hidden sm:block">
+                    <button
+                        class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors hidden sm:block">
                         <span class="material-symbols-outlined text-[20px]">help_outline</span>
                     </button>
                 </div>
 
                 <!-- Avatar Profile Dropdown -->
                 <div x-data="{ dropdownOpen: false }" class="relative">
-                    <button @click="dropdownOpen = !dropdownOpen" @click.outside="dropdownOpen = false" class="flex items-center space-x-2 pl-2 focus:outline-none">
-                        <div class="w-8 h-8 rounded-full bg-sovereign-blue text-white flex items-center justify-center font-bold text-sm">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                    <button @click="dropdownOpen = !dropdownOpen" @click.outside="dropdownOpen = false"
+                        class="flex items-center space-x-2 pl-2 focus:outline-none">
+                        <div
+                            class="w-8 h-8 rounded-full bg-sovereign-blue text-white flex items-center justify-center font-bold text-sm overflow-hidden">
+                            @if (Auth::user()->avatar_path)
+                                <img src="{{ Storage::url(Auth::user()->avatar_path) }}" class="w-full h-full object-cover" alt="Foto de perfil">
+                            @else
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            @endif
                         </div>
                         <div class="hidden md:block text-left">
                             <p class="text-sm font-medium text-slate-700">{{ Auth::user()->name }}</p>
@@ -190,8 +233,11 @@ $mostrarSkeleton = request()->routeIs('dashboard')
                     </button>
 
                     <!-- Dropdown Menu -->
-                    <div x-show="dropdownOpen" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-slate-200 py-1" style="display: none;">
-                        <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" wire:navigate>Perfil</a>
+                    <div x-show="dropdownOpen" x-transition
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-slate-200 py-1"
+                        style="display: none;">
+                        <a href="{{ route('profile') }}"
+                            class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" wire:navigate>Perfil</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100">Cerrar sesión</button>
@@ -206,12 +252,13 @@ $mostrarSkeleton = request()->routeIs('dashboard')
             <div class="relative w-full">
                 @if ($mostrarSkeleton)
                     <!-- Skeleton del dashboard: se superpone al contenido real y se
-                         desvanece tras una pausa simulada (ver script al final). -->
+                             desvanece tras una pausa simulada (ver script al final). -->
                     <div id="skeleton-dashboard" class="absolute inset-0 z-20 transition-opacity duration-300">
                         <x-skeleton-dashboard />
                     </div>
                 @endif
-                <div id="actual-page-content" class="w-full transition-opacity duration-300 {{ $mostrarSkeleton ? 'opacity-0' : '' }}">
+                <div id="actual-page-content"
+                    class="w-full transition-opacity duration-300 {{ $mostrarSkeleton ? 'opacity-0' : '' }}">
                     {{ $slot }}
                 </div>
             </div>
@@ -225,11 +272,21 @@ $mostrarSkeleton = request()->routeIs('dashboard')
         (function () {
             var skeletonProcesado = false;
 
-            // Skeleton post-login: pausa simulada, desvanecimiento del skeleton y
-            // entrada suave del contenido real.
+            // Skeleton post-login: pausa simulada, desvanecimiento del skeleton
+            // (dashboard + sidebar) y entrada suave del contenido real.
             function handleLoginSkeleton() {
                 var skeleton = document.getElementById('skeleton-dashboard');
+                var skeletonSidebar = document.getElementById('skeleton-sidebar');
                 var contenido = document.getElementById('actual-page-content');
+
+                // Al navegar, Livewire restaura el sidebar persistido desde su
+                // template, que todavía contiene el skeleton: se vuelve a quitar
+                // para que no reaparezca en otras pantallas.
+                if (!skeleton && skeletonSidebar) {
+                    skeletonSidebar.remove();
+                    return;
+                }
+
                 if (!skeleton || !contenido || skeletonProcesado) return;
                 skeletonProcesado = true;
 
@@ -237,9 +294,11 @@ $mostrarSkeleton = request()->routeIs('dashboard')
                     contenido.classList.remove('opacity-0');
                     contenido.classList.add('opacity-100', 'animate-fade-in-up');
                     skeleton.style.opacity = '0';
+                    if (skeletonSidebar) skeletonSidebar.style.opacity = '0';
 
                     setTimeout(function () {
                         skeleton.remove();
+                        if (skeletonSidebar) skeletonSidebar.remove();
                         setTimeout(function () {
                             contenido.classList.remove('animate-fade-in-up');
                         }, 400);
@@ -286,4 +345,5 @@ $mostrarSkeleton = request()->routeIs('dashboard')
         })();
     </script>
 </body>
+
 </html>

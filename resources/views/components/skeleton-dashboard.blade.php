@@ -2,37 +2,6 @@
      página. Simula la estructura real (KPIs con sparkline, gráfico, actividad
      reciente y tabla de facturas) con un efecto shimmer y aparición escalonada.
      Solo es decorativo: no recibe props ni interactúa. --}}
-<style>
-    .shimmer-bg {
-        position: relative;
-        overflow: hidden;
-    }
-    .shimmer-bg::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        transform: translateX(-100%);
-        background-image: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0) 0,
-            rgba(255, 255, 255, 0.4) 20%,
-            rgba(255, 255, 255, 0.8) 60%,
-            rgba(255, 255, 255, 0)
-        );
-        animation: shimmer 1.5s infinite;
-    }
-    @keyframes shimmer {
-        100% {
-            transform: translateX(100%);
-        }
-    }
-    .stagger-1::after { animation-delay: 100ms; }
-    .stagger-2::after { animation-delay: 200ms; }
-    .stagger-3::after { animation-delay: 300ms; }
-</style>
 
 <div class="bg-slate-50 flex flex-col gap-6 pointer-events-none" aria-hidden="true">
     {{-- Encabezado: título + selector de rango + botón de acción --}}

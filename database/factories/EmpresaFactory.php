@@ -17,6 +17,10 @@ class EmpresaFactory extends Factory
         return [
             'nombre' => fake()->company(),
             'identificacion_fiscal' => fake()->numerify('############'),
+            'email' => null,
+            'telefono' => null,
+            'ruc' => null,
+            'dv' => null,
             'logo_path' => null,
             'moneda' => 'USD',
             'simbolo_moneda' => '$',

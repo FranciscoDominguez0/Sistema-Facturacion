@@ -50,6 +50,15 @@ class FacturaForm extends Component
 
     public $linea_producto_actual = null;
 
+    // Para la creación rápida de impuesto
+    public $mostrarModalImpuesto = false;
+
+    public $linea_impuesto_actual = null;
+
+    public $nuevo_impuesto_nombre = '';
+
+    public $nuevo_impuesto_porcentaje = '';
+
     // Para la creación rápida de vendedor
     public $mostrarModalVendedor = false;
 
@@ -132,6 +141,12 @@ class FacturaForm extends Component
 
     public function updated($property, $value)
     {
+        // Sincronizar el cliente seleccionado en el form object
+        if ($property === 'cliente_id') {
+            $this->form->cliente_id = $value;
+            return;
+        }
+
         if (str_starts_with($property, 'form.items') || $property === 'form.descuento_porcentaje') {
             if (str_ends_with($property, '.producto_id')) {
                 preg_match('/form\.items\.(\d+)\.producto_id/', $property, $matches);
@@ -217,6 +232,32 @@ class FacturaForm extends Component
         $this->linea_producto_actual = null;
     }
 
+    public function guardarImpuestoExpress()
+    {
+        $this->validate([
+            'nuevo_impuesto_nombre' => 'required|string|max:255',
+            'nuevo_impuesto_porcentaje' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $impuesto = \App\Models\Impuesto::create([
+            'nombre' => $this->nuevo_impuesto_nombre,
+            'porcentaje' => $this->nuevo_impuesto_porcentaje,
+            'activo' => true,
+        ]);
+
+        if ($this->linea_impuesto_actual !== null) {
+            $this->form->items[$this->linea_impuesto_actual]['impuesto_id'] = $impuesto->id;
+            $this->form->items[$this->linea_impuesto_actual]['impuesto_nombre'] = $impuesto->nombre;
+            $this->form->items[$this->linea_impuesto_actual]['impuesto_porcentaje'] = $impuesto->porcentaje;
+            $this->form->recalcularTotales();
+        }
+
+        $this->mostrarModalImpuesto = false;
+        $this->nuevo_impuesto_nombre = '';
+        $this->nuevo_impuesto_porcentaje = '';
+        $this->linea_impuesto_actual = null;
+    }
+
     public function guardarVendedorExpress()
     {
         $this->validate([
@@ -250,6 +291,7 @@ class FacturaForm extends Component
             // navigate: solo se actualiza el contenido, el sidebar no se recarga
             return $this->redirectRoute('facturas.show', $factura->id, navigate: true);
         } catch (ValidationException $e) {
+            \Illuminate\Support\Facades\Log::error('Validation errors al crear factura', $e->errors());
             $this->dispatch('toast', message: 'Hay campos obligatorios vacíos o con errores. Por favor, revisa el formulario.', type: 'error');
             throw $e;
         }

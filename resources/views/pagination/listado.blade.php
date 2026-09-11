@@ -9,7 +9,7 @@
         // Se normalizan a ruta absoluta para que siempre apunten a la raíz.
         $absoluta = fn (string $url): string => str_starts_with($url, '/') ? $url : '/'.$url;
 
-        $base = 'inline-flex h-10 min-w-11 items-center justify-center rounded-lg text-sm font-medium transition-colors';
+        $base = 'inline-flex h-8 min-w-8 items-center justify-center rounded-md text-sm font-medium transition-colors';
     @endphp
     <nav role="navigation" aria-label="Paginación">
         <ul class="flex flex-wrap items-center justify-center gap-1.5">

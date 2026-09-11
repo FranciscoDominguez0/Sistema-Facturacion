@@ -18,9 +18,6 @@
                     {{ $form->cliente ? 'Actualice los datos del cliente.' : 'Ingrese los detalles para registrar un nuevo cliente en el sistema.' }}
                 </p>
             </div>
-            <a href="{{ route('clientes') }}" wire:navigate class="text-slate-400 hover:text-sovereign-blue transition-colors">
-                <span class="material-symbols-outlined text-[24px]" data-icon="close">close</span>
-            </a>
         </div>
 
         <!-- Form Body -->
@@ -34,7 +31,6 @@
                             Nombre Completo <span class="text-red-600 text-sm">*</span>
                         </label>
                         <div class="bg-white border @error('form.nombre') border-red-500 @else border-slate-200 @enderror rounded-lg shadow-sm px-4 py-3 focus-within:border-sovereign-blue focus-within:ring-1 focus-within:ring-sovereign-blue transition-all flex items-center">
-                            <span class="material-symbols-outlined text-slate-400 mr-3 text-[20px]" data-icon="person">person</span>
                             <input wire:model="form.nombre" class="bg-transparent border-none outline-none w-full text-sm text-slate-800 p-0 focus:ring-0" type="text"/>
                         </div>
                         @error('form.nombre')
@@ -47,7 +43,6 @@
                             Identificación Fiscal (Opcional)
                         </label>
                         <div class="bg-white border @error('form.identificacion') border-red-500 @else border-slate-200 @enderror rounded-lg shadow-sm px-4 py-3 focus-within:border-sovereign-blue focus-within:ring-1 focus-within:ring-sovereign-blue transition-all flex items-center">
-                            <span class="material-symbols-outlined text-slate-400 mr-3 text-[20px]" data-icon="badge">badge</span>
                             <input wire:model="form.identificacion" class="bg-transparent border-none outline-none w-full text-sm text-slate-800 p-0 focus:ring-0" type="text"/>
                         </div>
                         @error('form.identificacion')
@@ -61,7 +56,6 @@
                             Correo Electrónico
                         </label>
                         <div class="bg-white border @error('form.email') border-red-500 @else border-slate-200 @enderror rounded-lg shadow-sm px-4 py-3 focus-within:border-sovereign-blue focus-within:ring-1 focus-within:ring-sovereign-blue transition-all flex items-center">
-                            <span class="material-symbols-outlined text-slate-400 mr-3 text-[20px]" data-icon="mail">mail</span>
                             <input wire:model="form.email" class="bg-transparent border-none outline-none w-full text-sm text-slate-800 p-0 focus:ring-0" type="email"/>
                         </div>
                         @error('form.email')
@@ -74,7 +68,6 @@
                             Teléfono
                         </label>
                         <div class="bg-white border @error('form.telefono') border-red-500 @else border-slate-200 @enderror rounded-lg shadow-sm px-4 py-3 focus-within:border-sovereign-blue focus-within:ring-1 focus-within:ring-sovereign-blue transition-all flex items-center">
-                            <span class="material-symbols-outlined text-slate-400 mr-3 text-[20px]" data-icon="phone">phone</span>
                             <input wire:model="form.telefono" class="bg-transparent border-none outline-none w-full text-sm text-slate-800 p-0 focus:ring-0" type="tel"/>
                         </div>
                         @error('form.telefono')
@@ -91,7 +84,6 @@
                         Dirección Principal
                     </label>
                     <div class="bg-white border @error('form.direccion') border-red-500 @else border-slate-200 @enderror rounded-lg shadow-sm px-4 py-3 focus-within:border-sovereign-blue focus-within:ring-1 focus-within:ring-sovereign-blue transition-all flex items-start">
-                        <span class="material-symbols-outlined text-slate-400 mr-3 mt-1 text-[20px]" data-icon="location_on">location_on</span>
                         <textarea wire:model="form.direccion" class="bg-transparent border-none outline-none w-full text-sm text-slate-800 p-0 resize-none focus:ring-0" rows="3"></textarea>
                     </div>
                     @error('form.direccion')
@@ -120,8 +112,7 @@
                 <a href="{{ route('clientes') }}" wire:navigate class="px-6 py-2 text-sm font-semibold text-sovereign-blue border border-sovereign-blue rounded hover:bg-slate-100 transition-colors">
                     Cancelar
                 </a>
-                <button type="submit" class="px-6 py-2 text-sm font-semibold bg-sovereign-blue text-white border border-sovereign-blue rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]" data-icon="save">save</span>
+                <button type="submit" class="px-6 py-2 text-sm font-semibold bg-sovereign-blue text-white border border-sovereign-blue rounded hover:bg-opacity-90 transition-colors shadow-sm">
                     {{ $form->cliente ? 'Actualizar Cliente' : 'Guardar Cliente' }}
                 </button>
             </div>

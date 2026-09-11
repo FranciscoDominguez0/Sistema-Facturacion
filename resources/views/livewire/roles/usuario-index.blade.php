@@ -94,9 +94,6 @@
                 <button wire:click="$set('tab', 'detalles')" class="{{ $tab === 'detalles' ? 'border-sovereign-blue text-sovereign-blue font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300' }} flex-shrink-0 px-1 py-4 text-sm border-b-2 transition-all mr-8">
                     Detalles
                 </button>
-                <button wire:click="$set('tab', 'notificaciones')" class="{{ $tab === 'notificaciones' ? 'border-sovereign-blue text-sovereign-blue font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300' }} flex-shrink-0 px-1 py-4 text-sm border-b-2 transition-all mr-8">
-                    Notificaciones
-                </button>
                 <button wire:click="$set('tab', 'permisos')" class="{{ $tab === 'permisos' ? 'border-sovereign-blue text-sovereign-blue font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300' }} flex-shrink-0 px-1 py-4 text-sm border-b-2 transition-all">
                     Permisos
                 </button>
@@ -127,19 +124,6 @@
                                 <input type="password" wire:model="form.password" placeholder="{{ $form->usuario ? 'Dejar en blanco para no cambiar' : '' }}" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
                                 <x-input-error :messages="$errors->get('form.password')" class="mt-2 text-xs" />
                             </div>
-                        </div>
-                    </div>
-                @elseif($tab === 'notificaciones')
-                    <div class="max-w-2xl space-y-6">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                            <div>
-                                <h4 class="text-sm font-semibold text-slate-800">Notificación de inicio de sesión</h4>
-                                <p class="text-xs text-slate-500 mt-0.5">Envía un correo electrónico notificando que se ha realizado un inicio de sesión.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer" checked>
-                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sovereign-blue/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sovereign-blue"></div>
-                            </label>
                         </div>
                     </div>
                 @elseif($tab === 'permisos')

@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Volt\Volt;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -12,7 +15,7 @@ class ProfileTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * La página de perfil se muestra con sus formularios.
+     * La página de perfil se muestra correctamente.
      */
     public function test_la_pagina_de_perfil_se_muestra(): void
     {
@@ -20,11 +23,7 @@ class ProfileTest extends TestCase
 
         $response = $this->actingAs($user)->get('/profile');
 
-        $response
-            ->assertOk()
-            ->assertSeeVolt('profile.update-profile-information-form')
-            ->assertSeeVolt('profile.update-password-form')
-            ->assertSeeVolt('profile.delete-user-form');
+        $response->assertOk();
     }
 
     /**
@@ -34,16 +33,13 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('profile.update-profile-information-form')
-            ->set('name', 'Test User')
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('nombre', 'Test User')
             ->set('email', 'test@example.com')
-            ->call('updateProfileInformation');
-
-        $component
+            ->call('actualizarPerfil')
             ->assertHasNoErrors()
-            ->assertNoRedirect();
+            ->assertDispatched('toast');
 
         $user->refresh();
 
@@ -59,18 +55,55 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('profile.update-profile-information-form')
-            ->set('name', 'Test User')
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('nombre', 'Test User')
             ->set('email', $user->email)
-            ->call('updateProfileInformation');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertNoRedirect();
+            ->call('actualizarPerfil')
+            ->assertHasNoErrors();
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+    }
+
+    /**
+     * Al elegir una foto se guarda automáticamente.
+     */
+    public function test_guarda_la_foto_de_perfil(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('avatar', UploadedFile::fake()->image('avatar.png'))
+            ->assertHasNoErrors()
+            ->assertSet('avatar', null)
+            ->assertDispatched('toast');
+
+        $user->refresh();
+
+        $this->assertNotNull($user->avatar_path);
+        Storage::disk('public')->assertExists($user->avatar_path);
+    }
+
+    /**
+     * La foto de perfil puede eliminarse.
+     */
+    public function test_elimina_la_foto_de_perfil(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('avatars/avatar-anterior.png', 'contenido');
+
+        $user = User::factory()->create(['avatar_path' => 'avatars/avatar-anterior.png']);
+
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->call('eliminarAvatar')
+            ->assertDispatched('toast');
+
+        $this->assertNull($user->refresh()->avatar_path);
+        Storage::disk('public')->assertMissing('avatars/avatar-anterior.png');
     }
 
     /**
@@ -80,13 +113,10 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('profile.delete-user-form')
-            ->set('password', 'password')
-            ->call('deleteUser');
-
-        $component
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('password_eliminar', 'password')
+            ->call('eliminarCuenta')
             ->assertHasNoErrors()
             ->assertRedirect('/');
 
@@ -101,15 +131,11 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('profile.delete-user-form')
-            ->set('password', 'wrong-password')
-            ->call('deleteUser');
-
-        $component
-            ->assertHasErrors('password')
-            ->assertNoRedirect();
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('password_eliminar', 'wrong-password')
+            ->call('eliminarCuenta')
+            ->assertHasErrors('password_eliminar');
 
         $this->assertNotNull($user->fresh());
     }

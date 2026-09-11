@@ -106,7 +106,6 @@
                                 <th class="px-2 py-3">Producto / Descripción</th>
                                 <th class="px-2 py-3 w-24 text-center">Cant.</th>
                                 <th class="px-2 py-3 w-32 text-right">Precio U.</th>
-                                <th class="px-2 py-3 w-48 text-center">Desc %</th>
                                 <th class="px-2 py-3 w-44 text-center">Impuesto</th>
                                 <th class="px-2 py-3 w-28 text-right">Subtotal</th>
                                 <th class="px-2 py-3 w-10"></th>
@@ -132,30 +131,10 @@
                                     </div>
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
-                                    <input type="number" step="0.01" min="0.01" wire:model.live.debounce.500ms="form.items.{{ $index }}.cantidad" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
+                                    <input type="number" step="1" min="1" wire:model.live.debounce.500ms="form.items.{{ $index }}.cantidad" class="w-full text-center bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-md px-2 py-1.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors">
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
                                     <x-precio-input wire:model.live.debounce.500ms="form.items.{{ $index }}.precio_unitario" class="!px-3 !py-1.5 !rounded-md" />
-                                </td>
-                                <td class="px-2 py-3 align-top pt-3">
-                                    @php
-                                        // Si el descuento de la línea no está en las opciones (viene del
-                                        // producto), se agrega para que el selector lo muestre.
-                                        $descuentoLinea = floatval($item['descuento_porcentaje'] ?? 0);
-                                        $opcionesDescuentoLinea = collect($opcionesDescuentos)->first(fn ($opcion) => $opcion['id'] == $descuentoLinea)
-                                            ? $opcionesDescuentos
-                                            : collect([[
-                                                'id' => (string) $descuentoLinea,
-                                                'nombre' => rtrim(rtrim(number_format($descuentoLinea, 2), '0'), '.').'%',
-                                            ]])->concat($opcionesDescuentos)->values()->all();
-                                    @endphp
-                                    <!-- Descuento de la línea con el mismo componente que clientes/vendedores -->
-                                    <x-select-searchable 
-                                        compact
-                                        wire:model.live="form.items.{{ $index }}.descuento_porcentaje" 
-                                        :options="$opcionesDescuentoLinea" 
-                                        placeholder="0%" 
-                                    />
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3">
                                     <x-select-searchable 
@@ -163,6 +142,8 @@
                                         wire:model.live="form.items.{{ $index }}.impuesto_id" 
                                         :options="$opcionesImpuestos" 
                                         placeholder="Exento" 
+                                        action-text="Nuevo Impuesto"
+                                        action-click="$wire.set('linea_impuesto_actual', {{ $index }}); $wire.set('mostrarModalImpuesto', true);"
                                     />
                                 </td>
                                 <td class="px-2 py-3 align-top pt-3 text-right">
@@ -235,6 +216,13 @@
                             <span class="text-red-600 font-medium">-${{ number_format($form->descuento_total, 2) }}</span>
                         </div>
                     @endif
+
+                    @foreach($form->desglose_impuestos as $nombre => $monto)
+                        <div class="flex justify-between text-sm text-slate-600">
+                            <span>{{ $nombre }}</span>
+                            <span>${{ number_format($monto, 2) }}</span>
+                        </div>
+                    @endforeach
 
                     <div class="border-t border-slate-100 pt-3 mt-2 flex justify-between items-end">
                         <span class="text-base font-bold text-slate-900">Total</span>
@@ -404,6 +392,33 @@
             <button type="button" wire:click="guardarVendedorExpress" class="px-4 py-2 bg-sovereign-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-800 transition-colors shadow-sm" wire:loading.attr="disabled" wire:target="guardarVendedorExpress">
                 <span wire:loading.remove wire:target="guardarVendedorExpress">Guardar</span>
                 <span wire:loading wire:target="guardarVendedorExpress">Guardando...</span>
+            </button>
+        </div>
+    </x-modal-action>
+
+    <!-- Modal Nuevo Impuesto -->
+    <x-modal-action show="mostrarModalImpuesto" title="Nuevo Impuesto" maxWidth="sm">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Nombre <span class="text-red-500">*</span></label>
+                <input type="text" wire:model="nuevo_impuesto_nombre" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" @keydown.enter="$wire.guardarImpuestoExpress()">
+                <x-input-error :messages="$errors->get('nuevo_impuesto_nombre')" class="mt-1 text-xs" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Porcentaje (%) <span class="text-red-500">*</span></label>
+                <input type="number" step="0.01" min="0" max="100" wire:model="nuevo_impuesto_porcentaje" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-sovereign-blue rounded-lg px-4 py-2.5 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-1 transition-colors" @keydown.enter="$wire.guardarImpuestoExpress()">
+                <x-input-error :messages="$errors->get('nuevo_impuesto_porcentaje')" class="mt-1 text-xs" />
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-50">
+            <button type="button" @click="mostrarModalImpuesto = false" class="px-4 py-2 bg-white border border-slate-200 text-sm font-semibold rounded-lg text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                Cancelar
+            </button>
+            <button type="button" wire:click="guardarImpuestoExpress" class="px-4 py-2 bg-sovereign-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-800 transition-colors shadow-sm" wire:loading.attr="disabled" wire:target="guardarImpuestoExpress">
+                <span wire:loading.remove wire:target="guardarImpuestoExpress">Guardar</span>
+                <span wire:loading wire:target="guardarImpuestoExpress">Guardando...</span>
             </button>
         </div>
     </x-modal-action>

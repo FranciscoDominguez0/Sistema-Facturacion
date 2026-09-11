@@ -44,8 +44,40 @@
             <div class="flex items-center gap-6 px-6 py-4">
                 <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Identificación Fiscal</label>
                 <div class="flex-1">
-                    <input wire:model="form.identificacion_fiscal" type="text" placeholder="RUC, NIF, CUIT..." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    <input wire:model="form.identificacion_fiscal" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
                     @error('form.identificacion_fiscal') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6 px-6 py-4">
+                <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">RUC</label>
+                <div class="flex-1">
+                    <input wire:model="form.ruc" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    @error('form.ruc') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6 px-6 py-4">
+                <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">DV</label>
+                <div class="flex-1">
+                    <input wire:model="form.dv" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    @error('form.dv') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6 px-6 py-4">
+                <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Correo Electrónico</label>
+                <div class="flex-1">
+                    <input wire:model="form.email" type="email" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    @error('form.email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6 px-6 py-4">
+                <label class="w-48 flex-shrink-0 text-sm text-slate-600 font-medium">Teléfono</label>
+                <div class="flex-1">
+                    <input wire:model="form.telefono" type="tel" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all">
+                    @error('form.telefono') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -122,7 +154,7 @@
                     <div class="flex items-center gap-6">
                         <label class="w-16 flex-shrink-0 text-sm text-slate-600 font-medium">Símbolo</label>
                         <div class="w-20">
-                            <input wire:model.live="form.simbolo_moneda" type="text" placeholder="$" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
+                            <input wire:model.live="form.simbolo_moneda" type="text" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 text-center focus:outline-none transition-all">
                             @error('form.simbolo_moneda') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -140,7 +172,7 @@
                 <div class="flex gap-6">
                     <label class="w-32 flex-shrink-0 text-sm text-slate-600 font-medium pt-2">Pie de página</label>
                     <div class="flex-1">
-                        <textarea wire:model="form.pie_pagina_pdf" rows="3" placeholder="Ej. Gracias por su negocio. El pago vence en 30 días." class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all resize-none"></textarea>
+                        <textarea wire:model="form.pie_pagina_pdf" rows="3" class="w-full bg-white border border-slate-200 focus:border-sovereign-blue focus:ring-1 focus:ring-sovereign-blue rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none transition-all resize-none"></textarea>
                         @error('form.pie_pagina_pdf') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>

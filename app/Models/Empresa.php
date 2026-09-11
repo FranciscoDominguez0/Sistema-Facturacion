@@ -17,6 +17,10 @@ class Empresa extends Model
     protected $fillable = [
         'nombre',
         'identificacion_fiscal',
+        'email',
+        'telefono',
+        'ruc',
+        'dv',
         'logo_path',
         'moneda',
         'simbolo_moneda',

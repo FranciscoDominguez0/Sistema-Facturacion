@@ -2,10 +2,11 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Livewire\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Volt\Volt;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PasswordUpdateTest extends TestCase
@@ -19,17 +20,14 @@ class PasswordUpdateTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('profile.update-password-form')
-            ->set('current_password', 'password')
-            ->set('password', 'new-password')
-            ->set('password_confirmation', 'new-password')
-            ->call('updatePassword');
-
-        $component
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('password_actual', 'password')
+            ->set('password_nueva', 'new-password')
+            ->set('password_nueva_confirmation', 'new-password')
+            ->call('actualizarPassword')
             ->assertHasNoErrors()
-            ->assertNoRedirect();
+            ->assertDispatched('toast');
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
@@ -41,16 +39,12 @@ class PasswordUpdateTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('profile.update-password-form')
-            ->set('current_password', 'wrong-password')
-            ->set('password', 'new-password')
-            ->set('password_confirmation', 'new-password')
-            ->call('updatePassword');
-
-        $component
-            ->assertHasErrors(['current_password'])
-            ->assertNoRedirect();
+        Livewire::actingAs($user)
+            ->test(Profile::class)
+            ->set('password_actual', 'wrong-password')
+            ->set('password_nueva', 'new-password')
+            ->set('password_nueva_confirmation', 'new-password')
+            ->call('actualizarPassword')
+            ->assertHasErrors(['password_actual']);
     }
 }

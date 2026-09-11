@@ -96,15 +96,9 @@ class FacturaForm extends Form
             'descuento_porcentaje' => 'nullable|numeric|min:0|max:100',
             'items' => 'required|array|min:1',
             'items.*.descripcion' => 'nullable|string',
-            'items.*.cantidad' => 'required|numeric|min:0.01',
+            'items.*.cantidad' => 'required|integer|min:1',
             'items.*.precio_unitario' => 'required|numeric|min:0',
         ];
-
-        // Validar descuentos si el usuario tiene permisos
-        $puedeDescontar = Gate::allows('facturas.descuento');
-        if ($puedeDescontar) {
-            $reglas['items.*.descuento_porcentaje'] = ['required', 'numeric', 'min:0', 'max:100'];
-        }
 
         return $reglas;
     }
@@ -115,21 +109,21 @@ class FacturaForm extends Form
             'cliente_id.required' => 'Debe seleccionar un cliente.',
             'vendedor_id.required' => 'Debe seleccionar un vendedor.',
             'items.min' => 'La factura debe tener al menos una línea.',
-            'items.*.cantidad.min' => 'La cantidad debe ser mayor a 0.',
+            'items.*.cantidad.min' => 'La cantidad debe ser un entero mayor a 0.',
+            'items.*.cantidad.integer' => 'La cantidad debe ser un número entero.',
             'items.*.descuento_porcentaje.max' => 'El descuento no puede superar el 100%.',
         ];
     }
 
     public function guardar()
     {
-        $puedeDescontar = Gate::allows('facturas.descuento');
+        // Descuento por línea quitado del formulario: siempre se fuerza a 0
+        foreach ($this->items as &$item) {
+            $item['descuento_porcentaje'] = 0;
+        }
+        unset($item);
 
-        // Si no tiene permiso para descuentos, se fuerzan a 0
-        if (! $puedeDescontar) {
-            foreach ($this->items as &$item) {
-                $item['descuento_porcentaje'] = 0;
-            }
-            unset($item);
+        if (! Gate::allows('facturas.descuento')) {
             $this->descuento_porcentaje = 0;
         }
 

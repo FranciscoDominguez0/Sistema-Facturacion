@@ -51,13 +51,21 @@ class EmpresaFormTest extends TestCase
             'nombre' => 'Empresa Cargada',
             'moneda' => 'EUR - Euro',
             'simbolo_moneda' => '€',
+            'email' => 'info@empresa.com',
+            'telefono' => '+507 6000-0000',
+            'ruc' => '1234567890',
+            'dv' => '7',
         ]);
 
         Livewire::actingAs($user)
             ->test(EmpresaForm::class)
             ->assertSet('form.nombre', 'Empresa Cargada')
             ->assertSet('form.moneda', 'EUR - Euro')
-            ->assertSet('form.simbolo_moneda', '€');
+            ->assertSet('form.simbolo_moneda', '€')
+            ->assertSet('form.email', 'info@empresa.com')
+            ->assertSet('form.telefono', '+507 6000-0000')
+            ->assertSet('form.ruc', '1234567890')
+            ->assertSet('form.dv', '7');
     }
 
     public function test_guarda_datos_de_empresa_correctamente()
@@ -69,6 +77,10 @@ class EmpresaFormTest extends TestCase
             ->test(EmpresaForm::class)
             ->set('form.nombre', 'Empresa Test SA')
             ->set('form.identificacion_fiscal', '123456789')
+            ->set('form.email', 'info@empresa.com')
+            ->set('form.telefono', '+507 6000-0000')
+            ->set('form.ruc', '1234567890')
+            ->set('form.dv', '7')
             ->set('form.moneda', 'EUR - Euro')
             ->set('form.simbolo_moneda', '€')
             ->call('guardar')
@@ -77,6 +89,10 @@ class EmpresaFormTest extends TestCase
         $empresa = Empresa::actual();
         $this->assertEquals('Empresa Test SA', $empresa->nombre);
         $this->assertEquals('123456789', $empresa->identificacion_fiscal);
+        $this->assertEquals('info@empresa.com', $empresa->email);
+        $this->assertEquals('+507 6000-0000', $empresa->telefono);
+        $this->assertEquals('1234567890', $empresa->ruc);
+        $this->assertEquals('7', $empresa->dv);
         $this->assertEquals('EUR - Euro', $empresa->moneda);
     }
 

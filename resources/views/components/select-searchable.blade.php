@@ -68,8 +68,8 @@
     </div>
 
     {{-- Desplegable con las opciones (y la acción al final) --}}
-    <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white rounded-lg border border-slate-200 shadow-lg overflow-hidden" style="display:none">
-        <ul class="max-h-64 overflow-y-auto py-1">
+    <div x-show="open" x-transition class="absolute z-50 w-full mt-1 bg-white rounded-lg border border-slate-200 shadow-lg" style="display:none">
+        <ul class="py-1" style="max-height: 16rem; overflow-y: auto;">
             <template x-for="opt in filteredOptions" :key="opt.id">
                 <li>
                     <button type="button" @click="selectOption(opt.id)" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
