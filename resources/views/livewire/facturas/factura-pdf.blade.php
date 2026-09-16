@@ -52,10 +52,56 @@
     </div>
 
     <!-- Vista previa del PDF: ocupa toda la pantalla disponible -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div x-data="{ loaded: false }" class="relative bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden" style="min-height: 650px;">
+        
+        <!-- Skeleton Loader -->
+        <div x-show="!loaded" class="absolute inset-0 z-10 bg-slate-50/50 p-6 md:p-12 flex flex-col items-center overflow-hidden">
+            <!-- Simulación del esqueleto de una factura A4 -->
+            <div class="w-full max-w-[794px] h-[1123px] bg-white border border-slate-200 shadow-sm flex flex-col p-8 animate-pulse">
+                <!-- Header Skeleton -->
+                <div class="flex justify-between w-full mb-12">
+                    <div class="w-1/3">
+                        <div class="h-10 w-3/4 bg-slate-200 rounded mb-4"></div>
+                        <div class="h-4 w-1/2 bg-slate-100 rounded mb-2"></div>
+                        <div class="h-4 w-2/3 bg-slate-100 rounded"></div>
+                    </div>
+                    <div class="w-1/4 flex justify-end">
+                        <div class="h-20 w-full bg-slate-200 rounded-l-3xl"></div>
+                    </div>
+                </div>
+
+                <!-- Info Row Skeleton -->
+                <div class="flex justify-between w-full mb-10">
+                    <div class="w-1/3">
+                        <div class="h-3 w-1/4 bg-slate-200 rounded mb-4"></div>
+                        <div class="h-6 w-3/4 bg-slate-200 rounded mb-2"></div>
+                        <div class="h-4 w-1/2 bg-slate-100 rounded mb-4"></div>
+                        <div class="space-y-2">
+                            <div class="h-3 w-full bg-slate-100 rounded"></div>
+                            <div class="h-3 w-5/6 bg-slate-100 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="w-1/3 flex justify-end items-start">
+                        <div class="w-3/4 h-24 bg-slate-100 rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Table Skeleton -->
+                <div class="w-full mb-10">
+                    <div class="w-full h-10 bg-slate-200 rounded-full mb-4"></div>
+                    <div class="space-y-3">
+                        <div class="w-full h-12 bg-slate-50 rounded-full"></div>
+                        <div class="w-full h-12 bg-slate-50 rounded-full"></div>
+                        <div class="w-full h-12 bg-slate-50 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <iframe x-ref="pdfIframe" src="{{ route('facturas.preview', $factura->id) }}"
+            @load="loaded = true"
             style="width: 100%; height: calc(100vh - 13rem); min-height: 650px;"
-            class="bg-white block"
+            class="bg-white block relative z-0"
             title="Vista previa de la factura"></iframe>
     </div>
 </div>
