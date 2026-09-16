@@ -185,7 +185,7 @@
 
     <!-- Iframe oculto de impresión: carga el PDF y abre el diálogo de impresión directo -->
     <iframe x-ref="pdfImpresion"
-        src="{{ $facturaPdfVista ? route('facturas.pdf', $facturaPdfVista->id).'?print=true&v='.$impresionToken : 'about:blank' }}"
+        src="{{ $facturaPdfVista ? route('facturas.preview', $facturaPdfVista->id).'?v='.$impresionToken : 'about:blank' }}"
         @load="if ({{ $facturaPdfVista ? 'true' : 'false' }}) { setTimeout(() => $refs.pdfImpresion.contentWindow.print(), 400); }"
         class="sr-only" aria-hidden="true" title="Impresión PDF"></iframe>
 

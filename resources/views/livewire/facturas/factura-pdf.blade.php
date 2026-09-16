@@ -53,7 +53,7 @@
 
     <!-- Vista previa del PDF: ocupa toda la pantalla disponible -->
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <iframe x-ref="pdfIframe" src="{{ route('facturas.pdf', $factura->id) }}?print=true"
+        <iframe x-ref="pdfIframe" src="{{ route('facturas.preview', $factura->id) }}"
             style="width: 100%; height: calc(100vh - 13rem); min-height: 650px;"
             class="bg-white block"
             title="Vista previa de la factura"></iframe>
