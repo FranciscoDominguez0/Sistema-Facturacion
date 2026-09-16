@@ -84,6 +84,18 @@ class FacturaIndex extends Component
         $this->dispatch('toast', message: 'Factura eliminada correctamente.', type: 'success');
     }
 
+    public function marcarComoPagada($facturaId, FacturaService $facturaService)
+    {
+        $factura = Factura::findOrFail($facturaId);
+        
+        try {
+            $facturaService->cambiarEstado($factura, \App\Enums\EstadoFactura::PAGADA);
+            $this->dispatch('toast', message: 'Factura marcada como pagada.', type: 'success');
+        } catch (\DomainException $e) {
+            $this->dispatch('toast', message: $e->getMessage(), type: 'error');
+        }
+    }
+
     public function render()
     {
         $facturas = Factura::with('cliente')

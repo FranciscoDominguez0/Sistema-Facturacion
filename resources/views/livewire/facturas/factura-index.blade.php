@@ -106,44 +106,51 @@
                                     <div x-show="open" x-transition
                                         @click.outside="open = false"
                                         :style="`position:fixed; top:${posTop}px; right:${posRight}px; z-index:9999;`"
-                                        class="w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1 text-left"
+                                        class="w-64 bg-white rounded-md shadow-lg border border-slate-200 text-left divide-y divide-slate-100"
                                         style="display:none;">
                                         <a href="{{ route('facturas.edit', $factura->id) }}" wire:navigate
-                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                            <span class="material-symbols-outlined text-[18px] text-slate-400">edit</span>
+                                            class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[20px] text-blue-600">edit</span>
                                             Editar
                                         </a>
 
+                                        @if($factura->estado === \App\Enums\EstadoFactura::PENDIENTE)
+                                            <button type="button" wire:click="marcarComoPagada({{ $factura->id }})" @click="open = false"
+                                                class="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                                <span class="material-symbols-outlined text-[20px] text-blue-600">check_circle</span>
+                                                Marcar como pagada
+                                            </button>
+                                        @endif
+
                                         <button type="button" wire:click="enviarPorCorreo({{ $factura->id }})" @click="open = false"
-                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                            <span class="material-symbols-outlined text-[18px] text-slate-400">mail</span>
+                                            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[20px] text-blue-600">send</span>
                                             Enviar factura por correo
                                         </button>
 
                                         <a href="{{ route('facturas.pdf.vista', $factura->id) }}" wire:navigate
-                                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                            <span class="material-symbols-outlined text-[18px] text-slate-400">visibility</span>
+                                            class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[20px] text-blue-600">picture_as_pdf</span>
                                             Ver PDF
                                         </a>
 
                                         <button type="button" wire:click="abrirImpresion({{ $factura->id }})" @click="open = false"
-                                            class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
-                                            <span class="material-symbols-outlined text-[18px] text-slate-400">print</span>
+                                            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors">
+                                            <span class="material-symbols-outlined text-[20px] text-blue-600">print</span>
                                             Imprimir PDF
                                         </button>
 
                                         <div @click="open = false">
                                             <x-boton-descarga href="{{ route('facturas.pdf', $factura->id) }}" menu>
-                                                <span class="material-symbols-outlined text-[18px] text-slate-400">download</span>
+                                                <span class="material-symbols-outlined text-[20px] text-blue-600">download</span>
                                                 Descargar
                                             </x-boton-descarga>
                                         </div>
 
                                         @can('facturas.eliminar')
-                                            <div class="border-t border-slate-100 my-1"></div>
                                             <button type="button" wire:click="confirmarEliminacion({{ $factura->id }})" @click="open = false"
-                                                class="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                                class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
                                                 Eliminar
                                             </button>
                                         @endcan

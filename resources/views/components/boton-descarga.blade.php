@@ -15,7 +15,7 @@
 
 @php
     if ($menu) {
-        $clases = 'w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors';
+        $clases = 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-sovereign-blue transition-colors';
     } elseif ($primary) {
         $clases = 'bg-sovereign-blue text-white hover:bg-slate-800';
     } else {
