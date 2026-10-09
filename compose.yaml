@@ -6,8 +6,7 @@ services:
     container_name: vigifact_app
     restart: unless-stopped
     working_dir: /var/www/html
-    ports:
-      - "8088:80"
+    # Se elimina "ports", Nginx PM enrutará el tráfico internamente por el puerto 80
     environment:
       - DB_CONNECTION=pgsql
       - DB_HOST=db
@@ -23,6 +22,7 @@ services:
         condition: service_healthy
     networks:
       - vigifact_network
+      - npm_network # <--- Conectado a la red de Nginx Proxy Manager
 
   db:
     image: postgres:15-alpine
@@ -34,13 +34,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-12345678}
     ports:
       # SEGURIDAD: Vinculado EXCLUSIVAMENTE a 127.0.0.1 (localhost del host).
-      # No abre puertos a la red pública; solo accesible mediante túnel SSH:
-      # Ejemplo: ssh -L 5432:127.0.0.1:5432 usuario@tu-servidor
       - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - vigifact_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -50,6 +48,8 @@ services:
 networks:
   vigifact_network:
     driver: bridge
+  npm_network:
+    external: true # <--- Declarada como red externa global
 
 volumes:
   vigifact_db_data:
