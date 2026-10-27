@@ -8,6 +8,9 @@ services:
     working_dir: /var/www/html
     # Se elimina "ports", Nginx PM enrutará el tráfico internamente por el puerto 80
     environment:
+      - TZ=America/Panama
+      - APP_TIMEZONE=${APP_TIMEZONE:-America/Panama}
+      - DB_TIMEZONE=${DB_TIMEZONE:-America/Panama}
       - DB_CONNECTION=pgsql
       - DB_HOST=db
       - DB_PORT=5432
@@ -29,6 +32,7 @@ services:
     container_name: vigifact_db
     restart: unless-stopped
     environment:
+      TZ: America/Panama
       POSTGRES_DB: ${DB_DATABASE:-Sistema-Facturacion}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-12345678}
